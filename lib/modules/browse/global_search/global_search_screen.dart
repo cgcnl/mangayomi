@@ -52,6 +52,12 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
             .and()
             .itemTypeEqualTo(widget.itemType)
             .findAllSync();
+    sourceList = sourceList
+        .where(
+          (element) =>
+              ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false,
+        )
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -238,7 +244,8 @@ class _MangaGlobalImageCardState extends ConsumerState<MangaGlobalImageCard>
             lang: widget.source.lang!,
             itemType: widget.source.itemType,
             useMaterialRoute: true,
-            source: widget.source.name!);
+            source: widget.source.name!,
+            isNsfw: widget.source.isNsfw ?? false);
       },
       child: StreamBuilder(
           stream: isar.mangas

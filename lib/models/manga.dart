@@ -30,6 +30,8 @@ class Manga {
   List<String>? genre;
 
   bool? favorite;
+  
+  bool? isNsfw;
 
   String? source;
 
@@ -58,6 +60,7 @@ class Manga {
       required this.author,
       required this.artist,
       this.favorite = false,
+      this.isNsfw = false,
       required this.genre,
       required this.imageUrl,
       required this.lang,
@@ -83,6 +86,7 @@ class Manga {
     dateAdded = json['dateAdded'];
     description = json['description'];
     favorite = json['favorite']!;
+    isNsfw = json['isNsfw'];
     genre = json['genre']?.cast<String>();
     id = json['id'];
     imageUrl = json['imageUrl'];
@@ -107,6 +111,7 @@ class Manga {
         'dateAdded': dateAdded,
         'description': description,
         'favorite': favorite,
+        'isNsfw': isNsfw,
         'genre': genre,
         'id': id,
         'imageUrl': imageUrl,

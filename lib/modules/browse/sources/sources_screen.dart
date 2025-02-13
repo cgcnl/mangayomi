@@ -8,6 +8,7 @@ import 'package:mangayomi/models/source.dart';
 import 'package:mangayomi/modules/browse/sources/widgets/source_list_tile.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/utils/language.dart';
+import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 
 class SourcesScreen extends ConsumerStatefulWidget {
   final Function(int) tabIndex;
@@ -23,6 +24,7 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
   final controller = ScrollController();
   @override
   Widget build(BuildContext context) {
+    final showNSFW = ref.watch(showNSFWStateProvider);
     final l10n = l10nLocalizations(context)!;
     return Padding(
         padding: const EdgeInsets.only(top: 10),
@@ -40,7 +42,9 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
               if (!snapshot.hasData) {
                 return const SizedBox.shrink();
               }
-              List<Source> sources = snapshot.data!;
+              List<Source> sources = snapshot.data!
+                  .where((element) => showNSFW ? true : element.isNsfw == false)
+                  .toList();
               if (sources.isEmpty) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -132,6 +132,7 @@ class AnimeStreamController extends _$AnimeStreamController {
           mangaId: getAnime().id,
           date: DateTime.now().millisecondsSinceEpoch.toString(),
           itemType: getAnime().itemType,
+          isNsfw: getAnime().isNsfw,
           chapterId: episode.id)
         ..chapter.value = episode;
     } else {

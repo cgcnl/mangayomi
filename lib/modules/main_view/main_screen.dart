@@ -11,6 +11,7 @@ import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/update.dart';
 import 'package:mangayomi/models/source.dart';
 import 'package:mangayomi/modules/more/settings/reader/providers/reader_state_provider.dart';
+import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 import 'package:mangayomi/modules/widgets/loading_icon.dart';
 import 'package:mangayomi/services/fetch_anime_sources.dart';
 import 'package:mangayomi/services/fetch_manga_sources.dart';
@@ -363,6 +364,9 @@ Widget _extensionUpdateTotalNumbers(WidgetRef ref, Widget widget) {
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           final entries = snapshot.data!
+              .where((element) => ref.watch(showNSFWStateProvider)
+                  ? true
+                  : element.isNsfw == false)
               .where((element) =>
                   compareVersions(element.version!, element.versionLast!) < 0)
               .toList();

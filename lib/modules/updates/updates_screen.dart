@@ -20,6 +20,7 @@ import 'package:mangayomi/modules/library/widgets/search_text_form_field.dart';
 import 'package:mangayomi/modules/widgets/error_text.dart';
 import 'package:mangayomi/modules/widgets/progress_center.dart';
 import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
+import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 
 class UpdatesScreen extends ConsumerStatefulWidget {
   const UpdatesScreen({super.key});
@@ -311,6 +312,9 @@ class _UpdateTabState extends ConsumerState<UpdateTab> {
         update.when(
           data: (data) {
             final entries = data
+                .where((element) =>
+                  ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false,
+                )
                 .where((element) => widget.query.isNotEmpty
                     ? element.chapter.value!.manga.value!.name!
                         .toLowerCase()

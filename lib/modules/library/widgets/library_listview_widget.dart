@@ -57,7 +57,8 @@ class LibraryListViewWidget extends StatelessWidget {
                       context: context,
                       lang: entry.lang!,
                       mangaM: entry,
-                      source: entry.source!);
+                      source: entry.source!,
+                      isNsfw: entry.isNsfw!);
                   ref.invalidate(getAllMangaWithoutCategoriesStreamProvider(
                       itemType: entry.itemType));
                   ref.invalidate(getAllMangaStreamProvider(

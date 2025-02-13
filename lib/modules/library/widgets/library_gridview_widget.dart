@@ -95,7 +95,8 @@ class _LibraryGridViewWidgetState extends State<LibraryGridViewWidget> {
                         context: context,
                         lang: entry.lang!,
                         mangaM: entry,
-                        source: entry.source!);
+                        source: entry.source!,
+                        isNsfw: entry.isNsfw!);
                     ref.invalidate(getAllMangaWithoutCategoriesStreamProvider(
                         itemType: widget.itemType));
                     ref.invalidate(getAllMangaStreamProvider(

@@ -20,6 +20,7 @@ import 'package:mangayomi/utils/headers.dart';
 import 'package:mangayomi/modules/library/widgets/search_text_form_field.dart';
 import 'package:mangayomi/modules/widgets/error_text.dart';
 import 'package:mangayomi/modules/widgets/progress_center.dart';
+import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -238,6 +239,9 @@ class _HistoryTabState extends ConsumerState<HistoryTab> {
                     .toLowerCase()
                     .contains(widget.query.toLowerCase())
                 : true)
+            .where((element) =>
+              ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false,
+            )
             .toList();
 
         if (entries.isNotEmpty) {

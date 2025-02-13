@@ -68,6 +68,7 @@ class MangaImageCardWidget extends ConsumerWidget {
                     getManga: getMangaDetail!,
                     lang: source.lang!,
                     source: source.name!,
+                    isNsfw: source.isNsfw,
                     itemType: itemType);
               },
               onLongPress: () {
@@ -76,6 +77,7 @@ class MangaImageCardWidget extends ConsumerWidget {
                     getManga: getMangaDetail!,
                     lang: source.lang!,
                     source: source.name!,
+                    isNsfw: source.isNsfw,
                     itemType: itemType,
                     addToFavourite: true);
               },
@@ -85,6 +87,7 @@ class MangaImageCardWidget extends ConsumerWidget {
                     getManga: getMangaDetail!,
                     lang: source.lang!,
                     source: source.name!,
+                    isNsfw: source.isNsfw,
                     itemType: itemType,
                     addToFavourite: true);
               },
@@ -166,6 +169,7 @@ class MangaImageCardListTileWidget extends ConsumerWidget {
                       getManga: getMangaDetail!,
                       lang: source.lang!,
                       source: source.name!,
+                      isNsfw: source.isNsfw,
                       itemType: itemType);
                 },
                 onLongPress: () {
@@ -174,6 +178,7 @@ class MangaImageCardListTileWidget extends ConsumerWidget {
                       getManga: getMangaDetail!,
                       lang: source.lang!,
                       source: source.name!,
+                      isNsfw: source.isNsfw,
                       itemType: itemType,
                       addToFavourite: true);
                 },
@@ -183,6 +188,7 @@ class MangaImageCardListTileWidget extends ConsumerWidget {
                       getManga: getMangaDetail!,
                       lang: source.lang!,
                       source: source.name!,
+                      isNsfw: source.isNsfw,
                       itemType: itemType,
                       addToFavourite: true);
                 },
@@ -250,6 +256,7 @@ Future<void> pushToMangaReaderDetail(
     required String lang,
     required BuildContext context,
     required String source,
+    bool? isNsfw = false,
     int? archiveId,
     Manga? mangaM,
     ItemType? itemType,
@@ -267,6 +274,7 @@ Future<void> pushToMangaReaderDetail(
             description: getManga.description ?? "",
             link: getManga.link,
             source: source,
+            isNsfw: isNsfw,
             lang: lang,
             lastUpdate: 0,
             itemType: itemType ?? ItemType.manga,

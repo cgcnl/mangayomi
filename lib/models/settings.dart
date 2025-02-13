@@ -72,6 +72,8 @@ class Settings {
 
   int? doubleTapAnimationSpeed;
 
+  bool? showNSFW;
+
   bool? onlyIncludePinnedSources;
 
   bool? pureBlackDarkMode;
@@ -262,6 +264,7 @@ class Settings {
       this.personalReaderModeList,
       this.animatePageTransitions = true,
       this.doubleTapAnimationSpeed = 1,
+      this.showNSFW = true,
       this.onlyIncludePinnedSources = false,
       this.pureBlackDarkMode = false,
       this.downloadOnlyOnWifi = false,
@@ -434,6 +437,7 @@ class Settings {
     saveAsCBZArchive = json['saveAsCBZArchive'];
     scaleType =
         ScaleType.values[json['scaleType'] ?? ScaleType.fitScreen.index];
+    showNSFW = json['showNSFW'];
     showPagesNumber = json['showPagesNumber'];
     if (json['sortChapterList'] != null) {
       sortChapterList = (json['sortChapterList'] as List)
@@ -594,6 +598,7 @@ class Settings {
         'relativeTimesTamps': relativeTimesTamps,
         'saveAsCBZArchive': saveAsCBZArchive,
         'scaleType': scaleType.index,
+        'showNSFW': showNSFW,
         'showPagesNumber': showPagesNumber,
         'sortChapterList': sortChapterList?.map((v) => v.toJson()).toList(),
         'autoScrollPages': autoScrollPages?.map((v) => v.toJson()).toList(),

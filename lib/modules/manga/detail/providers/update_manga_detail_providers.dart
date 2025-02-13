@@ -85,6 +85,7 @@ Future<dynamic> updateMangaDetail(Ref ref,
           final update = Update(
               mangaId: mangaId,
               chapterName: chap.name,
+              isNsfw: manga.isNsfw,
               date: DateTime.now().millisecondsSinceEpoch.toString())
             ..chapter.value = chap;
           isar.updates.putSync(update);

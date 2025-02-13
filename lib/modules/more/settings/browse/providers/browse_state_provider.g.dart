@@ -174,6 +174,22 @@ final onlyIncludePinnedSourceStateProvider =
 );
 
 typedef _$OnlyIncludePinnedSourceState = AutoDisposeNotifier<bool>;
+String _$showNSFWStateHash() => r'fdb147ceef80a95066adc64ee63237fbdb3de81e';
+
+/// See also [ShowNSFWState].
+@ProviderFor(ShowNSFWState)
+final showNSFWStateProvider =
+    AutoDisposeNotifierProvider<ShowNSFWState, bool>.internal(
+  ShowNSFWState.new,
+  name: r'showNSFWStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$showNSFWStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$ShowNSFWState = AutoDisposeNotifier<bool>;
 String _$extensionsRepoStateHash() =>
     r'9e59b257433ed7f999dd4800f6ecb8c13c8b2c6a';
 

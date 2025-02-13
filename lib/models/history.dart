@@ -17,6 +17,8 @@ class History {
   @enumerated
   late ItemType itemType;
 
+  bool? isNsfw;
+
   final chapter = IsarLink<Chapter>();
 
   String? date;
@@ -28,6 +30,7 @@ class History {
     required this.chapterId,
     required this.mangaId,
     required this.date,
+    required this.isNsfw,
   });
 
   History.fromJson(Map<String, dynamic> json) {
@@ -37,6 +40,7 @@ class History {
     isManga = json['isManga'];
     itemType = ItemType.values[json['itemType'] ?? 0];
     mangaId = json['mangaId'];
+    isNsfw = json['isNsfw'];
   }
 
   Map<String, dynamic> toJson() => {
@@ -44,6 +48,7 @@ class History {
         'date': date,
         'id': id,
         'itemType': itemType.index,
+        'isNsfw': isNsfw,
         'mangaId': mangaId
       };
 }

@@ -44,7 +44,8 @@ class NovelReaderController extends _$NovelReaderController {
           mangaId: getManga().id,
           date: DateTime.now().millisecondsSinceEpoch.toString(),
           itemType: getManga().itemType,
-          chapterId: chapter.id)
+          chapterId: chapter.id,
+          isNsfw: false)
         ..chapter.value = chapter;
     } else {
       history = (isar.historys

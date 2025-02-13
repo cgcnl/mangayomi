@@ -37,6 +37,7 @@ import 'package:mangayomi/modules/manga/detail/widgets/chapter_sort_list_tile_wi
 import 'package:mangayomi/modules/widgets/error_text.dart';
 import 'package:mangayomi/modules/widgets/progress_center.dart';
 import 'package:mangayomi/utils/global_style.dart';
+import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   final ItemType itemType;
@@ -808,6 +809,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       required int sortType}) {
     List<Manga>? mangas;
     mangas = data
+        .where((element) =>
+          ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false,
+        )
         .where((element) {
           List list = [];
           if (downloadFilterType == 1) {
@@ -1810,7 +1814,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                                 context: context,
                                 lang: randomManga.lang!,
                                 mangaM: randomManga,
-                                source: randomManga.source!);
+                                source: randomManga.source!,
+                                isNsfw: randomManga.isNsfw ?? false);
                           });
                         } else if (value == 2) {
                           _importLocal(context, widget.itemType);

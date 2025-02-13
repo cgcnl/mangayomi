@@ -15,11 +15,14 @@ class Update {
 
   String? date;
 
+  bool? isNsfw;
+
   Update({
     this.id = Isar.autoIncrement,
     required this.mangaId,
     required this.chapterName,
     required this.date,
+    required this.isNsfw,
   });
 
   Update.fromJson(Map<String, dynamic> json) {
@@ -27,6 +30,7 @@ class Update {
     mangaId = json['mangaId'];
     chapterName = json['chapterName'];
     date = json['date'];
+    isNsfw = json['isNsfw'];
   }
 
   Map<String, dynamic> toJson() => {
@@ -34,5 +38,6 @@ class Update {
         'mangaId': mangaId,
         'chapterName': chapterName,
         'date': date,
+        'isNsfw': isNsfw,
       };
 }

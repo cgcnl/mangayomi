@@ -169,6 +169,7 @@ class ReaderController extends _$ReaderController {
       history = History(
           mangaId: getManga().id,
           date: DateTime.now().millisecondsSinceEpoch.toString(),
+          isNsfw: getManga().isNsfw,
           itemType: getManga().itemType,
           chapterId: chapter.id)
         ..chapter.value = chapter;

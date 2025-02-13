@@ -171,6 +171,8 @@ class _MangaDetailsViewState extends ConsumerState<MangaDetailsView> {
                       const Text(' • '),
                       Text(widget.manga.source!),
                       Text(' (${widget.manga.lang!.toUpperCase()})'),
+                      if (widget.manga.isNsfw!)
+                        Text(' • NSFW'),
                       if (!widget.sourceExist)
                         const Padding(
                           padding: EdgeInsets.all(3),
