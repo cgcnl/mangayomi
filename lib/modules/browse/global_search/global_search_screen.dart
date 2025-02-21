@@ -239,6 +239,7 @@ class _MangaGlobalImageCardState extends ConsumerState<MangaGlobalImageCard>
     return GestureDetector(
       onTap: () async {
         pushToMangaReaderDetail(
+            ref: ref,
             context: context,
             getManga: getMangaDetail,
             lang: widget.source.lang!,
