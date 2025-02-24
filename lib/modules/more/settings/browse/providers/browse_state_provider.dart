@@ -20,8 +20,9 @@ class OnlyIncludePinnedSourceState extends _$OnlyIncludePinnedSourceState {
   void set(bool value) {
     final settings = isar.settings.getSync(227);
     state = value;
-    isar.writeTxnSync(() =>
-        isar.settings.putSync(settings!..onlyIncludePinnedSources = value));
+    isar.writeTxnSync(
+      () => isar.settings.putSync(settings!..onlyIncludePinnedSources = value),
+    );
   }
 }
 
@@ -57,10 +58,12 @@ class ExtensionsRepoState extends _$ExtensionsRepoState {
     state = value;
     isar.writeTxnSync(() {
       final a = switch (itemType) {
-        ItemType.manga =>
-          isar.settings.putSync(settings..mangaExtensionsRepo = value),
-        ItemType.anime =>
-          isar.settings.putSync(settings..animeExtensionsRepo = value),
+        ItemType.manga => isar.settings.putSync(
+          settings..mangaExtensionsRepo = value,
+        ),
+        ItemType.anime => isar.settings.putSync(
+          settings..animeExtensionsRepo = value,
+        ),
         _ => isar.settings.putSync(settings..novelExtensionsRepo = value),
       };
       a;
@@ -68,11 +71,14 @@ class ExtensionsRepoState extends _$ExtensionsRepoState {
     try {
       final a = switch (itemType) {
         ItemType.manga => ref.refresh(
-            fetchMangaSourcesListProvider(id: null, reFresh: false).future),
+          fetchMangaSourcesListProvider(id: null, reFresh: false).future,
+        ),
         ItemType.anime => ref.refresh(
-            fetchAnimeSourcesListProvider(id: null, reFresh: false).future),
+          fetchAnimeSourcesListProvider(id: null, reFresh: false).future,
+        ),
         _ => ref.refresh(
-            fetchNovelSourcesListProvider(id: null, reFresh: false).future),
+          fetchNovelSourcesListProvider(id: null, reFresh: false).future,
+        ),
       };
       Future.wait([a]);
     } catch (_) {}
@@ -90,7 +96,8 @@ class AutoUpdateExtensionsState extends _$AutoUpdateExtensionsState {
     final settings = isar.settings.getSync(227);
     state = value;
     isar.writeTxnSync(
-        () => isar.settings.putSync(settings!..autoExtensionsUpdates = value));
+      () => isar.settings.putSync(settings!..autoExtensionsUpdates = value),
+    );
   }
 }
 
@@ -104,8 +111,9 @@ class CheckForExtensionsUpdateState extends _$CheckForExtensionsUpdateState {
   void set(bool value) {
     final settings = isar.settings.getSync(227);
     state = value;
-    isar.writeTxnSync(() =>
-        isar.settings.putSync(settings!..checkForExtensionUpdates = value));
+    isar.writeTxnSync(
+      () => isar.settings.putSync(settings!..checkForExtensionUpdates = value),
+    );
   }
 }
 
