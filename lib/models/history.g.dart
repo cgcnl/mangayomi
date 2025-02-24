@@ -98,7 +98,7 @@ History _historyDeserialize(
     date: reader.readStringOrNull(offsets[1]),
     id: id,
     isManga: reader.readBoolOrNull(offsets[2]),
-    isNsfw: reader.readBoolOrNull(offsets[3])
+    isNsfw: reader.readBoolOrNull(offsets[3]),
     itemType:
         _HistoryitemTypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
         ItemType.manga,
