@@ -78,8 +78,8 @@ const MangaSchema = CollectionSchema(
       type: IsarType.bool,
     ),
     r'isNsfw': PropertySchema(
-      id: 11,
-      name: r'isManga',
+      id: 12,
+      name: r'isNsfw',
       type: IsarType.bool,
     ),
     r'itemType': PropertySchema(
