@@ -15,14 +15,14 @@
       "developerName": "Moustapha Kodjo Amadou",
       "subtitle": "Read manga, novels, and watch anime",
       "version": "0.6.0",
-      "versionDate": "2025-04-02T13:40:06Z",
+      "versionDate": "2025-04-03T09:52:54Z",
       "versionDescription": "",
-      "downloadURL": "https://github.com/kodjodevf/mangayomi/releases/download/v0.6.0/Mangayomi-v0.6.0-ios.ipa",
+      "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.6.0/Mangayomi-v0.6.0-ios.ipa",
       "localizedDescription": "Mangayomi is an open-source Flutter app for reading manga, novels, and watching anime across multiple platforms.",
       "iconURL": "https://raw.githubusercontent.com/kodjodevf/mangayomi/refs/heads/main/repo/images/icons/icon_default.webp",
       "tintColor": "EF4444",
       "category": "entertainment",
-      "size": 58303131,
+      "size": 58311226,
       "screenshotURLs": [
         "https://raw.githubusercontent.com/kodjodevf/mangayomi/refs/heads/main/repo/images/screenshots/image_0_default.webp",
         "https://raw.githubusercontent.com/kodjodevf/mangayomi/refs/heads/main/repo/images/screenshots/image_1_default.webp",
@@ -31,31 +31,31 @@
       "versions": [
         {
           "version": "0.6.0",
-          "date": "2025-04-02T13:40:06Z",
+          "date": "2025-04-03T09:52:54Z",
           "localizedDescription": "",
-          "downloadURL": "https://github.com/kodjodevf/mangayomi/releases/download/v0.6.0/Mangayomi-v0.6.0-ios.ipa",
-          "size": 58303131
+          "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.6.0/Mangayomi-v0.6.0-ios.ipa",
+          "size": 58311226
         },
         {
           "version": "0.5.2",
-          "date": "2025-02-23T16:08:37Z",
-          "localizedDescription": "What's Changed\r\n* Update quarkuc extractor  by @yxxyun in https://github.com/kodjodevf/mangayomi/pull/393\r\n* added long press for 2x playback speed by @Schnitzel5 in https://github.com/kodjodevf/mangayomi/pull/396\r\n* fix broken category \r\n* add confirmation dialog for adding repositories\r\n\r\n\r\n**Full Changelog**: https://github.com/kodjodevf/mangayomi/compare/v0.5.1...v0.5.2",
-          "downloadURL": "https://github.com/kodjodevf/mangayomi/releases/download/v0.5.2/Mangayomi-v0.5.2-ios.ipa",
-          "size": 56680831
+          "date": "2025-02-24T06:23:45Z",
+          "localizedDescription": "",
+          "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.5.2/Mangayomi-v0.5.2-ios.ipa",
+          "size": 56678100
         },
         {
           "version": "0.5.1",
-          "date": "2025-02-20T14:29:54Z",
-          "localizedDescription": "What's Changed\r\n* added deep links for repo urls by @Schnitzel5 in https://github.com/kodjodevf/mangayomi/pull/379\r\n* enhanced sync feature by @Schnitzel5 in https://github.com/kodjodevf/mangayomi/pull/380\r\n* optimized sync and bug fixes by @Schnitzel5 in https://github.com/kodjodevf/mangayomi/pull/381\r\n\r\n\r\n**Full Changelog**: https://github.com/kodjodevf/mangayomi/compare/v0.5.0...v0.5.1",
-          "downloadURL": "https://github.com/kodjodevf/mangayomi/releases/download/v0.5.1/Mangayomi-v0.5.1-ios.ipa",
-          "size": 56754892
+          "date": "2025-02-21T02:09:21Z",
+          "localizedDescription": "",
+          "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.5.1/Mangayomi-v0.5.1-ios.ipa",
+          "size": 56684171
         },
         {
           "version": "0.5.0",
-          "date": "2025-02-12T11:16:16Z",
-          "localizedDescription": "\u2022 improve chapter download\r\n\u2022 improve custom navigation settings\r\n\u2022 remove embedded URLs from extensions\r\n\u2022 co\u2022written with @Schnitzel5 : update source fetching methods to utilize the given repositories",
-          "downloadURL": "https://github.com/kodjodevf/mangayomi/releases/download/v0.5.0/Mangayomi-v0.5.0-ios.ipa",
-          "size": 56707308
+          "date": "2025-02-13T07:49:04Z",
+          "localizedDescription": "",
+          "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.5.0/Mangayomi-v0.5.0-ios.ipa",
+          "size": 56732358
         }
       ],
       "appPermissions": {
