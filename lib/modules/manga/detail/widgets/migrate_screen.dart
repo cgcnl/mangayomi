@@ -525,6 +525,7 @@ class _MigrationMangaGlobalImageCardState
                                                   .millisecondsSinceEpoch
                                                   .toString(),
                                           itemType: widget.oldManga.itemType,
+                                          isNsfw: widget.oldManga.isNsfw,
                                           chapterId: chapter.id,
                                         )..chapter.value = chapter,
                                       );

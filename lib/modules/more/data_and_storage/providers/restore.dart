@@ -464,6 +464,7 @@ void restoreTachiBkBackup(Ref ref, String path, BackupType bkType) {
                     ? "${tempChapter.lastModifiedAt * 1000}"
                     : "${DateTime.now().millisecondsSinceEpoch - tempChapter.dateUpload.abs()}",
             itemType: ItemType.manga,
+            isNsfw: manga.isNsfw ?? false,
             chapterId: chapter.id,
           )..chapter.value = chapter;
         }
@@ -538,6 +539,7 @@ void restoreTachiBkBackup(Ref ref, String path, BackupType bkType) {
               mangaId: anime.id,
               date: "${tempEpisode.lastModifiedAt * 1000}",
               itemType: ItemType.anime,
+              isNsfw: anime.isNsfw ?? false,
               chapterId: episode.id,
             )..chapter.value = episode;
           }

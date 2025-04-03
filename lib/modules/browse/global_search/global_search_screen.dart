@@ -34,7 +34,7 @@ class GlobalSearchScreen extends ConsumerStatefulWidget {
 class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
   String query = "";
   final _textEditingController = TextEditingController();
-  List<Source> sourceList =
+  var sourceList =
       ref.watch(onlyIncludePinnedSourceStateProvider)
           ? isar.sources
               .filter()
