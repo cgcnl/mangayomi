@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:grouped_list/sliver_grouped_list.dart';
+import 'package:mangayomi/modules/widgets/custom_sliver_grouped_list_view.dart';
 import 'package:isar/isar.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/manga.dart';
@@ -88,7 +88,7 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
             child: CustomScrollView(
               controller: controller,
               slivers: [
-                SliverGroupedListView<Source, String>(
+                CustomSliverGroupedListView<Source, String>(
                   elements: lastUsedEntries,
                   groupBy: (element) => "",
                   groupSeparatorBuilder:
@@ -117,7 +117,7 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
                       (item1, item2) => item1.name!.compareTo(item2.name!),
                   order: GroupedListOrder.ASC,
                 ),
-                SliverGroupedListView<Source, String>(
+                CustomSliverGroupedListView<Source, String>(
                   elements: isPinnedEntries,
                   groupBy: (element) => "",
                   groupSeparatorBuilder:
@@ -146,7 +146,7 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
                       (item1, item2) => item1.name!.compareTo(item2.name!),
                   order: GroupedListOrder.ASC,
                 ),
-                SliverGroupedListView<Source, String>(
+                CustomSliverGroupedListView<Source, String>(
                   elements: allEntriesWithoutIspinned,
                   groupBy:
                       (element) =>

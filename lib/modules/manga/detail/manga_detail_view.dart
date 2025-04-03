@@ -543,12 +543,12 @@ class _MangaDetailViewState extends ConsumerState<MangaDetailView>
                             return [
                               if (!isLocalArchive)
                                 PopupMenuItem<int>(
-                                  value: 3,
+                                  value: 0,
                                   child: Text(l10n.refresh),
                                 ),
                               if (widget.manga!.favorite!)
                                 PopupMenuItem<int>(
-                                  value: 0,
+                                  value: 1,
                                   child: Text(l10n.edit_categories),
                                 ),
                               if (!isLocalArchive)
@@ -556,33 +556,43 @@ class _MangaDetailViewState extends ConsumerState<MangaDetailView>
                                   value: 2,
                                   child: Text(l10n.share),
                                 ),
+                              PopupMenuItem<int>(
+                                value: 3,
+                                child: Text(l10n.migrate),
+                              ),
                             ];
                           },
                           onSelected: (value) {
-                            if (value == 3) {
-                              widget.checkForUpdate(true);
-                            }
-                            if (value == 0) {
-                              context.push(
-                                "/categories",
-                                extra: (
-                                  true,
-                                  widget.manga!.itemType == ItemType.manga
-                                      ? 0
-                                      : widget.manga!.itemType == ItemType.anime
-                                      ? 1
-                                      : 2,
-                                ),
-                              );
-                            } else if (value == 1) {
-                            } else if (value == 2) {
-                              final source = getSource(
-                                widget.manga!.lang!,
-                                widget.manga!.source!,
-                              );
-                              final url =
-                                  "${source!.baseUrl}${widget.manga!.link!.getUrlWithoutDomain}";
-                              Share.share(url);
+                            switch (value) {
+                              case 0:
+                                widget.checkForUpdate(true);
+                                break;
+                              case 1:
+                                context.push(
+                                  "/categories",
+                                  extra: (
+                                    true,
+                                    widget.manga!.itemType == ItemType.manga
+                                        ? 0
+                                        : widget.manga!.itemType ==
+                                            ItemType.anime
+                                        ? 1
+                                        : 2,
+                                  ),
+                                );
+                                break;
+                              case 2:
+                                final source = getSource(
+                                  widget.manga!.lang!,
+                                  widget.manga!.source!,
+                                );
+                                final url =
+                                    "${source!.baseUrl}${widget.manga!.link!.getUrlWithoutDomain}";
+                                Share.share(url);
+                                break;
+                              case 3:
+                                context.push("/migrate", extra: widget.manga);
+                                break;
                             }
                           },
                         ),
@@ -1156,7 +1166,7 @@ class _MangaDetailViewState extends ConsumerState<MangaDetailView>
                                         ),
                                         content: SizedBox(
                                           width: context.width(0.8),
-                                          child: ListView.builder(
+                                          child: SuperListView.builder(
                                             shrinkWrap: true,
                                             itemCount: scanlators.$1.length,
                                             itemBuilder: (context, index) {
@@ -1468,26 +1478,80 @@ class _MangaDetailViewState extends ConsumerState<MangaDetailView>
                                     ),
                                     child: SizedBox(
                                       height: 30,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          elevation: 0,
-                                          backgroundColor: Colors.grey
-                                              .withValues(alpha: 0.2),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              5,
+                                      child: PopupMenuButton(
+                                        popUpAnimationStyle:
+                                            popupAnimationStyle,
+                                        itemBuilder: (context) {
+                                          return [
+                                            PopupMenuItem<int>(
+                                              height: 40,
+                                              value: 0,
+                                              child: Text(
+                                                context
+                                                    .l10n
+                                                    .genre_search_library,
+                                              ),
+                                            ),
+                                            PopupMenuItem<int>(
+                                              height: 40,
+                                              value: 1,
+                                              child: Text(
+                                                context
+                                                    .l10n
+                                                    .genre_search_source,
+                                              ),
+                                            ),
+                                          ];
+                                        },
+                                        onSelected: (value) async {
+                                          final source = getSource(
+                                            widget.manga!.lang!,
+                                            widget.manga!.source!,
+                                          );
+                                          if (source == null) {
+                                            botToast(l10n.source_not_added);
+                                            return;
+                                          }
+                                          if (value == 0) {
+                                            final genre = widget.manga!.genre![i];
+                                            switch (widget.manga!.itemType) {
+                                              case ItemType.manga:
+                                                context.pushReplacement('/MangaLibrary', extra: genre);
+                                                break;
+                                              case ItemType.anime:
+                                                context.pushReplacement('/AnimeLibrary', extra: genre);
+                                                break;
+                                              case ItemType.novel:
+                                                context.pushReplacement('/NovelLibrary', extra: genre);
+                                                break;
+                                            }
+                                          } else {
+                                            context.pushReplacement(
+                                              '/mangaHome',
+                                              extra: (source, false),
+                                            );
+                                          }
+                                        },
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            elevation: 0,
+                                            backgroundColor: Colors.grey
+                                                .withValues(alpha: 0.2),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
                                             ),
                                           ),
-                                        ),
-                                        onPressed: () {},
-                                        child: Text(
-                                          widget.manga!.genre![i],
-                                          style: TextStyle(
-                                            fontSize: 11.5,
-                                            color:
-                                                context.isLight
-                                                    ? Colors.black
-                                                    : Colors.white,
+                                          onPressed: null,
+                                          child: Text(
+                                            widget.manga!.genre![i],
+                                            style: TextStyle(
+                                              fontSize: 11.5,
+                                              color:
+                                                  context.isLight
+                                                      ? Colors.black
+                                                      : Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -2241,7 +2305,7 @@ class _MangaDetailViewState extends ConsumerState<MangaDetailView>
           clipBehavior: Clip.antiAliasWithSaveLayer,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ListView.separated(
+            child: SuperListView.separated(
               padding: const EdgeInsets.all(0),
               itemCount: entries!.length,
               primary: false,

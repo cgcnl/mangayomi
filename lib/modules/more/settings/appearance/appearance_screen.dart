@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mangayomi/modules/more/settings/appearance/providers/app_font_family.dart';
 import 'package:mangayomi/modules/more/settings/appearance/providers/theme_mode_state_provider.dart';
+import 'package:mangayomi/modules/more/settings/appearance/widgets/follow_system_theme_button.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
 import 'package:mangayomi/utils/date.dart';
@@ -12,7 +13,7 @@ import 'package:mangayomi/modules/more/settings/appearance/providers/pure_black_
 import 'package:mangayomi/modules/more/settings/appearance/widgets/blend_level_slider.dart';
 import 'package:mangayomi/modules/more/settings/appearance/widgets/dark_mode_button.dart';
 import 'package:mangayomi/modules/more/settings/appearance/widgets/theme_selector.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mangayomi/l10n/generated/app_localizations.dart';
 import 'package:mangayomi/utils/language.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
 
@@ -47,6 +48,7 @@ class AppearanceScreen extends ConsumerWidget {
                   (element) => element.value().fontFamily! == appFontFamily,
                 )
                 .key;
+    bool followSystemTheme = ref.watch(followSystemThemeStateProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n!.appearance)),
       body: SingleChildScrollView(
@@ -70,7 +72,8 @@ class AppearanceScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const DarkModeButton(),
+                  if (!followSystemTheme) const DarkModeButton(),
+                  const FollowSystemThemeButton(),
                   const ThemeSelector(),
                   if (isDarkTheme)
                     Padding(
@@ -117,7 +120,7 @@ class AppearanceScreen extends ConsumerWidget {
                             title: Text(l10n.app_language),
                             content: SizedBox(
                               width: context.width(0.8),
-                              child: ListView.builder(
+                              child: SuperListView.builder(
                                 shrinkWrap: true,
                                 itemCount:
                                     AppLocalizations.supportedLocales.length,
@@ -388,7 +391,7 @@ class AppearanceScreen extends ConsumerWidget {
                             title: Text(l10n.relative_timestamp),
                             content: SizedBox(
                               width: context.width(0.8),
-                              child: ListView.builder(
+                              child: SuperListView.builder(
                                 shrinkWrap: true,
                                 itemCount:
                                     relativeTimestampsList(context).length,
@@ -460,7 +463,7 @@ class AppearanceScreen extends ConsumerWidget {
                             title: Text(l10n.date_format),
                             content: SizedBox(
                               width: context.width(0.8),
-                              child: ListView.builder(
+                              child: SuperListView.builder(
                                 shrinkWrap: true,
                                 itemCount: dateFormatsList.length,
                                 itemBuilder: (context, index) {

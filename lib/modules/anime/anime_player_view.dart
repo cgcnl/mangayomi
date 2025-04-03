@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riv;
+import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/main.dart';
+import 'package:mangayomi/models/changed.dart';
 import 'package:mangayomi/models/chapter.dart';
+import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/video.dart' as vid;
 import 'package:mangayomi/modules/anime/providers/anime_player_controller_provider.dart';
 import 'package:mangayomi/modules/anime/widgets/aniskip_countdown_btn.dart';
@@ -17,18 +21,24 @@ import 'package:mangayomi/modules/anime/widgets/subtitle_view.dart';
 import 'package:mangayomi/modules/anime/widgets/subtitle_setting_widget.dart';
 import 'package:mangayomi/modules/manga/reader/providers/push_router.dart';
 import 'package:mangayomi/modules/more/settings/player/providers/player_state_provider.dart';
+import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:mangayomi/modules/widgets/custom_draggable_tabbar.dart';
 import 'package:mangayomi/modules/widgets/progress_center.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
+import 'package:mangayomi/providers/storage_provider.dart';
 import 'package:mangayomi/services/aniskip.dart';
 import 'package:mangayomi/services/get_video_list.dart';
 import 'package:mangayomi/services/torrent_server.dart';
 import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
+import 'package:mangayomi/utils/language.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/media_kit_video_controls/src/controls/extensions/duration.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:share_plus/share_plus.dart';
+import 'package:super_sliver_list/super_sliver_list.dart';
 
 bool _isDesktop = Platform.isMacOS || Platform.isLinux || Platform.isWindows;
 
@@ -69,6 +79,7 @@ class _AnimePlayerViewState extends riv.ConsumerState<AnimePlayerView> {
 
   @override
   Widget build(BuildContext context) {
+    final defaultSubtitleLang = ref.watch(defaultSubtitleLangStateProvider);
     final serversData = ref.watch(getVideoListProvider(episode: episode));
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     return serversData.when(
@@ -91,6 +102,9 @@ class _AnimePlayerViewState extends riv.ConsumerState<AnimePlayerView> {
         }
 
         return AnimeStreamPage(
+          defaultSubtitle: completeLanguageNameEnglish(
+            defaultSubtitleLang.toLanguageTag(),
+          ),
           episode: episode,
           videos: videos,
           isLocal: isLocal,
@@ -144,11 +158,13 @@ class _AnimePlayerViewState extends riv.ConsumerState<AnimePlayerView> {
 class AnimeStreamPage extends riv.ConsumerStatefulWidget {
   final List<vid.Video> videos;
   final Chapter episode;
+  final String defaultSubtitle;
   final bool isLocal;
   final bool isTorrent;
   final void Function(bool) desktopFullScreenPlayer;
   const AnimeStreamPage({
     super.key,
+    required this.defaultSubtitle,
     required this.isLocal,
     required this.videos,
     required this.episode,
@@ -200,6 +216,7 @@ class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
   bool _hasOpeningSkip = false;
   bool _hasEndingSkip = false;
   bool _initSubtitleAndAudio = true;
+  bool _includeSubtitles = false;
 
   late StreamSubscription<Duration> _currentPositionSub = _player
       .stream
@@ -214,8 +231,12 @@ class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
         if (_firstVid.subtitles?.isNotEmpty ?? false) {
           if (_initSubtitleAndAudio) {
             try {
-              final file = _firstVid.subtitles!.first.file ?? "";
-              final label = _firstVid.subtitles!.first.label;
+              final defaultTrack = _firstVid.subtitles!.firstWhere(
+                (sub) => sub.label == widget.defaultSubtitle,
+                orElse: () => _firstVid.subtitles!.first,
+              );
+              final file = defaultTrack.file ?? "";
+              final label = defaultTrack.label;
               _player.setSubtitleTrack(
                 file.startsWith("http")
                     ? SubtitleTrack.uri(file, title: label, language: label)
@@ -616,32 +637,54 @@ class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
       child: Column(
-        children:
-            videoSubtitleLast.toSet().toList().map((sub) {
-              final title =
-                  sub.title ??
-                  sub.subtitle?.title ??
-                  sub.subtitle?.language ??
-                  sub.subtitle?.channels ??
-                  "None";
+        children: [
+          ...videoSubtitleLast.toSet().toList().map((sub) {
+            final title =
+                sub.title ??
+                sub.subtitle?.title ??
+                sub.subtitle?.language ??
+                sub.subtitle?.channels ??
+                "None";
 
-              final selected =
-                  (title ==
-                      (subtitle.title ??
-                          subtitle.language ??
-                          subtitle.channels ??
-                          "None")) ||
-                  (subtitle.id == "no" && title == "None");
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                  try {
-                    _player.setSubtitleTrack(sub.subtitle!);
-                  } catch (_) {}
-                },
-                child: textWidget(title, selected),
-              );
-            }).toList(),
+            final selected =
+                (title ==
+                    (subtitle.title ??
+                        subtitle.language ??
+                        subtitle.channels ??
+                        "None")) ||
+                (subtitle.id == "no" && title == "None");
+            return GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+                try {
+                  _player.setSubtitleTrack(sub.subtitle!);
+                } catch (_) {}
+              },
+              child: textWidget(title, selected),
+            );
+          }),
+          GestureDetector(
+            onTap: () async {
+              try {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  allowMultiple: false,
+                );
+
+                if (result != null && context.mounted) {
+                  _player.setSubtitleTrack(
+                    SubtitleTrack.uri(result.files.first.path!),
+                  );
+                }
+                if (!context.mounted) return;
+                Navigator.pop(context);
+              } catch (_) {
+                botToast("Error");
+                Navigator.pop(context);
+              }
+            },
+            child: textWidget(context.l10n.load_own_subtitles, false),
+          ),
+        ],
       ),
     );
   }
@@ -1139,6 +1182,16 @@ class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
                       }
                     },
                   ),
+                  btnToShowShareScreenshot(
+                    widget.episode,
+                    onChanged: (v) {
+                      if (v) {
+                        _player.play();
+                      } else {
+                        _player.pause();
+                      }
+                    },
+                  ),
                   // IconButton(
                   //     onPressed: () {
                   //       showDialog(
@@ -1335,6 +1388,205 @@ class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
           ),
         ),
       ],
+    );
+  }
+
+  Widget btnToShowShareScreenshot(
+    Chapter episode, {
+    void Function(bool)? onChanged,
+  }) {
+    return IconButton(
+      onPressed: () async {
+        onChanged?.call(false);
+        Widget button(String label, IconData icon, Function() onPressed) =>
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                  ),
+                  onPressed: onPressed,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(icon),
+                      ),
+                      Text(label),
+                    ],
+                  ),
+                ),
+              ),
+            );
+        final name =
+            "${episode.manga.value!.name} ${episode.name} - ${_currentPosition.value.toString()}"
+                .replaceAll(RegExp(r'[^a-zA-Z0-9 .()\-\s]'), '_');
+        await showModalBottomSheet(
+          context: context,
+          constraints: BoxConstraints(maxWidth: context.width(1)),
+          builder: (context) {
+            return SuperListView(
+              shrinkWrap: true,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                    color: context.themeData.scaffoldBackgroundColor,
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          height: 7,
+                          width: 35,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: context.secondaryColor.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          button(
+                            context.l10n.set_as_cover,
+                            Icons.image_outlined,
+                            () async {
+                              final imageBytes = await _player.screenshot(
+                                format: "image/png",
+                                includeLibassSubtitles: _includeSubtitles,
+                              );
+                              if (context.mounted) {
+                                final res = await showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      content: Text(
+                                        context.l10n.use_this_as_cover_art,
+                                      ),
+                                      actions: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(context.l10n.cancel),
+                                            ),
+                                            const SizedBox(width: 15),
+                                            TextButton(
+                                              onPressed: () {
+                                                final manga =
+                                                    episode.manga.value!;
+                                                isar.writeTxnSync(() {
+                                                  isar.mangas.putSync(
+                                                    manga
+                                                      ..customCoverImage =
+                                                          imageBytes,
+                                                  );
+                                                  ref
+                                                      .read(
+                                                        synchingProvider(
+                                                          syncId: 1,
+                                                        ).notifier,
+                                                      )
+                                                      .addChangedPart(
+                                                        ActionType.updateItem,
+                                                        manga.id,
+                                                        manga.toJson(),
+                                                        false,
+                                                      );
+                                                });
+                                                if (context.mounted) {
+                                                  Navigator.pop(context, "ok");
+                                                }
+                                              },
+                                              child: Text(context.l10n.ok),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                                if (res != null &&
+                                    res == "ok" &&
+                                    context.mounted) {
+                                  Navigator.pop(context);
+                                  botToast(
+                                    context.l10n.cover_updated,
+                                    second: 3,
+                                  );
+                                }
+                              }
+                            },
+                          ),
+                          button(
+                            context.l10n.share,
+                            Icons.share_outlined,
+                            () async {
+                              final imageBytes = await _player.screenshot(
+                                format: "image/png",
+                                includeLibassSubtitles: _includeSubtitles,
+                              );
+                              await Share.shareXFiles([
+                                XFile.fromData(
+                                  imageBytes!,
+                                  name: name,
+                                  mimeType: 'image/png',
+                                ),
+                              ]);
+                            },
+                          ),
+                          button(
+                            context.l10n.save,
+                            Icons.save_outlined,
+                            () async {
+                              final imageBytes = await _player.screenshot(
+                                format: "image/png",
+                                includeLibassSubtitles: _includeSubtitles,
+                              );
+                              final dir =
+                                  await StorageProvider().getGalleryDirectory();
+                              final file = File(p.join(dir!.path, "$name.png"));
+                              file.writeAsBytesSync(imageBytes!);
+                              if (context.mounted) {
+                                botToast(context.l10n.picture_saved, second: 3);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      SwitchListTile(
+                        onChanged: (value) {
+                          setState(() {
+                            _includeSubtitles = value;
+                          });
+                        },
+                        title: Text(context.l10n.include_subtitles),
+                        value: _includeSubtitles,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+        onChanged?.call(true);
+      },
+      icon: Icon(Icons.adaptive.share),
     );
   }
 

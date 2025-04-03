@@ -51,6 +51,8 @@ class Settings {
 
   bool? themeIsDark;
 
+  bool? followSystemTheme;
+
   bool? incognitoMode;
 
   List<ChapterPageurls>? chapterPageUrlsList;
@@ -93,6 +95,8 @@ class Settings {
   bool? cropBorders;
 
   L10nLocale? locale;
+
+  L10nLocale? defaultSubtitleLang;
 
   @enumerated
   late DisplayType animeDisplayType;
@@ -254,6 +258,7 @@ class Settings {
     this.relativeTimesTamps = 2,
     this.flexSchemeColorIndex = 2,
     this.themeIsDark = false,
+    this.followSystemTheme = false,
     this.incognitoMode = false,
     this.chapterPageUrlsList,
     this.showPagesNumber = true,
@@ -430,6 +435,8 @@ class Settings {
     libraryShowNumbersOfItems = json['libraryShowNumbersOfItems'];
     locale =
         json['locale'] != null ? L10nLocale.fromJson(json['locale']) : null;
+    defaultSubtitleLang =
+        json['defaultSubtitleLang'] != null ? L10nLocale.fromJson(json['defaultSubtitleLang']) : null;
     onlyIncludePinnedSources = json['onlyIncludePinnedSources'];
     pagePreloadAmount = json['pagePreloadAmount'];
     if (json['personalPageModeList'] != null) {
@@ -472,6 +479,7 @@ class Settings {
               .toList();
     }
     themeIsDark = json['themeIsDark'];
+    followSystemTheme = json['followSystemTheme'];
     userAgent = json['userAgent'];
     backupFrequency = json['backupFrequency'];
     backupListOptions = json['backupListOptions']?.cast<int>();
@@ -620,6 +628,7 @@ class Settings {
     'libraryShowLanguage': libraryShowLanguage,
     'libraryShowNumbersOfItems': libraryShowNumbersOfItems,
     'locale': locale?.toJson(),
+    'defaultSubtitleLang': defaultSubtitleLang?.toJson(),
     'onlyIncludePinnedSources': onlyIncludePinnedSources,
     'pagePreloadAmount': pagePreloadAmount,
     'personalPageModeList':
@@ -637,6 +646,7 @@ class Settings {
     'sortLibraryAnime': sortLibraryAnime?.toJson(),
     'sortLibraryManga': sortLibraryManga?.toJson(),
     'themeIsDark': themeIsDark,
+    'followSystemTheme': followSystemTheme,
     'userAgent': userAgent,
     'backupFrequency': backupFrequency,
     'backupListOptions': backupListOptions,

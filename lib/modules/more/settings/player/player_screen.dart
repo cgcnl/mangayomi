@@ -3,13 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mangayomi/modules/more/settings/player/providers/player_state_provider.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
+import 'package:mangayomi/utils/language.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:super_sliver_list/super_sliver_list.dart';
+import 'package:mangayomi/l10n/generated/app_localizations.dart';
 
 class PlayerScreen extends ConsumerWidget {
   const PlayerScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final defaultSubtitleLang = ref.watch(defaultSubtitleLangStateProvider);
     final markEpisodeAsSeenType = ref.watch(markEpisodeAsSeenTypeStateProvider);
     final defaultSkipIntroLength = ref.watch(
       defaultSkipIntroLengthStateProvider,
@@ -31,6 +35,67 @@ class PlayerScreen extends ConsumerWidget {
           children: [
             ListTile(
               onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text(context.l10n.default_subtitle_language),
+                      content: SizedBox(
+                        width: context.width(0.8),
+                        child: SuperListView.builder(
+                          shrinkWrap: true,
+                          itemCount: AppLocalizations.supportedLocales.length,
+                          itemBuilder: (context, index) {
+                            final locale =
+                                AppLocalizations.supportedLocales[index];
+                            return RadioListTile(
+                              dense: true,
+                              contentPadding: const EdgeInsets.all(0),
+                              value: locale,
+                              groupValue: defaultSubtitleLang,
+                              onChanged: (value) {
+                                ref
+                                    .read(
+                                      defaultSubtitleLangStateProvider.notifier,
+                                    )
+                                    .setLocale(locale);
+                                Navigator.pop(context);
+                              },
+                              title: Text(
+                                completeLanguageName(locale.toLanguageTag()),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      actions: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                context.l10n.cancel,
+                                style: TextStyle(color: context.primaryColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              title: Text(context.l10n.default_subtitle_language),
+              subtitle: Text(
+                completeLanguageName(defaultSubtitleLang.toLanguageTag()),
+                style: TextStyle(fontSize: 11, color: context.secondaryColor),
+              ),
+            ),
+            ListTile(
+              onTap: () {
                 final values = [100, 95, 90, 85, 80, 75, 70];
                 showDialog(
                   context: context,
@@ -39,7 +104,7 @@ class PlayerScreen extends ConsumerWidget {
                       title: Text(context.l10n.markEpisodeAsSeenSetting),
                       content: SizedBox(
                         width: context.width(0.8),
-                        child: ListView.builder(
+                        child: SuperListView.builder(
                           shrinkWrap: true,
                           itemCount: values.length,
                           itemBuilder: (context, index) {
@@ -173,7 +238,7 @@ class PlayerScreen extends ConsumerWidget {
                       ),
                       content: SizedBox(
                         width: context.width(0.8),
-                        child: ListView.builder(
+                        child: SuperListView.builder(
                           shrinkWrap: true,
                           itemCount: values.length,
                           itemBuilder: (context, index) {
@@ -232,7 +297,7 @@ class PlayerScreen extends ConsumerWidget {
                       title: Text(context.l10n.default_playback_speed_length),
                       content: SizedBox(
                         width: context.width(0.8),
-                        child: ListView.builder(
+                        child: SuperListView.builder(
                           shrinkWrap: true,
                           itemCount: values.length,
                           itemBuilder: (context, index) {
@@ -338,7 +403,7 @@ class PlayerScreen extends ConsumerWidget {
                           ),
                           content: SizedBox(
                             width: context.width(0.8),
-                            child: ListView.builder(
+                            child: SuperListView.builder(
                               shrinkWrap: true,
                               itemCount: values.length,
                               itemBuilder: (context, index) {

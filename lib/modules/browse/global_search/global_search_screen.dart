@@ -6,6 +6,7 @@ import 'package:mangayomi/eval/model/m_manga.dart';
 import 'package:mangayomi/eval/model/m_pages.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/manga.dart';
+import 'package:mangayomi/modules/manga/detail/widgets/migrate_screen.dart';
 import 'package:mangayomi/modules/manga/home/manga_home_screen.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/router/router.dart';
@@ -20,6 +21,7 @@ import 'package:mangayomi/modules/library/widgets/search_text_form_field.dart';
 import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 import 'package:mangayomi/modules/widgets/bottom_text_widget.dart';
 import 'package:mangayomi/modules/widgets/manga_image_card_widget.dart';
+import 'package:super_sliver_list/super_sliver_list.dart';
 
 class GlobalSearchScreen extends ConsumerStatefulWidget {
   final ItemType itemType;
@@ -32,31 +34,30 @@ class GlobalSearchScreen extends ConsumerStatefulWidget {
 class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
   String query = "";
   final _textEditingController = TextEditingController();
-  @override
-  Widget build(BuildContext context) {
-    List<Source> sourceList =
-        ref.watch(onlyIncludePinnedSourceStateProvider)
-            ? isar.sources
-                .filter()
-                .isPinnedEqualTo(true)
-                .and()
-                .itemTypeEqualTo(widget.itemType)
-                .findAllSync()
-            : isar.sources
-                .filter()
-                .idIsNotNull()
-                .and()
-                .isAddedEqualTo(true)
-                .and()
-                .itemTypeEqualTo(widget.itemType)
-                .findAllSync();
-    sourceList = sourceList
+  List<Source> sourceList =
+      ref.watch(onlyIncludePinnedSourceStateProvider)
+          ? isar.sources
+              .filter()
+              .isPinnedEqualTo(true)
+              .and()
+              .itemTypeEqualTo(widget.itemType)
+              .findAllSync()
+          : isar.sources
+              .filter()
+              .idIsNotNull()
+              .and()
+              .isAddedEqualTo(true)
+              .and()
+              .itemTypeEqualTo(widget.itemType)
+              .findAllSync();
+  sourceList = sourceList
         .where(
           (element) =>
               ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false,
         )
         .toList();
-
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: Container(),
@@ -89,14 +90,16 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
       ),
       body:
           query.isNotEmpty
-              ? ListView(
-                children: [
-                  for (var source in sourceList)
-                    SizedBox(
-                      height: 260,
-                      child: SourceSearchScreen(query: query, source: source),
-                    ),
-                ],
+              ? SuperListView.builder(
+                itemCount: sourceList.length,
+                extentPrecalculationPolicy: SuperPrecalculationPolicy(),
+                itemBuilder: (context, index) {
+                  final source = sourceList[index];
+                  return SizedBox(
+                    height: 260,
+                    child: SourceSearchScreen(query: query, source: source),
+                  );
+                },
               )
               : Container(),
     );
@@ -191,7 +194,9 @@ class _SourceSearchScreenState extends State<SourceSearchScreen> {
                             return Center(child: Text(_errorMessage));
                           }
                           if (pages!.list.isNotEmpty) {
-                            return ListView.builder(
+                            return SuperListView.builder(
+                              extentPrecalculationPolicy:
+                                  SuperPrecalculationPolicy(),
                               scrollDirection: Axis.horizontal,
                               itemCount: pages!.list.length,
                               itemBuilder: (context, index) {

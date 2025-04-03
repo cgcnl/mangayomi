@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:grouped_list/sliver_grouped_list.dart';
+import 'package:mangayomi/modules/widgets/custom_sliver_grouped_list_view.dart';
 import 'package:isar/isar.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/changed.dart';
@@ -41,7 +41,7 @@ class SourcesFilterScreen extends ConsumerWidget {
                         .toList();
               return CustomScrollView(
                 slivers: [
-                  SliverGroupedListView<Source, String>(
+                  CustomSliverGroupedListView<Source, String>(
                     elements: entries,
                     groupBy: (element) => element.lang!,
                     groupSeparatorBuilder:
