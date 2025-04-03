@@ -34,7 +34,7 @@ class GlobalSearchScreen extends ConsumerStatefulWidget {
 class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
   String query = "";
   final _textEditingController = TextEditingController();
-  var sourceList =
+  late final List<Source> sourceList =
       ref.watch(onlyIncludePinnedSourceStateProvider)
           ? isar.sources
               .filter()
@@ -50,12 +50,6 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
               .and()
               .itemTypeEqualTo(widget.itemType)
               .findAllSync();
-  sourceList = sourceList
-        .where(
-          (element) =>
-              ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false,
-        )
-        .toList();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
