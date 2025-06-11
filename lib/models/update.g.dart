@@ -27,8 +27,13 @@ const UpdateSchema = CollectionSchema(
       name: r'date',
       type: IsarType.string,
     ),
-    r'mangaId': PropertySchema(
+    r'isNsfw': PropertySchema(
       id: 2,
+      name: r'isNsfw',
+      type: IsarType.bool,
+    ),
+    r'mangaId': PropertySchema(
+      id: 3,
       name: r'mangaId',
       type: IsarType.long,
     )
@@ -83,7 +88,8 @@ void _updateSerialize(
 ) {
   writer.writeString(offsets[0], object.chapterName);
   writer.writeString(offsets[1], object.date);
-  writer.writeLong(offsets[2], object.mangaId);
+  writer.writeBool(offsets[2], object.isNsfw);
+  writer.writeLong(offsets[3], object.mangaId);
 }
 
 Update _updateDeserialize(
@@ -96,7 +102,8 @@ Update _updateDeserialize(
     chapterName: reader.readStringOrNull(offsets[0]),
     date: reader.readStringOrNull(offsets[1]),
     id: id,
-    mangaId: reader.readLongOrNull(offsets[2]),
+    isNsfw: reader.readBoolOrNull(offsets[2]),
+    mangaId: reader.readLongOrNull(offsets[3]),
   );
   return object;
 }
@@ -113,6 +120,8 @@ P _updateDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 3:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -567,6 +576,32 @@ extension UpdateQueryFilter on QueryBuilder<Update, Update, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Update, Update, QAfterFilterCondition> isNsfwIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'isNsfw',
+      ));
+    });
+  }
+
+  QueryBuilder<Update, Update, QAfterFilterCondition> isNsfwIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'isNsfw',
+      ));
+    });
+  }
+
+  QueryBuilder<Update, Update, QAfterFilterCondition> isNsfwEqualTo(
+      bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isNsfw',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Update, Update, QAfterFilterCondition> mangaIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -679,6 +714,18 @@ extension UpdateQuerySortBy on QueryBuilder<Update, Update, QSortBy> {
     });
   }
 
+  QueryBuilder<Update, Update, QAfterSortBy> sortByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Update, Update, QAfterSortBy> sortByIsNsfwDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.desc);
+    });
+  }
+
   QueryBuilder<Update, Update, QAfterSortBy> sortByMangaId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mangaId', Sort.asc);
@@ -729,6 +776,18 @@ extension UpdateQuerySortThenBy on QueryBuilder<Update, Update, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Update, Update, QAfterSortBy> thenByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Update, Update, QAfterSortBy> thenByIsNsfwDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.desc);
+    });
+  }
+
   QueryBuilder<Update, Update, QAfterSortBy> thenByMangaId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mangaId', Sort.asc);
@@ -757,6 +816,12 @@ extension UpdateQueryWhereDistinct on QueryBuilder<Update, Update, QDistinct> {
     });
   }
 
+  QueryBuilder<Update, Update, QDistinct> distinctByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isNsfw');
+    });
+  }
+
   QueryBuilder<Update, Update, QDistinct> distinctByMangaId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'mangaId');
@@ -780,6 +845,12 @@ extension UpdateQueryProperty on QueryBuilder<Update, Update, QQueryProperty> {
   QueryBuilder<Update, String?, QQueryOperations> dateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'date');
+    });
+  }
+
+  QueryBuilder<Update, bool?, QQueryOperations> isNsfwProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isNsfw');
     });
   }
 

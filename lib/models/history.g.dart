@@ -32,14 +32,19 @@ const HistorySchema = CollectionSchema(
       name: r'isManga',
       type: IsarType.bool,
     ),
-    r'itemType': PropertySchema(
+    r'isNsfw': PropertySchema(
       id: 3,
+      name: r'isNsfw',
+      type: IsarType.bool,
+    ),
+    r'itemType': PropertySchema(
+      id: 4,
       name: r'itemType',
       type: IsarType.byte,
       enumMap: _HistoryitemTypeEnumValueMap,
     ),
     r'mangaId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'mangaId',
       type: IsarType.long,
     )
@@ -89,8 +94,9 @@ void _historySerialize(
   writer.writeLong(offsets[0], object.chapterId);
   writer.writeString(offsets[1], object.date);
   writer.writeBool(offsets[2], object.isManga);
-  writer.writeByte(offsets[3], object.itemType.index);
-  writer.writeLong(offsets[4], object.mangaId);
+  writer.writeBool(offsets[3], object.isNsfw);
+  writer.writeByte(offsets[4], object.itemType.index);
+  writer.writeLong(offsets[5], object.mangaId);
 }
 
 History _historyDeserialize(
@@ -104,9 +110,10 @@ History _historyDeserialize(
     date: reader.readStringOrNull(offsets[1]),
     id: id,
     isManga: reader.readBoolOrNull(offsets[2]),
-    itemType: _HistoryitemTypeValueEnumMap[reader.readByteOrNull(offsets[3])] ??
+    isNsfw: reader.readBoolOrNull(offsets[3]),
+    itemType: _HistoryitemTypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
         ItemType.manga,
-    mangaId: reader.readLongOrNull(offsets[4]),
+    mangaId: reader.readLongOrNull(offsets[5]),
   );
   return object;
 }
@@ -125,9 +132,11 @@ P _historyDeserializeProp<P>(
     case 2:
       return (reader.readBoolOrNull(offset)) as P;
     case 3:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 4:
       return (_HistoryitemTypeValueEnumMap[reader.readByteOrNull(offset)] ??
           ItemType.manga) as P;
-    case 4:
+    case 5:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -544,6 +553,32 @@ extension HistoryQueryFilter
     });
   }
 
+  QueryBuilder<History, History, QAfterFilterCondition> isNsfwIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'isNsfw',
+      ));
+    });
+  }
+
+  QueryBuilder<History, History, QAfterFilterCondition> isNsfwIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'isNsfw',
+      ));
+    });
+  }
+
+  QueryBuilder<History, History, QAfterFilterCondition> isNsfwEqualTo(
+      bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isNsfw',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<History, History, QAfterFilterCondition> itemTypeEqualTo(
       ItemType value) {
     return QueryBuilder.apply(this, (query) {
@@ -723,6 +758,18 @@ extension HistoryQuerySortBy on QueryBuilder<History, History, QSortBy> {
     });
   }
 
+  QueryBuilder<History, History, QAfterSortBy> sortByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.asc);
+    });
+  }
+
+  QueryBuilder<History, History, QAfterSortBy> sortByIsNsfwDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.desc);
+    });
+  }
+
   QueryBuilder<History, History, QAfterSortBy> sortByItemType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'itemType', Sort.asc);
@@ -798,6 +845,18 @@ extension HistoryQuerySortThenBy
     });
   }
 
+  QueryBuilder<History, History, QAfterSortBy> thenByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.asc);
+    });
+  }
+
+  QueryBuilder<History, History, QAfterSortBy> thenByIsNsfwDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNsfw', Sort.desc);
+    });
+  }
+
   QueryBuilder<History, History, QAfterSortBy> thenByItemType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'itemType', Sort.asc);
@@ -844,6 +903,12 @@ extension HistoryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<History, History, QDistinct> distinctByIsNsfw() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isNsfw');
+    });
+  }
+
   QueryBuilder<History, History, QDistinct> distinctByItemType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'itemType');
@@ -880,6 +945,12 @@ extension HistoryQueryProperty
   QueryBuilder<History, bool?, QQueryOperations> isMangaProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isManga');
+    });
+  }
+
+  QueryBuilder<History, bool?, QQueryOperations> isNsfwProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isNsfw');
     });
   }
 
