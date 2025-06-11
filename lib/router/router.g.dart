@@ -23,174 +23,21 @@ final routerProvider = AutoDisposeProvider<GoRouter>.internal(
 // ignore: unused_element
 typedef RouterRef = AutoDisposeProviderRef<GoRouter>;
 String _$routerCurrentLocationStateHash() =>
-    r'dcc4e40831f5391fd2554b5979497caf72839e02';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$RouterCurrentLocationState
-    extends BuildlessAutoDisposeNotifier<String?> {
-  late final BuildContext context;
-
-  String? build(
-    BuildContext context,
-  );
-}
+    r'e3248e9cbfd34a1c0576b28d9bcc01a07f644cb9';
 
 /// See also [RouterCurrentLocationState].
 @ProviderFor(RouterCurrentLocationState)
-const routerCurrentLocationStateProvider = RouterCurrentLocationStateFamily();
+final routerCurrentLocationStateProvider =
+    AutoDisposeNotifierProvider<RouterCurrentLocationState, String?>.internal(
+  RouterCurrentLocationState.new,
+  name: r'routerCurrentLocationStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$routerCurrentLocationStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-/// See also [RouterCurrentLocationState].
-class RouterCurrentLocationStateFamily extends Family<String?> {
-  /// See also [RouterCurrentLocationState].
-  const RouterCurrentLocationStateFamily();
-
-  /// See also [RouterCurrentLocationState].
-  RouterCurrentLocationStateProvider call(
-    BuildContext context,
-  ) {
-    return RouterCurrentLocationStateProvider(
-      context,
-    );
-  }
-
-  @override
-  RouterCurrentLocationStateProvider getProviderOverride(
-    covariant RouterCurrentLocationStateProvider provider,
-  ) {
-    return call(
-      provider.context,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'routerCurrentLocationStateProvider';
-}
-
-/// See also [RouterCurrentLocationState].
-class RouterCurrentLocationStateProvider
-    extends AutoDisposeNotifierProviderImpl<RouterCurrentLocationState,
-        String?> {
-  /// See also [RouterCurrentLocationState].
-  RouterCurrentLocationStateProvider(
-    BuildContext context,
-  ) : this._internal(
-          () => RouterCurrentLocationState()..context = context,
-          from: routerCurrentLocationStateProvider,
-          name: r'routerCurrentLocationStateProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$routerCurrentLocationStateHash,
-          dependencies: RouterCurrentLocationStateFamily._dependencies,
-          allTransitiveDependencies:
-              RouterCurrentLocationStateFamily._allTransitiveDependencies,
-          context: context,
-        );
-
-  RouterCurrentLocationStateProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.context,
-  }) : super.internal();
-
-  final BuildContext context;
-
-  @override
-  String? runNotifierBuild(
-    covariant RouterCurrentLocationState notifier,
-  ) {
-    return notifier.build(
-      context,
-    );
-  }
-
-  @override
-  Override overrideWith(RouterCurrentLocationState Function() create) {
-    return ProviderOverride(
-      origin: this,
-      override: RouterCurrentLocationStateProvider._internal(
-        () => create()..context = context,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        context: context,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeNotifierProviderElement<RouterCurrentLocationState, String?>
-      createElement() {
-    return _RouterCurrentLocationStateProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is RouterCurrentLocationStateProvider &&
-        other.context == context;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, context.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin RouterCurrentLocationStateRef on AutoDisposeNotifierProviderRef<String?> {
-  /// The parameter `context` of this provider.
-  BuildContext get context;
-}
-
-class _RouterCurrentLocationStateProviderElement
-    extends AutoDisposeNotifierProviderElement<RouterCurrentLocationState,
-        String?> with RouterCurrentLocationStateRef {
-  _RouterCurrentLocationStateProviderElement(super.provider);
-
-  @override
-  BuildContext get context =>
-      (origin as RouterCurrentLocationStateProvider).context;
-}
+typedef _$RouterCurrentLocationState = AutoDisposeNotifier<String?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

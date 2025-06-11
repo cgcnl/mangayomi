@@ -942,6 +942,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auto_extensions_updates_subtitle => '当有新版本可用时，将自动更新扩展。';
 
   @override
+  String get check_for_app_updates => '启动时检查应用更新';
+
+  @override
   String get reading_mode => '阅读模式';
 
   @override
@@ -1480,4 +1483,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+
+  @override
+  String get hwdec => 'Hardware Decoder';
 }

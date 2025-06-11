@@ -954,6 +954,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'سيتم تحديث الامتداد تلقائياً عند توفر إصدار جديد.';
 
   @override
+  String get check_for_app_updates => 'تحقق من تحديثات التطبيق عند بدء التشغيل';
+
+  @override
   String get reading_mode => 'وضع القراءة';
 
   @override
@@ -1511,4 +1514,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+
+  @override
+  String get hwdec => 'Hardware Decoder';
 }

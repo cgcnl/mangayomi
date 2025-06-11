@@ -960,6 +960,9 @@ class AppLocalizationsId extends AppLocalizations {
       'Akan secara otomatis memperbarui ekstensi ketika versi baru tersedia.';
 
   @override
+  String get check_for_app_updates => 'Periksa pembaruan aplikasi saat mulai';
+
+  @override
   String get reading_mode => 'Mode membaca';
 
   @override
@@ -1517,4 +1520,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+
+  @override
+  String get hwdec => 'Hardware Decoder';
 }

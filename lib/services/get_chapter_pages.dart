@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:path/path.dart' as p;
 import 'package:mangayomi/eval/lib.dart';
 import 'package:mangayomi/eval/javascript/http.dart';
 import 'package:mangayomi/main.dart';
@@ -78,11 +79,13 @@ Future<GetChapterPagesModel> getChapterPages(
   }
 
   if (pageUrls.isNotEmpty || isLocalArchive) {
-    if (await File("${mangaDirectory!.path}${chapter.name}.cbz").exists() ||
+    if (await File(
+          p.join(mangaDirectory!.path, "${chapter.name}.cbz"),
+        ).exists() ||
         isLocalArchive) {
       final path = isLocalArchive
           ? chapter.archivePath
-          : "${mangaDirectory.path}${chapter.name}.cbz";
+          : p.join(mangaDirectory.path, "${chapter.name}.cbz");
       final local = await ref.watch(
         getArchiveDataFromFileProvider(path!).future,
       );
@@ -93,10 +96,7 @@ Future<GetChapterPagesModel> getChapterPages(
     } else {
       for (var i = 0; i < pageUrls.length; i++) {
         archiveImages.add(null);
-        if (await File(
-          "${path!.path}"
-          "${padIndex(i + 1)}.jpg",
-        ).exists()) {
+        if (await File(p.join(path!.path, '${padIndex(i)}.jpg')).exists()) {
           isLocaleList.add(true);
         } else {
           isLocaleList.add(false);

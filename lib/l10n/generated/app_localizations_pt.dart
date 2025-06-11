@@ -961,6 +961,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Atualizará automaticamente a extensão quando uma nova versão estiver disponível.';
 
   @override
+  String get check_for_app_updates =>
+      'Verificar atualizações da aplicação ao iniciar';
+
+  @override
   String get reading_mode => 'Modo de leitura';
 
   @override
@@ -1524,6 +1528,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+
+  @override
+  String get hwdec => 'Hardware Decoder';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2478,6 +2485,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get auto_extensions_updates_subtitle =>
       'Atualizará automaticamente a extensão quando uma nova versão estiver disponível.';
+
+  @override
+  String get check_for_app_updates =>
+      'Verificar atualizações do app na inicialização';
 
   @override
   String get reading_mode => 'Modo de leitura';

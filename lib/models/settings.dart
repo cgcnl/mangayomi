@@ -127,6 +127,8 @@ class Settings {
 
   int? pagePreloadAmount;
 
+  bool? checkForAppUpdates;
+
   bool? checkForExtensionUpdates;
 
   @enumerated
@@ -203,6 +205,8 @@ class Settings {
   late SectionType disableSectionType;
 
   bool? useLibass;
+
+  String? hwdecMode;
 
   int? libraryFilterNovelDownloadType;
 
@@ -295,6 +299,7 @@ class Settings {
     this.sortLibraryAnime,
     this.pagePreloadAmount = 6,
     this.scaleType = ScaleType.fitScreen,
+    this.checkForAppUpdates = true,
     this.checkForExtensionUpdates = true,
     this.backgroundColor = BackgroundColor.black,
     this.personalPageModeList,
@@ -326,6 +331,7 @@ class Settings {
     this.animeGridSize,
     this.disableSectionType = SectionType.all,
     this.useLibass = true,
+    this.hwdecMode = "auto",
     this.libraryFilterNovelDownloadType = 0,
     this.libraryFilterNovelUnreadType = 0,
     this.libraryFilterNovelStartedType = 0,
@@ -389,6 +395,7 @@ class Settings {
           .map((e) => ChapterPageurls.fromJson(e))
           .toList();
     }
+    checkForAppUpdates = json['checkForAppUpdates'];
     checkForExtensionUpdates = json['checkForExtensionUpdates'];
     if (json['cookiesList'] != null) {
       cookiesList = (json['cookiesList'] as List)
@@ -509,6 +516,7 @@ class Settings {
     disableSectionType =
         SectionType.values[json['disableSectionType'] ?? SectionType.all.index];
     useLibass = json['useLibass'];
+    hwdecMode = json['hwdecMode'];
     libraryFilterNovelBookMarkedType = json['libraryFilterNovelBookMarkedType'];
     libraryFilterNovelDownloadType = json['libraryFilterNovelDownloadType'];
     libraryFilterNovelStartedType = json['libraryFilterNovelStartedType'];
@@ -585,6 +593,7 @@ class Settings {
         ?.map((v) => v.toJson())
         .toList(),
     'chapterPageUrlsList': chapterPageUrlsList?.map((v) => v.toJson()).toList(),
+    'checkForAppUpdates': checkForAppUpdates,
     'checkForExtensionUpdates': checkForExtensionUpdates,
     'cookiesList': cookiesList,
     'cropBorders': cropBorders,
@@ -666,6 +675,7 @@ class Settings {
     'animeGridSize': animeGridSize,
     'disableSectionType': disableSectionType.index,
     'useLibass': useLibass,
+    'hwdecMode': hwdecMode,
     'libraryFilterNovelBookMarkedType': libraryFilterNovelBookMarkedType,
     'libraryFilterNovelDownloadType': libraryFilterNovelDownloadType,
     'libraryFilterNovelStartedType': libraryFilterNovelStartedType,

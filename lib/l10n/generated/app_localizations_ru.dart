@@ -962,6 +962,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Автоматически обновлять расширение при появлении новой версии.';
 
   @override
+  String get check_for_app_updates =>
+      'Проверять обновления приложения при запуске';
+
+  @override
   String get reading_mode => 'Режим чтения';
 
   @override
@@ -1526,4 +1530,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+
+  @override
+  String get hwdec => 'Hardware Decoder';
 }

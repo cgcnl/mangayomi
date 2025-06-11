@@ -956,6 +956,9 @@ class AppLocalizationsTh extends AppLocalizations {
       'จะทำการอัพเดทส่วนขยายเมื่อมีเวอร์ชั่นใหม่พร้อมใช้งานโดยอัตโนมัติ';
 
   @override
+  String get check_for_app_updates => 'ตรวจสอบการอัปเดตแอปเมื่อเริ่มต้น';
+
+  @override
   String get reading_mode => 'โหมดการอ่าน';
 
   @override
@@ -1512,4 +1515,7 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+
+  @override
+  String get hwdec => 'Hardware Decoder';
 }

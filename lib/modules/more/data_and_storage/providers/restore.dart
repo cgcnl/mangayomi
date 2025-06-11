@@ -27,6 +27,7 @@ import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_pr
 import 'package:mangayomi/modules/more/settings/reader/providers/reader_state_provider.dart';
 import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
+import 'package:mangayomi/router/router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 part 'restore.g.dart';
@@ -252,6 +253,7 @@ void restoreBackup(Ref ref, Map<String, dynamic> backup, {bool full = true}) {
           ref
               .read(synchingProvider(syncId: 1).notifier)
               .clearAllChangedParts(false);
+          ref.invalidate(followSystemThemeStateProvider);
           ref.invalidate(themeModeStateProvider);
           ref.invalidate(blendLevelStateProvider);
           ref.invalidate(flexSchemeColorStateProvider);
@@ -262,6 +264,7 @@ void restoreBackup(Ref ref, Map<String, dynamic> backup, {bool full = true}) {
           ref.invalidate(extensionsRepoStateProvider(ItemType.manga));
           ref.invalidate(extensionsRepoStateProvider(ItemType.anime));
           ref.invalidate(extensionsRepoStateProvider(ItemType.novel));
+          ref.read(routerCurrentLocationStateProvider.notifier).refresh();
         }
       });
     } catch (e) {

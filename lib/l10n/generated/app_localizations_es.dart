@@ -963,6 +963,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Actualizará automáticamente la extensión cuando haya una nueva versión disponible.';
 
   @override
+  String get check_for_app_updates =>
+      'Buscar actualizaciones de la aplicación al iniciar';
+
+  @override
   String get reading_mode => 'Modo de lectura';
 
   @override
@@ -1527,6 +1531,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+
+  @override
+  String get hwdec => 'Hardware Decoder';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
@@ -2484,6 +2491,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   @override
   String get auto_extensions_updates_subtitle =>
       'Actualizará automáticamente la extensión cuando haya una nueva versión disponible.';
+
+  @override
+  String get check_for_app_updates =>
+      'Buscar actualizaciones de la app al iniciar';
 
   @override
   String get reading_mode => 'Modo de lectura';
