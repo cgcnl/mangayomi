@@ -14,21 +14,28 @@
       "bundleIdentifier": "com.kodjodevf.mangayomi",
       "developerName": "Moustapha Kodjo Amadou",
       "subtitle": "Read manga, novels, and watch anime",
-      "version": "0.6.0",
-      "versionDate": "2025-04-03T15:07:36Z",
+      "version": "0.6.25",
+      "versionDate": "2025-06-11T03:31:12Z",
       "versionDescription": "",
-      "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.6.0/Mangayomi-v0.6.0-ios.ipa",
+      "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.6.25/Mangayomi-v0.6.25-ios.ipa",
       "localizedDescription": "Mangayomi is an open-source Flutter app for reading manga, novels, and watching anime across multiple platforms.",
       "iconURL": "https://raw.githubusercontent.com/cgcnl/mangayomi/refs/heads/main/repo/images/icons/icon_default.webp",
       "tintColor": "EF4444",
       "category": "entertainment",
-      "size": 58311163,
+      "size": 58162020,
       "screenshotURLs": [
         "https://raw.githubusercontent.com/cgcnl/mangayomi/refs/heads/main/repo/images/screenshots/image_0_default.webp",
         "https://raw.githubusercontent.com/cgcnl/mangayomi/refs/heads/main/repo/images/screenshots/image_1_default.webp",
         "https://raw.githubusercontent.com/cgcnl/mangayomi/refs/heads/main/repo/images/screenshots/image_2_default.webp"
       ],
       "versions": [
+        {
+          "version": "0.6.25",
+          "date": "2025-06-11T03:31:12Z",
+          "localizedDescription": "",
+          "downloadURL": "https://github.com/cgcnl/mangayomi/releases/download/v0.6.25/Mangayomi-v0.6.25-ios.ipa",
+          "size": 58162020
+        },
         {
           "version": "0.6.0",
           "date": "2025-04-03T15:07:36Z",
@@ -99,6 +106,17 @@
       "imageURL": "https://raw.githubusercontent.com/cgcnl/mangayomi/refs/heads/main/repo/images/news/update_default.webp",
       "notify": true,
       "url": "https://github.com/cgcnl/mangayomi/releases/tag/v0.6.0"
+    },
+    {
+      "appID": "com.kodjodevf.mangayomi",
+      "title": "0.6.25 - 11 Jun",
+      "identifier": "release-0.6.25",
+      "caption": "Update for Mangayomi now available!",
+      "date": "2025-06-11T03:31:12Z",
+      "tintColor": "EF4444",
+      "imageURL": "https://raw.githubusercontent.com/cgcnl/mangayomi/refs/heads/main/repo/images/news/update_default.webp",
+      "notify": true,
+      "url": "https://github.com/cgcnl/mangayomi/releases/tag/v0.6.25"
     }
   ]
 }
