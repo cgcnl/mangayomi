@@ -21,14 +21,17 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 
 class StorageProvider {
+  static bool _hasPermission = false;
   Future<bool> requestPermission() async {
-    Permission permission = Permission.manageExternalStorage;
+    if (_hasPermission) return true;
     if (Platform.isAndroid) {
+      Permission permission = Permission.manageExternalStorage;
       if (await permission.isGranted) {
         return true;
       } else {
         final result = await permission.request();
         if (result == PermissionStatus.granted) {
+          _hasPermission = true;
           return true;
         }
         return false;
@@ -42,13 +45,18 @@ class StorageProvider {
     await Directory(d!.path).delete(recursive: true);
   }
 
+  Future<void> deleteTmpDirectory() async {
+    final d = await getTmpDirectory();
+    await Directory(d!.path).delete(recursive: true);
+  }
+
   Future<Directory?> getDefaultDirectory() async {
     Directory? directory;
     if (Platform.isAndroid) {
       directory = Directory("/storage/emulated/0/Mangayomi/");
     } else {
       final dir = await getApplicationDocumentsDirectory();
-      directory = Directory("${dir.path}/Mangayomi/".fixSeparator);
+      directory = Directory(path.join(dir.path, 'Mangayomi'));
     }
     return directory;
   }
@@ -56,6 +64,13 @@ class StorageProvider {
   Future<Directory?> getBtDirectory() async {
     final gefaultDirectory = await getDefaultDirectory();
     String dbDir = path.join(gefaultDirectory!.path, 'torrents');
+    await Directory(dbDir).create(recursive: true);
+    return Directory(dbDir);
+  }
+
+  Future<Directory?> getTmpDirectory() async {
+    final gefaultDirectory = await getDirectory();
+    String dbDir = path.join(gefaultDirectory!.path, 'tmp');
     await Directory(dbDir).create(recursive: true);
     return Directory(dbDir);
   }
@@ -69,51 +84,44 @@ class StorageProvider {
 
   Future<Directory?> getDirectory() async {
     Directory? directory;
-    String path = isar.settings.getSync(227)!.downloadLocation ?? "";
+    String dPath = isar.settings.getSync(227)!.downloadLocation ?? "";
     if (Platform.isAndroid) {
       directory = Directory(
-        path.isEmpty ? "/storage/emulated/0/Mangayomi/" : "$path/",
+        dPath.isEmpty ? "/storage/emulated/0/Mangayomi/" : "$dPath/",
       );
     } else {
       final dir = await getApplicationDocumentsDirectory();
-      final p = path.isEmpty ? dir.path : path;
-      directory = Directory("$p/Mangayomi/".fixSeparator);
+      final p = dPath.isEmpty ? dir.path : dPath;
+      directory = Directory(path.join(p, 'Mangayomi'));
     }
     return directory;
-  }
-
-  Future<Directory?> getMangaChapterDirectory(Chapter chapter) async {
-    final manga = chapter.manga.value!;
-    String scanlator =
-        chapter.scanlator?.isNotEmpty ?? false
-            ? "${chapter.scanlator!.replaceForbiddenCharacters('_')}_"
-            : "";
-    final itemType = chapter.manga.value!.itemType;
-    final itemTypePath =
-        itemType == ItemType.manga
-            ? "Manga"
-            : itemType == ItemType.anime
-            ? "Anime"
-            : "Novel";
-    final dir = await getDirectory();
-    return Directory(
-      "${dir!.path}downloads/$itemTypePath/${manga.source} (${manga.lang!.toUpperCase()})/${manga.name!.replaceForbiddenCharacters('_')}/$scanlator${chapter.name!.replaceForbiddenCharacters('_')}/"
-          .fixSeparator,
-    );
   }
 
   Future<Directory?> getMangaMainDirectory(Chapter chapter) async {
     final manga = chapter.manga.value!;
     final itemType = chapter.manga.value!.itemType;
-    final itemTypePath =
-        itemType == ItemType.manga
-            ? "Manga"
-            : itemType == ItemType.anime
-            ? "Anime"
-            : "Novel";
+    final itemTypePath = itemType == ItemType.manga
+        ? "Manga"
+        : itemType == ItemType.anime
+        ? "Anime"
+        : "Novel";
     final dir = await getDirectory();
     return Directory(
-      "${dir!.path}/downloads/$itemTypePath/${manga.source} (${manga.lang!.toUpperCase()})/${manga.name!.replaceForbiddenCharacters('_')}/"
+      "${dir!.path}downloads/$itemTypePath/${manga.source} (${manga.lang!.toUpperCase()})/${manga.name!.replaceForbiddenCharacters('_')}/"
+          .fixSeparator,
+    );
+  }
+
+  Future<Directory?> getMangaChapterDirectory(
+    Chapter chapter, {
+    Directory? mangaMainDirectory,
+  }) async {
+    final basedir = mangaMainDirectory ?? await getMangaMainDirectory(chapter);
+    String scanlator = chapter.scanlator?.isNotEmpty ?? false
+        ? "${chapter.scanlator!.replaceForbiddenCharacters('_')}_"
+        : "";
+    return Directory(
+      "${basedir!.path}$scanlator${chapter.name!.replaceForbiddenCharacters('_')}/"
           .fixSeparator,
     );
   }
@@ -136,7 +144,6 @@ class StorageProvider {
     } else {
       gPath = path.join(gPath, 'Pictures');
     }
-    gPath = gPath.fixSeparator;
     await Directory(gPath).create(recursive: true);
     return Directory(gPath);
   }
@@ -149,7 +156,7 @@ class StorageProvider {
       dir = Directory(path);
     }
 
-    final isar = Isar.openSync(
+    final isar = await Isar.open(
       [
         MangaSchema,
         ChangedPartSchema,
@@ -171,9 +178,10 @@ class StorageProvider {
       inspector: inspector!,
     );
 
-    if (isar.settings.filter().idEqualTo(227).isEmptySync()) {
-      isar.writeTxnSync(() {
-        isar.settings.putSync(Settings());
+    final settings = await isar.settings.filter().idEqualTo(227).findFirst();
+    if (settings == null) {
+      await isar.writeTxn(() async {
+        isar.settings.put(Settings());
       });
     }
 

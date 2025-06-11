@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:dart_eval/dart_eval_bridge.dart';
-import 'package:dart_eval/stdlib/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +7,6 @@ import 'package:html/dom.dart' hide Text;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:js_packer/js_packer.dart';
-import 'package:json_path/json_path.dart';
 import 'package:mangayomi/eval/model/document.dart';
 import 'package:mangayomi/eval/javascript/http.dart';
 import 'package:mangayomi/main.dart';
@@ -70,11 +67,8 @@ class MBridge {
   }
 
   ///Create query by html string
-  static const $Function xpath = $Function(_xpath);
 
-  static $Value? _xpath(_, __, List<$Value?> args) {
-    String html = args[0]!.$reified;
-    String xpath = args[1]!.$reified;
+  static List<String>? xpath(String html, String xpath) {
     List<String> attrs = [];
     try {
       var htmlXPath = HtmlXPath.html(html);
@@ -86,15 +80,16 @@ class MBridge {
       }
       //Return one attr
       else if (query.nodes.length == 1) {
-        String attr =
-            query.attr != null ? query.attr!.trim().trimLeft().trimRight() : "";
+        String attr = query.attr != null
+            ? query.attr!.trim().trimLeft().trimRight()
+            : "";
         if (attr.isNotEmpty) {
           attrs = [attr];
         }
       }
-      return $List.wrap(attrs.map((e) => $String(e)).toList());
+      return attrs;
     } catch (_) {
-      return $List.wrap([]);
+      return [];
     }
   }
 
@@ -104,11 +99,7 @@ class MBridge {
   static Status parseStatus(String status, List statusList) {
     for (var element in statusList) {
       Map statusMap = {};
-      if (element is $Map<$Value, $Value>) {
-        statusMap = element.$reified;
-      } else {
-        statusMap = element;
-      }
+      statusMap = element;
       for (var element in statusMap.entries) {
         if (element.key.toString().toLowerCase().contains(
           status.toLowerCase().trim().trimLeft().trimRight(),
@@ -128,79 +119,22 @@ class MBridge {
   }
 
   ///Unpack a JS code
-  static const $Function unpackJs = $Function(_unpackJs);
 
-  static $Value? _unpackJs(_, __, List<$Value?> args) {
-    String code = args[0]!.$reified;
+  static String? unpackJs(String code) {
     try {
       final jsPacker = JSPacker(code);
-      return $String(jsPacker.unpack() ?? "");
+      return jsPacker.unpack() ?? "";
     } catch (_) {
-      return $String("");
+      return "";
     }
   }
 
   ///Unpack a JS code
-  static const $Function unpackJsAndCombine = $Function(_unpackJsAndCombine);
-
-  static $Value? _unpackJsAndCombine(_, __, List<$Value?> args) {
-    String code = args[0]!.$reified;
+  static String? unpackJsAndCombine(String code) {
     try {
-      return $String(JsUnpacker.unpackAndCombine(code) ?? "");
+      return JsUnpacker.unpackAndCombine(code) ?? "";
     } catch (_) {
-      return $String("");
-    }
-  }
-
-  ///Read values in parsed JSON object and return resut to List<String>
-  static const $Function jsonPathToList = $Function(_jsonPathToList);
-
-  static $Value? _jsonPathToList(_, __, List<$Value?> args) {
-    String source = args[0]!.$reified;
-    String expression = args[1]!.$reified;
-    int type = args[2]!.$reified;
-    try {
-      //Check jsonDecode(source) is list value
-      if (jsonDecode(source) is List) {
-        List<dynamic> values = [];
-        final val = jsonDecode(source) as List;
-        for (var element in val) {
-          final mMap = element as Map?;
-          Map<String, dynamic> map = {};
-          if (mMap != null) {
-            map = mMap.map((key, value) => MapEntry(key.toString(), value));
-          }
-          values.add(map);
-        }
-        List<String> list = [];
-        for (var data in values) {
-          final jsonRes = JsonPath(expression).read(data);
-          String val = "";
-
-          //Get jsonRes first string value
-          if (type == 0) {
-            val = jsonRes.first.value.toString();
-          }
-          //Decode jsonRes first map value
-          else {
-            val = jsonEncode(jsonRes.first.value);
-          }
-          list.add(val);
-        }
-        return $List.wrap(list.map((e) => $String(e)).toList());
-      }
-      // else jsonDecode(source) is Map value
-      else {
-        var map = json.decode(source);
-        var values = JsonPath(expression).readValues(map);
-        return $List.wrap(
-          values.map((e) {
-            return $String(e == null ? "{}" : json.encode(e));
-          }).toList(),
-        );
-      }
-    } catch (_) {
-      return $List.wrap([]);
+      return "";
     }
   }
 
@@ -217,56 +151,6 @@ class MBridge {
     }
   }
 
-  ///Read values in parsed JSON object and return resut to String
-  static const $Function jsonPathToString = $Function(_jsonPathToString);
-
-  static $Value? _jsonPathToString(_, __, List<$Value?> args) {
-    String source = args[0]!.$reified;
-    String expression = args[1]!.$reified;
-    String join = args[2]!.$reified;
-    try {
-      List<dynamic> values = [];
-
-      //Check jsonDecode(source) is list value
-      if (jsonDecode(source) is List) {
-        final val = jsonDecode(source) as List;
-        for (var element in val) {
-          final mMap = element as Map?;
-          Map<String, dynamic> map = {};
-          if (mMap != null) {
-            map = mMap.map((key, value) => MapEntry(key.toString(), value));
-          }
-          values.add(map);
-        }
-      }
-      // else jsonDecode(source) is Map value
-      else {
-        final mMap = jsonDecode(source) as Map?;
-        Map<String, dynamic> map = {};
-        if (mMap != null) {
-          map = mMap.map((key, value) => MapEntry(key.toString(), value));
-        }
-        values.add(map);
-      }
-
-      List<String> listRg = [];
-
-      for (var data in values) {
-        final jsonRes = JsonPath(expression).readValues(data);
-        List list = [];
-
-        for (var element in jsonRes) {
-          list.add(element);
-        }
-        //join the list into listRg
-        listRg.add(list.join(join));
-      }
-      return $String(listRg.first);
-    } catch (_) {
-      return $String("");
-    }
-  }
-
   //Parse a list of dates to millisecondsSinceEpoch
   static List parseDates(
     List value,
@@ -275,28 +159,25 @@ class MBridge {
   ) {
     List<dynamic> val = [];
     for (var element in value) {
-      if (element is $Value) {
-        val.add(element.$reified.toString());
-      } else {
+      element = element.toString().trim();
+      if (element.isNotEmpty) {
         val.add(element);
       }
     }
     bool error = false;
     List<dynamic> valD = [];
     for (var date in val) {
-      if (date.toString().isNotEmpty) {
-        String dateStr = "";
-        if (error) {
-          dateStr = DateTime.now().millisecondsSinceEpoch.toString();
-        } else {
-          dateStr = parseChapterDate(date, dateFormat, dateFormatLocale, (val) {
-            dateFormat = val.$1;
-            dateFormatLocale = val.$2;
-            error = val.$3;
-          });
-        }
-        valD.add(dateStr);
+      String dateStr = "";
+      if (error) {
+        dateStr = DateTime.now().millisecondsSinceEpoch.toString();
+      } else {
+        dateStr = parseChapterDate(date, dateFormat, dateFormatLocale, (val) {
+          dateFormat = val.$1;
+          dateFormatLocale = val.$2;
+          error = val.$3;
+        });
       }
+      valD.add(dateStr);
     }
     return valD;
   }
@@ -348,19 +229,18 @@ class MBridge {
     return await FilemoonExtractor().videosFromUrl(url, prefix, suffix);
   }
 
+  static Map<String, String> decodeHeaders(String? headers) =>
+      headers == null ? {} : (jsonDecode(headers) as Map).toMapStringString!;
+
   static Future<List<Video>> mp4UploadExtractor(
     String url,
     String? headers,
     String prefix,
     String suffix,
   ) async {
-    Map<String, String> newHeaders = {};
-    if (headers != null) {
-      newHeaders = (jsonDecode(headers) as Map).toMapStringString!;
-    }
     return await Mp4uploadExtractor().videosFromUrl(
       url,
-      newHeaders,
+      decodeHeaders(headers),
       prefix: prefix,
       suffix: suffix,
     );
@@ -529,10 +409,9 @@ class MBridge {
         final cleanedDate = date
             .split(" ")
             .map(
-              (it) =>
-                  it.contains(RegExp(r"\d\D\D"))
-                      ? it.replaceAll(RegExp(r"\D"), "")
-                      : it,
+              (it) => it.contains(RegExp(r"\d\D\D"))
+                  ? it.replaceAll(RegExp(r"\D"), "")
+                  : it,
             )
             .join(" ");
         return DateFormat(
@@ -578,10 +457,9 @@ class MBridge {
               final cleanedDate = date
                   .split(" ")
                   .map(
-                    (it) =>
-                        it.contains(RegExp(r"\d\D\D"))
-                            ? it.replaceAll(RegExp(r"\D"), "")
-                            : it,
+                    (it) => it.contains(RegExp(r"\d\D\D"))
+                        ? it.replaceAll(RegExp(r"\D"), "")
+                        : it,
                   )
                   .join(" ");
               return DateFormat(
@@ -615,13 +493,8 @@ class MBridge {
     String? headers,
     String prefix,
   ) async {
-    Map<String, String> newHeaders = {};
-    if (headers != null) {
-      newHeaders = (jsonDecode(headers) as Map).toMapStringString!;
-    }
-
     return await SendvidExtractor(
-      newHeaders,
+      decodeHeaders(headers),
     ).videosFromUrl(url, prefix: prefix);
   }
 
@@ -639,13 +512,9 @@ class MBridge {
     String? name,
     String prefix,
   ) async {
-    Map<String, String> newHeaders = {};
-    if (headers != null) {
-      newHeaders = (jsonDecode(headers) as Map).toMapStringString!;
-    }
     return await YourUploadExtractor().videosFromUrl(
       url,
-      newHeaders,
+      decodeHeaders(headers),
       prefix: prefix,
       name: name ?? "YourUpload",
     );
@@ -687,15 +556,11 @@ class MBridge {
     List<Track>? subtitles,
     List<Track>? audios,
   ) {
-    Map<String, String> newHeaders = {};
-    if (headers != null) {
-      newHeaders = (jsonDecode(headers) as Map).toMapStringString!;
-    }
     return Video(
       url,
       quality,
       originalUrl,
-      headers: newHeaders,
+      headers: decodeHeaders(headers),
       subtitles: subtitles ?? [],
       audios: audios ?? [],
     );
@@ -810,7 +675,7 @@ final List<String> _dateFormats = [
   "MMM dd,yyyy",
 ];
 
-void botToast(
+void Function() botToast(
   String title, {
   int second = 10,
   double? fontSize,
@@ -818,38 +683,46 @@ void botToast(
   double alignY = 0.99,
   bool hasCloudFlare = false,
   String? url,
+  int animationDuration = 200,
+  List<DismissDirection> dismissDirections = const [
+    DismissDirection.horizontal,
+    DismissDirection.down,
+  ],
+  bool onlyOne = true,
+  bool? themeDark,
 }) {
   final context = navigatorKey.currentState?.context;
   final assets = [
     'assets/app_icons/icon-black.png',
     'assets/app_icons/icon-red.png',
   ];
-  BotToast.showNotification(
-    onlyOne: true,
-    dismissDirections: [DismissDirection.horizontal, DismissDirection.down],
+  return BotToast.showNotification(
+    onlyOne: onlyOne,
+    dismissDirections: dismissDirections,
     align: Alignment(alignX, alignY),
     duration: Duration(seconds: second),
-    animationDuration: const Duration(milliseconds: 200),
-    animationReverseDuration: const Duration(milliseconds: 200),
-    leading: (_) => Image.asset((assets..shuffle()).first, height: 25),
+    animationDuration: Duration(milliseconds: animationDuration),
+    animationReverseDuration: Duration(milliseconds: animationDuration),
+    leading: (_) => Image.asset(
+      (themeDark == null
+          ? (assets..shuffle()).first
+          : assets[themeDark ? 0 : 1]),
+      height: 25,
+    ),
     title: (_) => Text(title, style: TextStyle(fontSize: fontSize)),
-    trailing:
-        hasCloudFlare
-            ? (_) => OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(elevation: 10),
-              onPressed: () {
-                context?.push(
-                  "/mangawebview",
-                  extra: {'url': url, 'title': ''},
-                );
-              },
-              label: Text(
-                "Resolve Cloudflare challenge",
-                style: TextStyle(color: context?.secondaryColor),
-              ),
-              icon: const Icon(Icons.public),
-            )
-            : null,
+    trailing: hasCloudFlare
+        ? (_) => OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(elevation: 10),
+            onPressed: () {
+              context?.push("/mangawebview", extra: {'url': url, 'title': ''});
+            },
+            label: Text(
+              "Resolve Cloudflare challenge",
+              style: TextStyle(color: context?.secondaryColor),
+            ),
+            icon: const Icon(Icons.public),
+          )
+        : null,
   );
 }
 

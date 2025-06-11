@@ -8,6 +8,10 @@
     "open_random_entry": "随机打开条目",
     "import": "导入",
     "filter": "筛选",
+    "ignore_filters": "忽略\n筛选",
+    "@ignore_filters": {
+      "description": "Manual line break added for better rendering of the ignore filters text on mobile."
+    },
     "downloaded": "已下载",
     "unread": "未读",
     "started": "已开始",
@@ -286,7 +290,7 @@
     "skip_ending": "跳过结尾",
     "fullscreen": "全屏",
     "update_library": "更新库",
-    "updating_library": "正在更新库",
+    "updating_library": "正在更新库 ({cur} / {max}) - 失败: {failed}",
     "next_chapter": "下一章",
     "next_5_chapters": "下5章",
     "next_10_chapters": "下10章",
@@ -464,5 +468,6 @@
     "genre_search_library": "按类别搜索图书馆",
     "genre_search_source": "按类别搜索来源",
     "source_not_added": "来源未添加",
-    "load_own_subtitles": "加载自定义字幕"
+    "load_own_subtitles": "加载自定义字幕",
+    "unsupported_repo": "您试图添加不支持的版本库。请查看 discord 服务器以获得支持！"
 }

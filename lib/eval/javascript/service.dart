@@ -23,7 +23,7 @@ class JsExtensionService implements ExtensionService {
   JsExtensionService(this.source);
 
   void _init() {
-    runtime = getJavascriptRuntime(xhr: false);
+    runtime = getJavascriptRuntime();
     JsHttpClient(runtime).init();
     JsDomSelector(runtime).init();
     JsVideosExtractors(runtime).init();
@@ -59,7 +59,7 @@ class MProvider {
     async getVideoList(url) {
         throw new Error("getVideoList not implemented");
     }
-    async getHtmlContent(url) {
+    async getHtmlContent(name, url) {
         throw new Error("getHtmlContent not implemented");
     }
     async cleanHtmlContent(html) {
@@ -129,10 +129,9 @@ var extention = new DefaultExtension();
   Future<List<PageUrl>> getPageList(String url) async {
     return (await _extensionCallAsync<List>('getPageList(`$url`)'))
         .map(
-          (e) =>
-              e is String
-                  ? PageUrl(e.trim())
-                  : PageUrl.fromJson((e as Map).toMapStringDynamic!),
+          (e) => e is String
+              ? PageUrl(e.trim())
+              : PageUrl.fromJson((e as Map).toMapStringDynamic!),
         )
         .toList();
   }
@@ -150,26 +149,24 @@ var extention = new DefaultExtension();
   }
 
   @override
-  Future<String> getHtmlContent(String url) async {
+  Future<String> getHtmlContent(String name, String url) async {
     _init();
-    final res =
-        (await runtime.handlePromise(
-          await runtime.evaluateAsync(
-            'jsonStringify(() => extention.getHtmlContent(`$url`))',
-          ),
-        )).stringResult;
+    final res = (await runtime.handlePromise(
+      await runtime.evaluateAsync(
+        'jsonStringify(() => extention.getHtmlContent(`$name`, `$url`))',
+      ),
+    )).stringResult;
     return res;
   }
 
   @override
   Future<String> cleanHtmlContent(String html) async {
     _init();
-    final res =
-        (await runtime.handlePromise(
-          await runtime.evaluateAsync(
-            'jsonStringify(() => extention.cleanHtmlContent(`$html`))',
-          ),
-        )).stringResult;
+    final res = (await runtime.handlePromise(
+      await runtime.evaluateAsync(
+        'jsonStringify(() => extention.cleanHtmlContent(`$html`))',
+      ),
+    )).stringResult;
     return res;
   }
 

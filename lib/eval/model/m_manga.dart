@@ -50,27 +50,24 @@ class MManga {
         _ => Status.unknown,
       },
       genre: (json['genre'] as List?)?.map((e) => e.toString()).toList() ?? [],
-      chapters:
-          json['chapters'] != null
-              ? (json['chapters'] as List)
-                  .map((e) => MChapter.fromJson(e))
-                  .toList()
-              : json['episodes'] != null
-              ? (json['episodes'] as List)
-                  .map((e) => MChapter.fromJson(e))
-                  .toList()
-              : [],
+      chapters: json['chapters'] != null
+          ? (json['chapters'] as List).map((e) => MChapter.fromJson(e)).toList()
+          : json['episodes'] != null
+          ? (json['episodes'] as List).map((e) => MChapter.fromJson(e)).toList()
+          : [],
     );
   }
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'link': link,
-    'imageUrl': imageUrl,
-    'description': description,
-    'author': author,
-    'artist': artist,
-    'status': status.toString().substringAfter("."),
-    'genre': genre,
-    'chapters': chapters!.map((e) => e.toJson()).toList(),
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'link': link,
+      'imageUrl': imageUrl,
+      'description': description,
+      'author': author,
+      'artist': artist,
+      'status': status.toString().substringAfter("."),
+      'genre': genre,
+      'chapters': chapters!.map((e) => e.toJson()).toList(),
+    };
+  }
 }

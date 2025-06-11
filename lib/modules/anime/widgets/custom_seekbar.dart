@@ -31,6 +31,7 @@ class CustomSeekBarState extends State<CustomSeekBar> {
 
   @override
   void initState() {
+    super.initState();
     player.stream.position.listen((event) {
       if (mounted) {
         setState(() {
@@ -55,12 +56,15 @@ class CustomSeekBarState extends State<CustomSeekBar> {
     position = player.state.position;
     duration = player.state.duration;
     buffer = player.state.buffer;
-    super.initState();
   }
 
   final isDesktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
   @override
   Widget build(BuildContext context) {
+    final maxValue = max(duration.inMilliseconds.toDouble(), 0).toDouble();
+    final rawValue = (widget.delta ?? tempPosition ?? position).inMilliseconds
+        .toDouble();
+    final clampedValue = rawValue.clamp(0, maxValue).toDouble();
     return SizedBox(
       height: 20,
       child: Row(
@@ -88,12 +92,8 @@ class CustomSeekBarState extends State<CustomSeekBar> {
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 5.0),
               ),
               child: Slider(
-                max: max(duration.inMilliseconds.toDouble(), 0),
-                value: max(
-                  (widget.delta ?? tempPosition ?? position).inMilliseconds
-                      .toDouble(),
-                  0,
-                ),
+                max: maxValue,
+                value: clampedValue,
                 secondaryTrackValue: max(buffer.inMilliseconds.toDouble(), 0),
                 onChanged: (value) {
                   widget.onSeekStart?.call(

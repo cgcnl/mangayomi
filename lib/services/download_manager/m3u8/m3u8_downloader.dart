@@ -39,7 +39,7 @@ class M3u8Downloader {
     required this.fileName,
     this.headers,
     required this.chapter,
-    this.concurrentDownloads = 15,
+    this.concurrentDownloads = 2,
   });
 
   void _log(String message) {
@@ -342,11 +342,10 @@ class M3u8Downloader {
   Future<void> _mergeTsToMp4(String fileName, String directory) async {
     try {
       final dir = Directory(directory);
-      final files =
-          await dir
-              .list()
-              .where((entity) => entity.path.endsWith('.ts'))
-              .toList();
+      final files = await dir
+          .list()
+          .where((entity) => entity.path.endsWith('.ts'))
+          .toList();
 
       files.sort((a, b) {
         final aIndex = int.parse(
@@ -360,8 +359,8 @@ class M3u8Downloader {
 
       final outFile = File(fileName).openWrite();
       for (var file in files) {
-        final bytes = await File(file.path).readAsBytes();
-        outFile.add(bytes);
+        final inFile = File(file.path).openRead();
+        await outFile.addStream(inFile);
       }
       await outFile.close();
     } catch (e) {
@@ -385,8 +384,9 @@ class M3u8Downloader {
     for (final line in lines) {
       if (line.isEmpty || line.startsWith('#')) continue;
       index++;
-      final tsUrl =
-          line.startsWith('http') ? line : '$host${line.replaceFirst("/", "")}';
+      final tsUrl = line.startsWith('http')
+          ? line
+          : '$host${line.replaceFirst("/", "")}';
       tsList.add(TsInfo('TS_$index', tsUrl));
     }
     return tsList;
@@ -430,10 +430,9 @@ class M3u8Downloader {
     }
 
     final ivStr = match.group(2);
-    final iv =
-        ivStr != null
-            ? Uint8List.fromList(hex.decode(ivStr.replaceFirst('0x', '')))
-            : null;
+    final iv = ivStr != null
+        ? Uint8List.fromList(hex.decode(ivStr.replaceFirst('0x', '')))
+        : null;
 
     return (uri, iv);
   }

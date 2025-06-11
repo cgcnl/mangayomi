@@ -48,10 +48,9 @@ extension UChapDataPreloadExtensions on UChapDataPreload {
     if (archiveImage != null) {
       imageBytes = archiveImage;
     } else if (isLocale!) {
-      imageBytes =
-          File(
-            '${directory!.path}${padIndex(index! + 1)}.jpg',
-          ).readAsBytesSync();
+      imageBytes = File(
+        '${directory!.path}${padIndex(index! + 1)}.jpg',
+      ).readAsBytesSync();
     } else {
       File? cachedImage;
       if (pageUrl != null) {
@@ -71,36 +70,42 @@ extension UChapDataPreloadExtensions on UChapDataPreload {
     bool showCloudFlareError,
   ) {
     final data = this;
+
+    if (data.isTransitionPage) {
+      return const AssetImage('assets/transparent.png')
+          as ImageProvider<Object>;
+    }
+
     final isLocale = data.isLocale!;
     final archiveImage = data.archiveImage;
     final cropBorders = ref.watch(cropBordersStateProvider);
     return cropBorders && data.cropImage != null
         ? ExtendedMemoryImageProvider(data.cropImage!)
         : (isLocale
-                ? archiveImage != null
-                    ? ExtendedMemoryImageProvider(archiveImage)
-                    : ExtendedFileImageProvider(
-                      File(
-                        '${data.directory!.path}${padIndex(data.index! + 1)}.jpg',
-                      ),
-                    )
-                : CustomExtendedNetworkImageProvider(
-                  data.pageUrl!.url.trim().trimLeft().trimRight(),
-                  cache: true,
-                  cacheMaxAge: const Duration(days: 7),
-                  showCloudFlareError: showCloudFlareError,
-                  imageCacheFolderName: "cacheimagemanga",
-                  headers: {
-                    ...data.pageUrl!.headers ?? {},
-                    ...ref.watch(
-                      headersProvider(
-                        source: data.chapter!.manga.value!.source!,
-                        lang: data.chapter!.manga.value!.lang!,
-                      ),
-                    ),
-                  },
-                ))
-            as ImageProvider<Object>;
+                  ? archiveImage != null
+                        ? ExtendedMemoryImageProvider(archiveImage)
+                        : ExtendedFileImageProvider(
+                            File(
+                              '${data.directory!.path}${padIndex(data.index! + 1)}.jpg',
+                            ),
+                          )
+                  : CustomExtendedNetworkImageProvider(
+                      data.pageUrl!.url.trim().trimLeft().trimRight(),
+                      cache: true,
+                      cacheMaxAge: const Duration(days: 7),
+                      showCloudFlareError: showCloudFlareError,
+                      imageCacheFolderName: "cacheimagemanga",
+                      headers: {
+                        ...data.pageUrl!.headers ?? {},
+                        ...ref.watch(
+                          headersProvider(
+                            source: data.chapter!.manga.value!.source!,
+                            lang: data.chapter!.manga.value!.lang!,
+                          ),
+                        ),
+                      },
+                    ))
+              as ImageProvider<Object>;
   }
 }
 

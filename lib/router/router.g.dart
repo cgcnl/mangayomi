@@ -23,7 +23,7 @@ final routerProvider = AutoDisposeProvider<GoRouter>.internal(
 // ignore: unused_element
 typedef RouterRef = AutoDisposeProviderRef<GoRouter>;
 String _$routerCurrentLocationStateHash() =>
-    r'6d08e611ff9bb4c7b91e02b7ffc456df010990aa';
+    r'dcc4e40831f5391fd2554b5979497caf72839e02';
 
 /// Copied from Dart SDK
 class _SystemHash {

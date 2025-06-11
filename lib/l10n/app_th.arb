@@ -8,6 +8,10 @@
   "open_random_entry": "สุ่มอ่าน",
   "import": "นำเข้า",
   "filter": "ตัวกรอง",
+  "ignore_filters": "ไม่สนใจ\nตัวกรอง",
+  "@ignore_filters": {
+    "description": "Manual line break added for better rendering of the ignore filters text on mobile."
+  },
   "downloaded": "ดาวน์โหลดแล้ว",
   "unread": "ยังไม่อ่าน",
   "started": "เริ่มแล้ว",
@@ -286,7 +290,7 @@
   "skip_ending": "ข้ามตอนจบ",
   "fullscreen": "เต็มจอ",
   "update_library": "อัพเดทชั้นหนังสือ",
-  "updating_library": "กำลังอัพเดทชั้นหนังสือ",
+  "updating_library": "กำลังอัพเดทชั้นหนังสือ ({cur} / {max}) - ล้มเหลว: {failed}",
   "next_chapter": "ตอนถัดไป",
   "next_5_chapters": "5 ตอนถัดไป",
   "next_10_chapters": "10 ตอนถัดไป",
@@ -462,5 +466,6 @@
   "genre_search_library": "ค้นหาประเภทในห้องสมุด",
   "genre_search_source": "เรียกดูในแหล่งข้อมูล",
   "source_not_added": "แหล่งข้อมูลไม่ได้ติดตั้ง!",
-  "load_own_subtitles": "โหลดคำบรรยายของคุณเอง..."
+  "load_own_subtitles": "โหลดคำบรรยายของคุณเอง...",
+  "unsupported_repo": "คุณพยายามเพิ่มที่เก็บข้อมูลที่ไม่รองรับ โปรดตรวจสอบเซิร์ฟเวอร์ Discord เพื่อรับการสนับสนุน!"
 }

@@ -5,6 +5,7 @@ import 'package:mangayomi/models/settings.dart';
 import 'package:mangayomi/modules/manga/reader/image_view_paged.dart';
 import 'package:mangayomi/modules/manga/reader/reader_view.dart';
 import 'package:mangayomi/modules/manga/reader/widgets/circular_progress_indicator_animate_rotate.dart';
+import 'package:mangayomi/modules/manga/reader/widgets/transition_view_paged.dart';
 import 'package:mangayomi/modules/more/settings/reader/reader_screen.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
@@ -37,8 +38,9 @@ class _DoubleColummViewState extends State<DoubleColummView>
   final PhotoViewScaleStateController _photoViewScaleStateController =
       PhotoViewScaleStateController();
   Duration? _doubleTapAnimationDuration() {
-    int doubleTapAnimationValue =
-        isar.settings.getSync(227)!.doubleTapAnimationSpeed!;
+    int doubleTapAnimationValue = isar.settings
+        .getSync(227)!
+        .doubleTapAnimationSpeed!;
     if (doubleTapAnimationValue == 0) {
       return const Duration(milliseconds: 10);
     } else if (doubleTapAnimationValue == 1) {
@@ -68,6 +70,7 @@ class _DoubleColummViewState extends State<DoubleColummView>
 
   @override
   void initState() {
+    super.initState();
     _scaleAnimationController = AnimationController(
       duration: _doubleTapAnimationDuration(),
       vsync: this,
@@ -78,8 +81,6 @@ class _DoubleColummViewState extends State<DoubleColummView>
     _animation.addListener(() {
       _photoViewController.scale = _animation.value;
     });
-
-    super.initState();
   }
 
   void _toggleScale(Offset tapPosition) {
@@ -112,6 +113,14 @@ class _DoubleColummViewState extends State<DoubleColummView>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.datas[0]?.isTransitionPage ?? false) {
+      return TransitionViewPaged(data: widget.datas[0]!);
+    }
+    if (widget.datas.length > 1 &&
+        (widget.datas[1]?.isTransitionPage ?? false)) {
+      return TransitionViewPaged(data: widget.datas[1]!);
+    }
+
     return PhotoViewGallery.builder(
       backgroundDecoration: const BoxDecoration(color: Colors.transparent),
       itemCount: 1,
@@ -141,9 +150,9 @@ class _DoubleColummViewState extends State<DoubleColummView>
                               state.loadingProgress;
                           final double progress =
                               loadingProgress?.expectedTotalBytes != null
-                                  ? loadingProgress!.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : 0;
+                              ? loadingProgress!.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : 0;
                           return Container(
                             color: getBackgroundColor(widget.backgroundColor),
                             height: context.height(0.8),
@@ -203,8 +212,8 @@ class _DoubleColummViewState extends State<DoubleColummView>
                         }
                         return null;
                       },
-                      onLongPressData:
-                          (datas) => widget.onLongPressData.call(datas),
+                      onLongPressData: (datas) =>
+                          widget.onLongPressData.call(datas),
                     ),
                   ),
                 // if (widget.datas[1] != null) const SizedBox(width: 10),
@@ -218,9 +227,9 @@ class _DoubleColummViewState extends State<DoubleColummView>
                               state.loadingProgress;
                           final double progress =
                               loadingProgress?.expectedTotalBytes != null
-                                  ? loadingProgress!.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : 0;
+                              ? loadingProgress!.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : 0;
                           return Container(
                             color: getBackgroundColor(widget.backgroundColor),
                             height: context.height(0.8),
@@ -280,8 +289,8 @@ class _DoubleColummViewState extends State<DoubleColummView>
                         }
                         return null;
                       },
-                      onLongPressData:
-                          (datas) => widget.onLongPressData.call(datas),
+                      onLongPressData: (datas) =>
+                          widget.onLongPressData.call(datas),
                     ),
                   ),
               ],

@@ -72,7 +72,8 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -80,7 +81,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -92,12 +94,13 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -114,7 +117,7 @@ abstract class AppLocalizations {
     Locale('ru'),
     Locale('th'),
     Locale('tr'),
-    Locale('zh')
+    Locale('zh'),
   ];
 
   /// No description provided for @library.
@@ -164,6 +167,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filter'**
   String get filter;
+
+  /// No description provided for @ignore_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore Filters'**
+  String get ignore_filters;
 
   /// No description provided for @downloaded.
   ///
@@ -836,6 +845,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save as CBZ archive'**
   String get save_as_cbz_archive;
+
+  /// No description provided for @concurrent_downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Concurrent downloads'**
+  String get concurrent_downloads;
 
   /// No description provided for @browse_subtitle.
   ///
@@ -1800,7 +1815,7 @@ abstract class AppLocalizations {
   /// No description provided for @uninstall_extension.
   ///
   /// In en, this message translates to:
-  /// **'Uninstall {ext} extension ?'**
+  /// **'Uninstall {ext} extension?'**
   String uninstall_extension(Object ext);
 
   /// No description provided for @langauage.
@@ -2310,8 +2325,8 @@ abstract class AppLocalizations {
   /// No description provided for @updating_library.
   ///
   /// In en, this message translates to:
-  /// **'Updating library'**
-  String get updating_library;
+  /// **'Updating library ({cur} / {max}) - Failed: {failed}'**
+  String updating_library(Object cur, Object failed, Object max);
 
   /// No description provided for @next_chapter.
   ///
@@ -2337,6 +2352,12 @@ abstract class AppLocalizations {
   /// **'Next 25 chapters'**
   String get next_25_chapters;
 
+  /// No description provided for @all_chapters.
+  ///
+  /// In en, this message translates to:
+  /// **'All chapters'**
+  String get all_chapters;
+
   /// No description provided for @next_episode.
   ///
   /// In en, this message translates to:
@@ -2360,6 +2381,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next 25 episodes'**
   String get next_25_episodes;
+
+  /// No description provided for @all_episodes.
+  ///
+  /// In en, this message translates to:
+  /// **'All episodes'**
+  String get all_episodes;
 
   /// No description provided for @cover_saved.
   ///
@@ -2882,9 +2909,58 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Load your own subtitles...'**
   String get load_own_subtitles;
+
+  /// No description provided for @extension_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes: {notes}'**
+  String extension_notes(Object notes);
+
+  /// No description provided for @unsupported_repo.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve tried to add an unsupported repository. Please check the discord server for support!'**
+  String get unsupported_repo;
+
+  /// No description provided for @end_of_chapter.
+  ///
+  /// In en, this message translates to:
+  /// **'End of chapter'**
+  String get end_of_chapter;
+
+  /// No description provided for @chapter_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter completed'**
+  String get chapter_completed;
+
+  /// No description provided for @continue_to_next_chapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue scrolling to read the next chapter'**
+  String get continue_to_next_chapter;
+
+  /// No description provided for @no_next_chapter.
+  ///
+  /// In en, this message translates to:
+  /// **'No next chapter'**
+  String get no_next_chapter;
+
+  /// No description provided for @you_have_finished_reading.
+  ///
+  /// In en, this message translates to:
+  /// **'You have finished reading'**
+  String get you_have_finished_reading;
+
+  /// No description provided for @return_to_the_list_of_chapters.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to the list of chapters'**
+  String get return_to_the_list_of_chapters;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -2893,50 +2969,78 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'de', 'en', 'es', 'fr', 'id', 'it', 'pt', 'ru', 'th', 'tr', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'ar',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'id',
+    'it',
+    'pt',
+    'ru',
+    'th',
+    'tr',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'es': {
-  switch (locale.countryCode) {
-    case '419': return AppLocalizationsEs419();
-   }
-  break;
-   }
-    case 'pt': {
-  switch (locale.countryCode) {
-    case 'BR': return AppLocalizationsPtBr();
-   }
-  break;
-   }
+    case 'es':
+      {
+        switch (locale.countryCode) {
+          case '419':
+            return AppLocalizationsEs419();
+        }
+        break;
+      }
+    case 'pt':
+      {
+        switch (locale.countryCode) {
+          case 'BR':
+            return AppLocalizationsPtBr();
+        }
+        break;
+      }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar': return AppLocalizationsAr();
-    case 'de': return AppLocalizationsDe();
-    case 'en': return AppLocalizationsEn();
-    case 'es': return AppLocalizationsEs();
-    case 'fr': return AppLocalizationsFr();
-    case 'id': return AppLocalizationsId();
-    case 'it': return AppLocalizationsIt();
-    case 'pt': return AppLocalizationsPt();
-    case 'ru': return AppLocalizationsRu();
-    case 'th': return AppLocalizationsTh();
-    case 'tr': return AppLocalizationsTr();
-    case 'zh': return AppLocalizationsZh();
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'de':
+      return AppLocalizationsDe();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'id':
+      return AppLocalizationsId();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'th':
+      return AppLocalizationsTh();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

@@ -39,6 +39,8 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
+  Timer? _backupTimer;
+  Timer? _syncTimer;
   String getHyphenatedUpdatesLabel(String languageCode, String defaultLabel) {
     switch (languageCode) {
       case 'de':
@@ -56,34 +58,28 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 
   late final navigationOrder = ref.watch(navigationOrderStateProvider);
-  late final autoSyncFrequency =
-      ref.watch(synchingProvider(syncId: 1)).autoSyncFrequency;
+  late final autoSyncFrequency = ref
+      .watch(synchingProvider(syncId: 1))
+      .autoSyncFrequency;
   late String? location = ref.watch(
     routerCurrentLocationStateProvider(context),
   );
   late String defaultLocation = navigationOrder.first;
   @override
   initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.go(defaultLocation);
 
-      Timer.periodic(Duration(minutes: 5), (timer) {
-        ref.read(checkAndBackupProvider);
-      });
+      _backupTimer = Timer.periodic(
+        const Duration(minutes: 5),
+        _onBackupTimerTick,
+      );
       if (autoSyncFrequency != 0) {
-        final l10n = l10nLocalizations(context)!;
-        Timer.periodic(Duration(seconds: autoSyncFrequency), (timer) {
-          try {
-            ref
-                .read(syncServerProvider(syncId: 1).notifier)
-                .startSync(l10n, true);
-          } catch (e) {
-            botToast(
-              "Failed to sync! Maybe the sync server is down. Restart the app to resume auto sync.",
-            );
-            timer.cancel();
-          }
-        });
+        _syncTimer = Timer.periodic(
+          Duration(seconds: autoSyncFrequency),
+          _onSyncTimerTick,
+        );
       }
 
       ref.watch(checkForUpdateProvider(context: context));
@@ -91,8 +87,38 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       ref.watch(fetchAnimeSourcesListProvider(id: null, reFresh: false));
       ref.watch(fetchNovelSourcesListProvider(id: null, reFresh: false));
     });
+  }
 
-    super.initState();
+  void _onBackupTimerTick(Timer timer) {
+    if (!mounted) {
+      timer.cancel();
+      return;
+    }
+    ref.read(checkAndBackupProvider);
+  }
+
+  void _onSyncTimerTick(Timer timer) {
+    if (!mounted) {
+      timer.cancel();
+      return;
+    }
+    try {
+      final l10n = l10nLocalizations(context)!;
+      ref.read(syncServerProvider(syncId: 1).notifier).startSync(l10n, true);
+    } catch (e) {
+      botToast(
+        "Failed to sync! Maybe the sync server is down. "
+        "Restart the app to resume auto sync.",
+      );
+      timer.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _backupTimer?.cancel();
+    _syncTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -112,10 +138,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     location == '/mangaReaderView' ||
                     location == '/animePlayerView' ||
                     location == '/novelReaderView';
-                final dest =
-                    navigationOrder
-                        .where((nav) => !hideItems.contains(nav))
-                        .toList();
+                final dest = navigationOrder
+                    .where((nav) => !hideItems.contains(nav))
+                    .toList();
 
                 int currentIndex = dest.indexOf(location ?? defaultLocation);
                 if (currentIndex == -1) {
@@ -131,12 +156,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     if (!isReadingScreen)
                       Material(
                         child: AnimatedContainer(
-                          height:
-                              incognitoMode
-                                  ? Platform.isAndroid || Platform.isIOS
-                                      ? MediaQuery.of(context).padding.top * 2
-                                      : 50
-                                  : 0,
+                          height: incognitoMode
+                              ? Platform.isAndroid || Platform.isIOS
+                                    ? MediaQuery.of(context).padding.top * 2
+                                    : 50
+                              : 0,
                           curve: Curves.easeIn,
                           duration: const Duration(milliseconds: 150),
                           color: context.primaryColor,
@@ -161,118 +185,111 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       ),
                     Flexible(
                       child: Scaffold(
-                        body:
-                            context.isTablet
-                                ? Row(
-                                  children: [
-                                    AnimatedContainer(
-                                      duration: const Duration(milliseconds: 0),
-                                      width: switch (isLongPressed) {
-                                        true => 0,
-                                        _ => switch (location) {
-                                          null => 100,
-                                          != '/MangaLibrary' &&
-                                              != '/AnimeLibrary' &&
-                                              != '/NovelLibrary' &&
-                                              != '/history' &&
-                                              != '/updates' &&
-                                              != '/browse' &&
-                                              != '/more' =>
-                                            0,
-                                          _ => 100,
-                                        },
+                        body: context.isTablet
+                            ? Row(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 0),
+                                    width: switch (isLongPressed) {
+                                      true => 0,
+                                      _ => switch (location) {
+                                        null => 100,
+                                        != '/MangaLibrary' &&
+                                            != '/AnimeLibrary' &&
+                                            != '/NovelLibrary' &&
+                                            != '/history' &&
+                                            != '/updates' &&
+                                            != '/browse' &&
+                                            != '/more' =>
+                                          0,
+                                        _ => 100,
                                       },
-                                      child: Stack(
-                                        children: [
-                                          NavigationRailTheme(
-                                            data: NavigationRailThemeData(
-                                              indicatorShape:
-                                                  RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          30,
-                                                        ),
-                                                  ),
-                                            ),
-                                            child: Builder(
-                                              builder: (context) {
-                                                return NavigationRail(
-                                                  labelType:
-                                                      NavigationRailLabelType
-                                                          .all,
-                                                  useIndicator: true,
-                                                  destinations:
-                                                      _buildNavigationWidgetsDesktop(
-                                                        ref,
-                                                        dest,
-                                                        context,
-                                                      ),
-                                                  selectedIndex: currentIndex,
-                                                  onDestinationSelected: (
-                                                    newIndex,
-                                                  ) {
-                                                    route.go(dest[newIndex]);
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Expanded(child: widget.child),
-                                  ],
-                                )
-                                : widget.child,
-                        bottomNavigationBar:
-                            context.isTablet
-                                ? null
-                                : AnimatedContainer(
-                                  duration: const Duration(milliseconds: 0),
-                                  width: context.width(1),
-                                  height: switch (isLongPressed) {
-                                    true => 0,
-                                    _ => switch (location) {
-                                      null => null,
-                                      != '/MangaLibrary' &&
-                                          != '/AnimeLibrary' &&
-                                          != '/NovelLibrary' &&
-                                          != '/history' &&
-                                          != '/updates' &&
-                                          != '/browse' &&
-                                          != '/more' =>
-                                        0,
-                                      _ => null,
                                     },
-                                  },
-                                  child: NavigationBarTheme(
-                                    data: NavigationBarThemeData(
-                                      labelTextStyle: WidgetStatePropertyAll(
-                                        TextStyle(
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      indicatorShape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                    ),
-                                    child: NavigationBar(
-                                      animationDuration: const Duration(
-                                        milliseconds: 500,
-                                      ),
-                                      selectedIndex: currentIndex,
-                                      destinations:
-                                          _buildNavigationWidgetsMobile(
-                                            ref,
-                                            dest,
-                                            context,
+                                    child: Stack(
+                                      children: [
+                                        NavigationRailTheme(
+                                          data: NavigationRailThemeData(
+                                            indicatorShape:
+                                                RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                ),
                                           ),
-                                      onDestinationSelected: (newIndex) {
-                                        route.go(dest[newIndex]);
-                                      },
+                                          child: Builder(
+                                            builder: (context) {
+                                              return NavigationRail(
+                                                labelType:
+                                                    NavigationRailLabelType.all,
+                                                useIndicator: true,
+                                                destinations:
+                                                    _buildNavigationWidgetsDesktop(
+                                                      ref,
+                                                      dest,
+                                                      context,
+                                                    ),
+                                                selectedIndex: currentIndex,
+                                                onDestinationSelected:
+                                                    (newIndex) {
+                                                      route.go(dest[newIndex]);
+                                                    },
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  Expanded(child: widget.child),
+                                ],
+                              )
+                            : widget.child,
+                        bottomNavigationBar: context.isTablet
+                            ? null
+                            : AnimatedContainer(
+                                duration: const Duration(milliseconds: 0),
+                                width: context.width(1),
+                                height: switch (isLongPressed) {
+                                  true => 0,
+                                  _ => switch (location) {
+                                    null => null,
+                                    != '/MangaLibrary' &&
+                                        != '/AnimeLibrary' &&
+                                        != '/NovelLibrary' &&
+                                        != '/history' &&
+                                        != '/updates' &&
+                                        != '/browse' &&
+                                        != '/more' =>
+                                      0,
+                                    _ => null,
+                                  },
+                                },
+                                child: NavigationBarTheme(
+                                  data: NavigationBarThemeData(
+                                    labelTextStyle: WidgetStatePropertyAll(
+                                      TextStyle(
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    indicatorShape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                  ),
+                                  child: NavigationBar(
+                                    animationDuration: const Duration(
+                                      milliseconds: 500,
+                                    ),
+                                    selectedIndex: currentIndex,
+                                    destinations: _buildNavigationWidgetsMobile(
+                                      ref,
+                                      dest,
+                                      context,
+                                    ),
+                                    onDestinationSelected: (newIndex) {
+                                      route.go(dest[newIndex]);
+                                    },
+                                  ),
                                 ),
+                              ),
                       ),
                     ),
                   ],
@@ -464,18 +481,16 @@ Widget _extensionUpdateTotalNumbers(WidgetRef ref, Widget widget) {
         .watch(fireImmediately: true),
     builder: (context, snapshot) {
       if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-        final entries =
-            snapshot.data!
-                .where((element) => ref.watch(showNSFWStateProvider)
-                  ? true
-                  : element.isNsfw == false
-                )
-                .where(
-                  (element) =>
-                      compareVersions(element.version!, element.versionLast!) <
-                      0,
-                )
-                .toList();
+        final entries = snapshot.data!
+            .where(
+              (element) =>
+                ref.watch(showNSFWStateProvider)?true:element.isNsfw == false,
+            )
+            .where(
+              (element) =>
+                  compareVersions(element.version!, element.versionLast!) < 0,
+            )
+            .toList();
         if (entries.isEmpty) {
           return widget;
         }
@@ -513,13 +528,12 @@ Widget _updatesTotalNumbers(WidgetRef ref, Widget widget) {
         .watch(fireImmediately: true),
     builder: (context, snapshot) {
       if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-        final entries =
-            snapshot.data!.where((element) {
-              if (!element.chapter.isLoaded) {
-                element.chapter.loadSync();
-              }
-              return !(element.chapter.value?.isRead ?? false);
-            }).toList();
+        final entries = snapshot.data!.where((element) {
+          if (!element.chapter.isLoaded) {
+            element.chapter.loadSync();
+          }
+          return !(element.chapter.value?.isRead ?? false);
+        }).toList();
         if (entries.isEmpty) {
           return widget;
         }

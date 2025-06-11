@@ -15,6 +15,8 @@ import 'package:mangayomi/services/http/rhttp/rhttp.dart' as rhttp;
 
 class MClient {
   MClient();
+  static final defaultClient = IOClient(HttpClient());
+  static final Map<rhttp.ClientSettings, Client> rhttpPool = {};
   static Client httpClient({
     Map<String, dynamic>? reqcopyWith,
     rhttp.ClientSettings? settings,
@@ -23,28 +25,27 @@ class MClient {
       try {
         settings ??= rhttp.ClientSettings(
           throwOnStatusCode: false,
-          proxySettings:
-              reqcopyWith?["noProxy"] ?? false
-                  ? const rhttp.ProxySettings.noProxy()
-                  : null,
-          timeout:
-              reqcopyWith?["timeout"] != null
-                  ? Duration(seconds: reqcopyWith?["timeout"])
-                  : null,
+          proxySettings: reqcopyWith?["noProxy"] ?? false
+              ? const rhttp.ProxySettings.noProxy()
+              : null,
+          timeout: reqcopyWith?["timeout"] != null
+              ? Duration(seconds: reqcopyWith?["timeout"])
+              : null,
           timeoutSettings: TimeoutSettings(
-            connectTimeout:
-                reqcopyWith?["connectTimeout"] != null
-                    ? Duration(seconds: reqcopyWith?["connectTimeout"])
-                    : null,
+            connectTimeout: reqcopyWith?["connectTimeout"] != null
+                ? Duration(seconds: reqcopyWith?["connectTimeout"])
+                : null,
           ),
           tlsSettings: rhttp.TlsSettings(
             verifyCertificates: reqcopyWith?["verifyCertificates"] ?? false,
           ),
         );
-        return rhttp.RhttpCompatibleClient.createSync(settings: settings);
+        return rhttpPool.putIfAbsent(settings, () {
+          return rhttp.RhttpCompatibleClient.createSync(settings: settings);
+        });
       } catch (_) {}
     }
-    return IOClient(HttpClient());
+    return defaultClient;
   }
 
   static InterceptedClient init({
@@ -66,15 +67,13 @@ class MClient {
   static Map<String, String> getCookiesPref(String url) {
     final cookiesList = isar.settings.getSync(227)!.cookiesList ?? [];
     if (cookiesList.isEmpty) return {};
-    final cookies =
-        cookiesList
-            .firstWhere(
-              (element) =>
-                  element.host == Uri.parse(url).host ||
-                  Uri.parse(url).host.contains(element.host!),
-              orElse: () => MCookie(cookie: ""),
-            )
-            .cookie!;
+    final host = Uri.parse(url).host;
+    final cookies = cookiesList
+        .firstWhere(
+          (element) => element.host == host || host.contains(element.host!),
+          orElse: () => MCookie(cookie: ""),
+        )
+        .cookie!;
     if (cookies.isEmpty) return {};
     return {HttpHeaders.cookieHeader: cookies};
   }
@@ -88,61 +87,57 @@ class MClient {
     List<String> cookies = [];
     // if incoming cookie is not empty, use it first
     if (cookie != null && cookie.isNotEmpty) {
+      cookies = cookie
+          .split(RegExp('(?<=)(,)(?=[^;]+?=)'))
+          .where((cookie) => cookie.isNotEmpty)
+          .toList();
+    } else if (!Platform.isLinux) {
       cookies =
-          cookie
-              .split(RegExp('(?<=)(,)(?=[^;]+?=)'))
-              .where((cookie) => cookie.isNotEmpty)
+          (await flutter_inappwebview.CookieManager.instance(
+                webViewEnvironment: webViewEnvironment,
+              ).getCookies(
+                url: flutter_inappwebview.WebUri(url),
+                webViewController: webViewController,
+              ))
+              .map((e) => "${e.name}=${e.value}")
               .toList();
-    } else {
-      if (!Platform.isLinux) {
-        cookies =
-            (await flutter_inappwebview.CookieManager.instance(
-              webViewEnvironment: webViewEnvironment,
-            ).getCookies(
-              url: flutter_inappwebview.WebUri(url),
-              webViewController: webViewController,
-            )).map((e) => "${e.name}=${e.value}").toList();
-      }
     }
     if (cookies.isNotEmpty) {
       final host = Uri.parse(url).host;
       final newCookie = cookies.join("; ");
-      final settings = isar.settings.getSync(227);
-      List<MCookie>? cookieList = [];
-      for (var cookie in settings!.cookiesList ?? []) {
-        if (cookie.host != host || (!host.contains(cookie.host))) {
-          cookieList.add(cookie);
-        }
-      }
-      cookieList.add(
+      final settings = await isar.settings.get(227);
+      final existingCookies = settings!.cookiesList ?? [];
+      final filteredCookies = removeCookiesForHost(existingCookies, host);
+      filteredCookies.add(
         MCookie()
           ..host = host
           ..cookie = newCookie,
       );
-      isar.writeTxnSync(
-        () => isar.settings.putSync(settings..cookiesList = cookieList),
+      await isar.writeTxn(
+        () => isar.settings.put(settings..cookiesList = filteredCookies),
       );
     }
     if (ua.isNotEmpty) {
-      final settings = isar.settings.getSync(227);
-      isar.writeTxnSync(() => isar.settings.putSync(settings!..userAgent = ua));
+      final settings = await isar.settings.get(227);
+      await isar.writeTxn(() => isar.settings.put(settings!..userAgent = ua));
     }
   }
 
-  static void deleteAllCookies(String url) {
-    final cookiesList = isar.settings.getSync(227)!.cookiesList ?? [];
-    List<MCookie>? cookieList = [];
-    for (var cookie in cookiesList) {
-      if (!(cookie.host == Uri.parse(url).host ||
-          Uri.parse(url).host.contains(cookie.host!))) {
-        cookieList.add(cookie);
-      }
-    }
-    isar.writeTxnSync(
-      () => isar.settings.putSync(
-        isar.settings.getSync(227)!..cookiesList = cookieList,
-      ),
-    );
+  static List<MCookie> removeCookiesForHost(
+    List<MCookie> allCookies,
+    String host,
+  ) {
+    return allCookies
+        .where((cookie) => cookie.host != host && !host.contains(cookie.host!))
+        .toList();
+  }
+
+  static Future<void> deleteAllCookies(String url) async {
+    final settings = await isar.settings.get(227);
+    final oldCookies = settings!.cookiesList ?? [];
+    final host = Uri.parse(url).host;
+    settings.cookiesList = removeCookiesForHost(oldCookies, host);
+    await isar.writeTxn(() => isar.settings.put(settings));
   }
 }
 
@@ -154,7 +149,8 @@ class MCookieManager extends InterceptorContract {
   Future<BaseRequest> interceptRequest({required BaseRequest request}) async {
     final cookie = MClient.getCookiesPref(request.url.toString());
     if (cookie.isNotEmpty) {
-      final userAgent = isar.settings.getSync(227)!.userAgent!;
+      final settings = await isar.settings.get(227);
+      final userAgent = settings!.userAgent!;
       if (request.headers[HttpHeaders.cookieHeader] == null) {
         request.headers.addAll(cookie);
       }
@@ -211,12 +207,7 @@ class LoggerInterceptor extends InterceptorContract {
     required BaseResponse response,
   }) async {
     if (showCloudFlareError) {
-      final cloudflare =
-          [403, 503].contains(response.statusCode) &&
-          [
-            "cloudflare-nginx",
-            "cloudflare",
-          ].contains(response.headers["server"]);
+      final cloudflare = isCloudflare(response);
       final content =
           "----- Response -----\n${response.request?.method}: ${response.request?.url}, statusCode: ${response.statusCode} ${cloudflare ? "Failed to bypass Cloudflare" : ""}";
       if (kDebugMode) {
@@ -238,6 +229,11 @@ class LoggerInterceptor extends InterceptorContract {
   }
 }
 
+bool isCloudflare(BaseResponse response) {
+  return [403, 503].contains(response.statusCode) &&
+      ["cloudflare-nginx", "cloudflare"].contains(response.headers["server"]);
+}
+
 class ResolveCloudFlareChallenge extends RetryPolicy {
   bool showCloudFlareError;
   ResolveCloudFlareChallenge(this.showCloudFlareError);
@@ -249,11 +245,8 @@ class ResolveCloudFlareChallenge extends RetryPolicy {
     flutter_inappwebview.HeadlessInAppWebView? headlessWebView;
     int time = 0;
     bool timeOut = false;
-    final cloudflare =
-        [403, 503].contains(response.statusCode) &&
-        ["cloudflare-nginx", "cloudflare"].contains(response.headers["server"]);
-    if (cloudflare) {
-      bool isCloudFlare = true;
+    bool isCloudFlare = isCloudflare(response);
+    if (isCloudFlare) {
       headlessWebView = flutter_inappwebview.HeadlessInAppWebView(
         webViewEnvironment: webViewEnvironment,
         initialUrlRequest: flutter_inappwebview.URLRequest(
@@ -270,10 +263,7 @@ class ResolveCloudFlareChallenge extends RetryPolicy {
           }
 
           await Future.doWhile(() async {
-            if (timeOut == true) {
-              return false;
-            }
-            if (isCloudFlare) {
+            if (!timeOut && isCloudFlare) {
               try {
                 isCloudFlare = await controller.platform.evaluateJavascript(
                   source:
@@ -282,9 +272,10 @@ class ResolveCloudFlareChallenge extends RetryPolicy {
               } catch (_) {
                 isCloudFlare = false;
               }
-              return true;
             }
-            return false;
+            if (isCloudFlare) await Future.delayed(Duration(milliseconds: 300));
+
+            return isCloudFlare;
           });
           if (!timeOut) {
             final ua =

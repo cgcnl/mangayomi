@@ -33,6 +33,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get filter => '筛选';
 
   @override
+  String get ignore_filters => '忽略\n筛选';
+
+  @override
   String get downloaded => '已下载';
 
   @override
@@ -373,6 +376,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get save_as_cbz_archive => '保存为CBZ档案';
 
   @override
+  String get concurrent_downloads => 'Concurrent downloads';
+
+  @override
   String get browse_subtitle => '来源，全球搜索';
 
   @override
@@ -632,7 +638,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sync_logged => '登录成功';
 
   @override
-  String get syncing_subtitle => '通过自托管服务器在多个设备间同步您的进度。首次同步时，请先上传；或者在设备上启用（自动）同步之前先下载！';
+  String get syncing_subtitle =>
+      '通过自托管服务器在多个设备间同步您的进度。首次同步时，请先上传；或者在设备上启用（自动）同步之前先下载！';
 
   @override
   String get last_sync => '上次同步时间：';
@@ -910,7 +917,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get page_preload_amount => '页面预加载量';
 
   @override
-  String get page_preload_amount_subtitle => '阅读时预加载的页面数量。更高的值将导致更顺畅的阅读体验，但会增加缓存和网络使用。';
+  String get page_preload_amount_subtitle =>
+      '阅读时预加载的页面数量。更高的值将导致更顺畅的阅读体验，但会增加缓存和网络使用。';
 
   @override
   String get image_loading_error => '无法加载此图片';
@@ -1136,7 +1144,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get update_library => '更新库';
 
   @override
-  String get updating_library => '正在更新库';
+  String updating_library(Object cur, Object failed, Object max) {
+    return '正在更新库 ($cur / $max) - 失败: $failed';
+  }
 
   @override
   String get next_chapter => '下一章';
@@ -1151,6 +1161,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get next_25_chapters => '下25章';
 
   @override
+  String get all_chapters => 'All chapters';
+
+  @override
   String get next_episode => '下一集';
 
   @override
@@ -1161,6 +1174,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get next_25_episodes => '接下来的 25 集';
+
+  @override
+  String get all_episodes => 'All episodes';
 
   @override
   String get cover_saved => '封面已保存';
@@ -1300,7 +1316,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get use_native_http_client => '使用本地 HTTP 客户端';
 
   @override
-  String get use_native_http_client_info => '它自动支持平台特性，如 VPN，支持更多 HTTP 特性，如 HTTP/3 和自定义重定向处理';
+  String get use_native_http_client_info =>
+      '它自动支持平台特性，如 VPN，支持更多 HTTP 特性，如 HTTP/3 和自定义重定向处理';
 
   @override
   String n_hour_ago(Object hour) {
@@ -1436,4 +1453,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get load_own_subtitles => '加载自定义字幕';
+
+  @override
+  String extension_notes(Object notes) {
+    return 'Notes: $notes';
+  }
+
+  @override
+  String get unsupported_repo => '您试图添加不支持的版本库。请查看 discord 服务器以获得支持！';
+
+  @override
+  String get end_of_chapter => 'End of chapter';
+
+  @override
+  String get chapter_completed => 'Chapter completed';
+
+  @override
+  String get continue_to_next_chapter =>
+      'Continue scrolling to read the next chapter';
+
+  @override
+  String get no_next_chapter => 'No next chapter';
+
+  @override
+  String get you_have_finished_reading => 'You have finished reading';
+
+  @override
+  String get return_to_the_list_of_chapters => 'Return to the list of chapters';
 }

@@ -8,6 +8,7 @@
     "open_random_entry": "Rastgele Giriş Aç",
     "import": "İçe Aktar",
     "filter": "Filtre",
+    "ignore_filters": "Filtreleri yok say",
     "downloaded": "İndirildi",
     "unread": "Okunmamış",
     "started": "Başladı",
@@ -284,7 +285,7 @@
     "aniskip_button_timeout": "Düğme Zaman Aşımı",
     "fullscreen": "Tam ekran",
     "update_library": "Kütüphaneyi güncelle",
-    "updating_library": "Kütüphaneyi güncelleme",
+    "updating_library": "Kütüphaneyi güncelleme ({cur} / {max}) - Başarısız: {failed}",
     "next_chapter": "Sonraki bölüm",
     "next_5_chapters": "Sonraki 5 bölüm",
     "next_10_chapters": "Sonraki 10 bölüm",
@@ -462,5 +463,6 @@
     "genre_search_library": "Kütüphanede tür ara",
     "genre_search_source": "Kaynağı keşfet",
     "source_not_added": "Kaynak yüklenmedi!",
-    "load_own_subtitles": "Kendi altyazılarınızı yükleyin..."
+    "load_own_subtitles": "Kendi altyazılarınızı yükleyin...",
+    "unsupported_repo": "Desteklenmeyen bir depo eklemeye çalıştınız. Lütfen destek için discord sunucusunu kontrol edin!"
 }

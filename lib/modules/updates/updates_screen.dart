@@ -1,6 +1,7 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mangayomi/modules/more/settings/appearance/providers/theme_mode_state_provider.dart';
 import 'package:mangayomi/modules/widgets/custom_sliver_grouped_list_view.dart';
 
 import 'package:isar/isar.dart';
@@ -38,37 +39,57 @@ class _UpdatesScreenState extends ConsumerState<UpdatesScreen>
     setState(() {
       _isLoading = true;
     });
+    bool isDark = ref.read(themeModeStateProvider);
     botToast(
-      context.l10n.updating_library,
+      context.l10n.updating_library("0", "0", "0"),
       fontSize: 13,
-      second: 1600,
+      second: 30,
       alignY: !context.isTablet ? 0.85 : 1,
+      themeDark: isDark,
     );
-    final mangaList =
-        isar.mangas
-            .filter()
-            .idIsNotNull()
-            .favoriteEqualTo(true)
-            .and()
-            .itemTypeEqualTo(
-              _tabBarController.index == 0
-                  ? ItemType.manga
-                  : _tabBarController.index == 1
-                  ? ItemType.anime
-                  : ItemType.novel,
-            )
-            .and()
-            .isLocalArchiveEqualTo(false)
-            .findAllSync();
+    final mangaList = isar.mangas
+        .filter()
+        .idIsNotNull()
+        .favoriteEqualTo(true)
+        .and()
+        .itemTypeEqualTo(
+          _tabBarController.index == 0
+              ? ItemType.manga
+              : _tabBarController.index == 1
+              ? ItemType.anime
+              : ItemType.novel,
+        )
+        .and()
+        .isLocalArchiveEqualTo(false)
+        .findAllSync();
     int numbers = 0;
+    int failed = 0;
 
     for (var manga in mangaList) {
       try {
         await ref.read(
-          updateMangaDetailProvider(mangaId: manga.id, isInit: false).future,
+          updateMangaDetailProvider(
+            mangaId: manga.id,
+            isInit: false,
+            showToast: false,
+          ).future,
         );
-      } catch (_) {}
+      } catch (_) {
+        failed++;
+      }
       numbers++;
+      if (mounted) {
+        botToast(
+          context.l10n.updating_library(numbers, failed, mangaList.length),
+          fontSize: 13,
+          second: 10,
+          alignY: !context.isTablet ? 0.85 : 1,
+          animationDuration: 0,
+          dismissDirections: [DismissDirection.none],
+          onlyOne: false,
+          themeDark: isDark,
+        );
+      }
     }
     await Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 1));
@@ -92,10 +113,10 @@ class _UpdatesScreenState extends ConsumerState<UpdatesScreen>
 
   @override
   void initState() {
+    super.initState();
     _tabBarController = TabController(length: tabs, vsync: this);
     _tabBarController.animateTo(0);
     _tabBarController.addListener(tabListener);
-    super.initState();
   }
 
   final _textEditingController = TextEditingController();
@@ -129,43 +150,42 @@ class _UpdatesScreenState extends ConsumerState<UpdatesScreen>
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Colors.transparent,
-          title:
-              _isSearch
-                  ? null
-                  : Text(
-                    l10n.updates,
-                    style: TextStyle(color: Theme.of(context).hintColor),
-                  ),
+          title: _isSearch
+              ? null
+              : Text(
+                  l10n.updates,
+                  style: TextStyle(color: Theme.of(context).hintColor),
+                ),
           actions: [
             _isSearch
                 ? SeachFormTextField(
-                  onChanged: (value) {
-                    setState(() {});
-                  },
-                  onSuffixPressed: () {
-                    _textEditingController.clear();
-                    setState(() {});
-                  },
-                  onPressed: () {
-                    setState(() {
-                      _isSearch = false;
-                    });
-                    _textEditingController.clear();
-                  },
-                  controller: _textEditingController,
-                )
+                    onChanged: (value) {
+                      setState(() {});
+                    },
+                    onSuffixPressed: () {
+                      _textEditingController.clear();
+                      setState(() {});
+                    },
+                    onPressed: () {
+                      setState(() {
+                        _isSearch = false;
+                      });
+                      _textEditingController.clear();
+                    },
+                    controller: _textEditingController,
+                  )
                 : IconButton(
-                  splashRadius: 20,
-                  onPressed: () {
-                    setState(() {
-                      _isSearch = true;
-                    });
-                  },
-                  icon: Icon(
-                    Icons.search_outlined,
-                    color: Theme.of(context).hintColor,
+                    splashRadius: 20,
+                    onPressed: () {
+                      setState(() {
+                        _isSearch = true;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.search_outlined,
+                      color: Theme.of(context).hintColor,
+                    ),
                   ),
-                ),
             IconButton(
               splashRadius: 20,
               onPressed: () {
@@ -197,45 +217,7 @@ class _UpdatesScreenState extends ConsumerState<UpdatesScreen>
                             ),
                             const SizedBox(width: 15),
                             TextButton(
-                              onPressed: () {
-                                List<Update> updates =
-                                    isar.updates
-                                        .filter()
-                                        .idIsNotNull()
-                                        .chapter(
-                                          (q) => q.manga(
-                                            (q) => q.itemTypeEqualTo(
-                                              _tabBarController.index == 0 &&
-                                                      !hideItems.contains(
-                                                        "/MangaLibrary",
-                                                      )
-                                                  ? ItemType.manga
-                                                  : _tabBarController.index ==
-                                                          1 -
-                                                              (hideItems.contains(
-                                                                    "/MangaLibrary",
-                                                                  )
-                                                                  ? 1
-                                                                  : 0) &&
-                                                      !hideItems.contains(
-                                                        "/AnimeLibrary",
-                                                      )
-                                                  ? ItemType.anime
-                                                  : ItemType.novel,
-                                            ),
-                                          ),
-                                        )
-                                        .findAllSync()
-                                        .toList();
-                                isar.writeTxnSync(() {
-                                  for (var update in updates) {
-                                    isar.updates.deleteSync(update.id!);
-                                  }
-                                });
-                                if (mounted) {
-                                  Navigator.pop(context);
-                                }
-                              },
+                              onPressed: () => clearUpdates(hideItems),
                               child: Text(l10n.ok),
                             ),
                           ],
@@ -314,6 +296,36 @@ class _UpdatesScreenState extends ConsumerState<UpdatesScreen>
       ),
     );
   }
+
+  void clearUpdates(List<String> hideItems) {
+    List<Update> updates = isar.updates
+        .filter()
+        .idIsNotNull()
+        .chapter(
+          (q) =>
+              q.manga((q) => q.itemTypeEqualTo(getCurrentItemType(hideItems))),
+        )
+        .findAllSync()
+        .toList();
+    isar.writeTxnSync(() {
+      for (var update in updates) {
+        isar.updates.deleteSync(update.id!);
+      }
+    });
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  ItemType getCurrentItemType(List<String> hideItems) {
+    return _tabBarController.index == 0 && !hideItems.contains("/MangaLibrary")
+        ? ItemType.manga
+        : _tabBarController.index ==
+                  1 - (hideItems.contains("/MangaLibrary") ? 1 : 0) &&
+              !hideItems.contains("/AnimeLibrary")
+        ? ItemType.anime
+        : ItemType.novel;
+  }
 }
 
 class UpdateTab extends ConsumerStatefulWidget {
@@ -336,34 +348,27 @@ class _UpdateTabState extends ConsumerState<UpdateTab> {
   Widget build(BuildContext context) {
     final l10n = l10nLocalizations(context)!;
     final update = ref.watch(
-      getAllUpdateStreamProvider(itemType: widget.itemType),
+      getAllUpdateStreamProvider(
+        itemType: widget.itemType,
+        search: widget.query,
+      ),
     );
     return Scaffold(
       body: Stack(
         children: [
           update.when(
-            data: (data) {
-              final entries =
-                  data
-                      .where(
-                        (element) =>
-                            ref.watch(showNSFWStateProvider)
-                                ? true : element.isNsfw == false,
-                      )
-                      .where(
-                        (element) =>
-                            widget.query.isNotEmpty
-                                ? element.chapter.value!.manga.value!.name!
-                                    .toLowerCase()
-                                    .contains(widget.query.toLowerCase())
-                                : true,
-                      )
-                      .toList();
-              final lastUpdatedList =
-                  data
-                      .map((e) => e.chapter.value!.manga.value!.lastUpdate!)
-                      .toList();
-              lastUpdatedList.sort((a, b) => a.compareTo(b));
+            data: (entries) {
+              entries = entries
+                .where(
+                  (element) =>
+                      ref.watch(showNSFWStateProvider)
+                          ? true : element.isNsfw == false,
+                )
+              .toList();
+              final lastUpdatedList = entries
+                  .map((e) => e.chapter.value!.manga.value!.lastUpdate!)
+                  .toList();
+              lastUpdatedList.sort((a, b) => b.compareTo(a));
               final lastUpdated = lastUpdatedList.firstOrNull;
               if (entries.isNotEmpty) {
                 return CustomScrollView(
@@ -397,30 +402,28 @@ class _UpdateTabState extends ConsumerState<UpdateTab> {
                       ),
                     CustomSliverGroupedListView<Update, String>(
                       elements: entries,
-                      groupBy:
-                          (element) => dateFormat(
-                            element.date!,
-                            context: context,
-                            ref: ref,
-                            forHistoryValue: true,
-                            useRelativeTimesTamps: false,
-                          ),
-                      groupSeparatorBuilder:
-                          (String groupByValue) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8, left: 12),
-                            child: Row(
-                              children: [
-                                Text(
-                                  dateFormat(
-                                    null,
-                                    context: context,
-                                    stringDate: groupByValue,
-                                    ref: ref,
-                                  ),
-                                ),
-                              ],
+                      groupBy: (element) => dateFormat(
+                        element.date!,
+                        context: context,
+                        ref: ref,
+                        forHistoryValue: true,
+                        useRelativeTimesTamps: false,
+                      ),
+                      groupSeparatorBuilder: (String groupByValue) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8, left: 12),
+                        child: Row(
+                          children: [
+                            Text(
+                              dateFormat(
+                                null,
+                                context: context,
+                                stringDate: groupByValue,
+                                ref: ref,
+                              ),
                             ),
-                          ),
+                          ],
+                        ),
+                      ),
                       itemBuilder: (context, element) {
                         final chapter = element.chapter.value!;
                         return UpdateChapterListTileWidget(
@@ -428,8 +431,8 @@ class _UpdateTabState extends ConsumerState<UpdateTab> {
                           sourceExist: true,
                         );
                       },
-                      itemComparator:
-                          (item1, item2) => item1.date!.compareTo(item2.date!),
+                      itemComparator: (item1, item2) =>
+                          item1.date!.compareTo(item2.date!),
                       order: GroupedListOrder.DESC,
                     ),
                   ],
@@ -474,14 +477,14 @@ Widget _updateNumbers(WidgetRef ref, ItemType itemType) {
         return entries.isEmpty
             ? SizedBox.shrink()
             : Badge(
-              backgroundColor: Theme.of(context).focusColor,
-              label: Text(
-                entries.length.toString(),
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodySmall!.color,
+                backgroundColor: Theme.of(context).focusColor,
+                label: Text(
+                  entries.length.toString(),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodySmall!.color,
+                  ),
                 ),
-              ),
-            );
+              );
       }
       return Container();
     },

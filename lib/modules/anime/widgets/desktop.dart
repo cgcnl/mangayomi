@@ -22,6 +22,7 @@ class DesktopControllerWidget extends StatefulWidget {
   final GlobalKey<VideoState> videoStatekey;
   final Widget bottomButtonBarWidget;
   final Widget seekToWidget;
+  final int defaultSkipIntroLength;
   const DesktopControllerWidget({
     super.key,
     required this.videoController,
@@ -32,6 +33,7 @@ class DesktopControllerWidget extends StatefulWidget {
     required this.seekToWidget,
     required this.tempDuration,
     required this.doubleSpeed,
+    required this.defaultSkipIntroLength,
   });
 
   @override
@@ -149,18 +151,18 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
       bindings: {
         // Default key-board shortcuts.
         // https://support.google.com/youtube/answer/7631406
-        const SingleActivator(LogicalKeyboardKey.mediaPlay):
-            () => widget.videoController.player.play(),
-        const SingleActivator(LogicalKeyboardKey.mediaPause):
-            () => widget.videoController.player.pause(),
-        const SingleActivator(LogicalKeyboardKey.mediaPlayPause):
-            () => widget.videoController.player.playOrPause(),
-        const SingleActivator(LogicalKeyboardKey.mediaTrackNext):
-            () => widget.videoController.player.next(),
-        const SingleActivator(LogicalKeyboardKey.mediaTrackPrevious):
-            () => widget.videoController.player.previous(),
-        const SingleActivator(LogicalKeyboardKey.space):
-            () => widget.videoController.player.playOrPause(),
+        const SingleActivator(LogicalKeyboardKey.mediaPlay): () =>
+            widget.videoController.player.play(),
+        const SingleActivator(LogicalKeyboardKey.mediaPause): () =>
+            widget.videoController.player.pause(),
+        const SingleActivator(LogicalKeyboardKey.mediaPlayPause): () =>
+            widget.videoController.player.playOrPause(),
+        const SingleActivator(LogicalKeyboardKey.mediaTrackNext): () =>
+            widget.videoController.player.next(),
+        const SingleActivator(LogicalKeyboardKey.mediaTrackPrevious): () =>
+            widget.videoController.player.previous(),
+        const SingleActivator(LogicalKeyboardKey.space): () =>
+            widget.videoController.player.playOrPause(),
         const SingleActivator(LogicalKeyboardKey.keyJ): () {
           final rate =
               widget.videoController.player.state.position -
@@ -171,6 +173,12 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
           final rate =
               widget.videoController.player.state.position +
               const Duration(seconds: 10);
+          widget.videoController.player.seek(rate);
+        },
+        const SingleActivator(LogicalKeyboardKey.enter): () {
+          final rate =
+              widget.videoController.player.state.position +
+              Duration(seconds: widget.defaultSkipIntroLength);
           widget.videoController.player.seek(rate);
         },
         const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
@@ -194,51 +202,46 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
           widget.videoController.player.setVolume(volume.clamp(0.0, 100.0));
         },
         const SingleActivator(LogicalKeyboardKey.keyF): () => setFullScreen(),
-        const SingleActivator(LogicalKeyboardKey.escape):
-            () => setFullScreen(value: false),
+        const SingleActivator(LogicalKeyboardKey.escape): () =>
+            setFullScreen(value: false),
       },
       child: Stack(
         children: [
           Consumer(
-            builder:
-                (context, ref, _) =>
-                    ref.read(useLibassStateProvider)
-                        ? const SizedBox.shrink()
-                        : Positioned(
-                          child: CustomSubtitleView(
-                            controller: widget.videoController,
-                            configuration: SubtitleViewConfiguration(
-                              style: subtileTextStyle(ref),
-                            ),
-                          ),
-                        ),
+            builder: (context, ref, _) => ref.read(useLibassStateProvider)
+                ? const SizedBox.shrink()
+                : Positioned(
+                    child: CustomSubtitleView(
+                      controller: widget.videoController,
+                      configuration: SubtitleViewConfiguration(
+                        style: subtileTextStyle(ref),
+                      ),
+                    ),
+                  ),
           ),
           Focus(
             autofocus: true,
             child: Listener(
-              onPointerSignal:
-                  modifyVolumeOnScroll
-                      ? (e) {
-                        if (e is PointerScrollEvent) {
-                          if (e.delta.dy > 0) {
-                            final volume =
-                                widget.videoController.player.state.volume -
-                                5.0;
-                            widget.videoController.player.setVolume(
-                              volume.clamp(0.0, 100.0),
-                            );
-                          }
-                          if (e.delta.dy < 0) {
-                            final volume =
-                                widget.videoController.player.state.volume +
-                                5.0;
-                            widget.videoController.player.setVolume(
-                              volume.clamp(0.0, 100.0),
-                            );
-                          }
+              onPointerSignal: modifyVolumeOnScroll
+                  ? (e) {
+                      if (e is PointerScrollEvent) {
+                        if (e.delta.dy > 0) {
+                          final volume =
+                              widget.videoController.player.state.volume - 5.0;
+                          widget.videoController.player.setVolume(
+                            volume.clamp(0.0, 100.0),
+                          );
+                        }
+                        if (e.delta.dy < 0) {
+                          final volume =
+                              widget.videoController.player.state.volume + 5.0;
+                          widget.videoController.player.setVolume(
+                            volume.clamp(0.0, 100.0),
+                          );
                         }
                       }
-                      : null,
+                    }
+                  : null,
               child: GestureDetector(
                 onLongPressStart: (e) {
                   previousPlaybackSpeed =
@@ -257,46 +260,41 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
                     widget.doubleSpeed(false);
                   }
                 },
-                onTapUp:
-                    !toggleFullscreenOnDoublePress
-                        ? null
-                        : (e) {
-                          final now = DateTime.now();
-                          final difference = now.difference(last);
-                          last = now;
-                          if (difference < const Duration(milliseconds: 400)) {
-                            setFullScreen();
-                          }
-                        },
-                onPanUpdate:
-                    modifyVolumeOnScroll
-                        ? (e) {
-                          if (e.delta.dy > 0) {
-                            final volume =
-                                widget.videoController.player.state.volume -
-                                5.0;
-                            widget.videoController.player.setVolume(
-                              volume.clamp(0.0, 100.0),
-                            );
-                          }
-                          if (e.delta.dy < 0) {
-                            final volume =
-                                widget.videoController.player.state.volume +
-                                5.0;
-                            widget.videoController.player.setVolume(
-                              volume.clamp(0.0, 100.0),
-                            );
-                          }
+                onTapUp: !toggleFullscreenOnDoublePress
+                    ? null
+                    : (e) {
+                        final now = DateTime.now();
+                        final difference = now.difference(last);
+                        last = now;
+                        if (difference < const Duration(milliseconds: 400)) {
+                          setFullScreen();
                         }
-                        : null,
+                      },
+                onPanUpdate: modifyVolumeOnScroll
+                    ? (e) {
+                        if (e.delta.dy > 0) {
+                          final volume =
+                              widget.videoController.player.state.volume - 5.0;
+                          widget.videoController.player.setVolume(
+                            volume.clamp(0.0, 100.0),
+                          );
+                        }
+                        if (e.delta.dy < 0) {
+                          final volume =
+                              widget.videoController.player.state.volume + 5.0;
+                          widget.videoController.player.setVolume(
+                            volume.clamp(0.0, 100.0),
+                          );
+                        }
+                      }
+                    : null,
                 child: MouseRegion(
                   onHover: (_) => onHover(),
                   onEnter: (_) => onEnter(),
                   onExit: (_) => onExit(),
-                  cursor:
-                      cursorVisible
-                          ? SystemMouseCursors.basic
-                          : SystemMouseCursors.none,
+                  cursor: cursorVisible
+                      ? SystemMouseCursors.basic
+                      : SystemMouseCursors.none,
                   child: Stack(
                     children: [
                       AnimatedOpacity(
@@ -349,8 +347,8 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
                                     (
                                     // Add padding in fullscreen!
                                     isFullscreen(context)
-                                        ? MediaQuery.of(context).padding
-                                        : EdgeInsets.zero),
+                                    ? MediaQuery.of(context).padding
+                                    : EdgeInsets.zero),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -361,12 +359,11 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
                                     Expanded(
                                       child: AnimatedOpacity(
                                         curve: Curves.easeInOut,
-                                        opacity:
-                                            buffering
-                                                ? 0.0
-                                                : !showSwipeDuration
-                                                ? 0.0
-                                                : 1.0,
+                                        opacity: buffering
+                                            ? 0.0
+                                            : !showSwipeDuration
+                                            ? 0.0
+                                            : 1.0,
                                         duration: controlsTransitionDuration,
                                         child: Center(
                                           child: seekIndicatorTextWidget(
@@ -437,8 +434,8 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
                               (
                               // Add padding in fullscreen!
                               isFullscreen(context)
-                                  ? MediaQuery.of(context).padding
-                                  : EdgeInsets.zero),
+                              ? MediaQuery.of(context).padding
+                              : EdgeInsets.zero),
                           child: Column(
                             children: [
                               Container(
@@ -487,75 +484,6 @@ class _DesktopControllerWidgetState extends State<DesktopControllerWidget> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// BUTTON: PLAY/PAUSE
-
-/// A material design play/pause button.
-class CustomeMaterialDesktopPlayOrPauseButton extends StatefulWidget {
-  final VideoController controller;
-
-  const CustomeMaterialDesktopPlayOrPauseButton({
-    super.key,
-    required this.controller,
-  });
-
-  @override
-  CustomeMaterialDesktopPlayOrPauseButtonState createState() =>
-      CustomeMaterialDesktopPlayOrPauseButtonState();
-}
-
-class CustomeMaterialDesktopPlayOrPauseButtonState
-    extends State<CustomeMaterialDesktopPlayOrPauseButton>
-    with SingleTickerProviderStateMixin {
-  late final animation = AnimationController(
-    vsync: this,
-    value: widget.controller.player.state.playing ? 1 : 0,
-    duration: const Duration(milliseconds: 200),
-  );
-
-  StreamSubscription<bool>? subscription;
-
-  @override
-  void setState(VoidCallback fn) {
-    if (mounted) {
-      super.setState(fn);
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    subscription ??= widget.controller.player.stream.playing.listen((event) {
-      if (event) {
-        animation.forward();
-      } else {
-        animation.reverse();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    animation.dispose();
-    subscription?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: widget.controller.player.playOrPause,
-      iconSize: 25,
-      color: Colors.white,
-      icon: AnimatedIcon(
-        progress: animation,
-        icon: AnimatedIcons.play_pause,
-        size: 25,
-        color: Colors.white,
       ),
     );
   }
@@ -666,21 +594,20 @@ class CustomMaterialDesktopVolumeButtonState
               color: Colors.white,
               icon: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 150),
-                child:
-                    volume == 0.0
-                        ? const Icon(
-                          Icons.volume_off,
-                          key: ValueKey(Icons.volume_off),
-                        )
-                        : volume < 50.0
-                        ? const Icon(
-                          Icons.volume_down,
-                          key: ValueKey(Icons.volume_down),
-                        )
-                        : const Icon(
-                          Icons.volume_up,
-                          key: ValueKey(Icons.volume_up),
-                        ),
+                child: volume == 0.0
+                    ? const Icon(
+                        Icons.volume_off,
+                        key: ValueKey(Icons.volume_off),
+                      )
+                    : volume < 50.0
+                    ? const Icon(
+                        Icons.volume_down,
+                        key: ValueKey(Icons.volume_down),
+                      )
+                    : const Icon(
+                        Icons.volume_up,
+                        key: ValueKey(Icons.volume_up),
+                      ),
               ),
             ),
             AnimatedOpacity(
@@ -796,8 +723,12 @@ class CustomMaterialDesktopPositionIndicatorState
 
   @override
   Widget build(BuildContext context) {
+    final clampedPosition = (widget.delta ?? position).clamp(
+      Duration.zero,
+      duration,
+    );
     return Text(
-      '${(widget.delta ?? position).label(reference: duration)} / ${duration.label(reference: duration)}',
+      '${clampedPosition.label(reference: duration)} / ${duration.label(reference: duration)}',
       style: const TextStyle(height: 1.0, fontSize: 12.0, color: Colors.white),
     );
   }
@@ -845,10 +776,9 @@ class _CustomMaterialDesktopFullscreenButtonState
           _isFullscreen = isFullScreen;
         });
       },
-      icon:
-          _isFullscreen
-              ? const Icon(Icons.fullscreen_exit)
-              : const Icon(Icons.fullscreen),
+      icon: _isFullscreen
+          ? const Icon(Icons.fullscreen_exit)
+          : const Icon(Icons.fullscreen),
       iconSize: 25,
       color: Colors.white,
     );

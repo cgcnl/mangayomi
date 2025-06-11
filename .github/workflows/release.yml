@@ -246,7 +246,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install webkit2gtk-4.1 clang cmake ninja-build pkg-config libgtk-3-dev mpv libmpv-dev dpkg-dev libblkid-dev liblzma-dev fuse rpm
-          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage"
+          wget -O appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
 
@@ -291,7 +291,7 @@ jobs:
           Exec=usr/bin/mangayomi
           Icon=mangayomi
           Type=Application
-          Categories=Utility;
+          Categories=AudioVideo;
           EOF
           # Create AppRun file
           cat <<EOF > AppDir/AppRun
@@ -342,7 +342,7 @@ jobs:
           Exec=/usr/bin/mangayomi
           Icon=mangayomi
           Type=Application
-          Categories=Utility;
+          Categories=AudioVideo;
           EOL
           %files
           /usr/bin/*
@@ -356,7 +356,7 @@ jobs:
       - name: upload artifact linux zip
         uses: actions/upload-artifact@v4
         with:
-          name: Mangayomi-${{ github.ref_name }}-limux-zip
+          name: Mangayomi-${{ github.ref_name }}-linux-zip
           path: |
             build/linux/x64/release/bundle/Mangayomi-*.zip
             build/linux/x64/release/Mangayomi-*.AppImage

@@ -23,6 +23,7 @@ class _CreateExtensionState extends State<CreateExtension> {
   String _baseUrl = "";
   String _apiUrl = "";
   String _iconUrl = "";
+  String _notes = "";
   int _sourceTypeIndex = 0;
   int _itemTypeIndex = 0;
   int _languageIndex = 0;
@@ -54,18 +55,17 @@ class _CreateExtensionState extends State<CreateExtension> {
                           _languages[_languageIndex],
                           style: const TextStyle(fontSize: 13),
                         ),
-                        items:
-                            _languages
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: _languages.indexOf(e),
-                                    child: Text(
-                                      e,
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
+                        items: _languages
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: _languages.indexOf(e),
+                                child: Text(
+                                  e,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) {
                           setState(() {
                             if (v == 0) {
@@ -112,6 +112,16 @@ class _CreateExtensionState extends State<CreateExtension> {
                   _iconUrl = v;
                 });
               }),
+              _textEditing(
+                "notes",
+                context,
+                "ex: this extension requires login",
+                (v) {
+                  setState(() {
+                    _notes = v;
+                  });
+                },
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 17),
                 child: Row(
@@ -127,18 +137,17 @@ class _CreateExtensionState extends State<CreateExtension> {
                           _sourceTypes[_sourceTypeIndex],
                           style: const TextStyle(fontSize: 13),
                         ),
-                        items:
-                            _sourceTypes
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: _sourceTypes.indexOf(e),
-                                    child: Text(
-                                      e,
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
+                        items: _sourceTypes
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: _sourceTypes.indexOf(e),
+                                child: Text(
+                                  e,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) {
                           setState(() {
                             _sourceTypeIndex = v!;
@@ -171,18 +180,17 @@ class _CreateExtensionState extends State<CreateExtension> {
                           _itemTypes[_itemTypeIndex],
                           style: const TextStyle(fontSize: 13),
                         ),
-                        items:
-                            _itemTypes
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: _itemTypes.indexOf(e),
-                                    child: Text(
-                                      e,
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
+                        items: _itemTypes
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: _itemTypes.indexOf(e),
+                                child: Text(
+                                  e,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              ),
+                            )
+                            .toList(),
                         onChanged: (v) {
                           setState(() {
                             _itemTypeIndex = v!;
@@ -196,69 +204,65 @@ class _CreateExtensionState extends State<CreateExtension> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Consumer(
-                  builder:
-                      (context, ref, child) => ElevatedButton(
-                        onPressed: () {
-                          if (_name.isNotEmpty &&
-                              _lang.isNotEmpty &&
-                              _baseUrl.isNotEmpty &&
-                              _iconUrl.isNotEmpty) {
-                            try {
-                              final id =
+                  builder: (context, ref, child) => ElevatedButton(
+                    onPressed: () {
+                      if (_name.isNotEmpty &&
+                          _lang.isNotEmpty &&
+                          _baseUrl.isNotEmpty &&
+                          _iconUrl.isNotEmpty) {
+                        try {
+                          final id =
+                              _sourceCodeLanguage == SourceCodeLanguage.dart
+                              ? 'mangayomi-$_lang.$_name'.hashCode
+                              : 'mangayomi-js-$_lang.$_name'.hashCode;
+                          final checkIfExist = isar.sources.getSync(id);
+                          if (checkIfExist == null) {
+                            Source source = Source(
+                              id: id,
+                              name: _name,
+                              lang: _lang,
+                              baseUrl: _baseUrl,
+                              apiUrl: _apiUrl,
+                              iconUrl: _iconUrl,
+                              typeSource: _sourceTypes[_sourceTypeIndex],
+                              itemType: ItemType.values.elementAt(
+                                _itemTypeIndex,
+                              ),
+                              isAdded: true,
+                              isActive: true,
+                              version: "0.0.1",
+                              isNsfw: _isNsfw,
+                              notes: _notes,
+                            )..sourceCodeLanguage = _sourceCodeLanguage;
+                            source = source
+                              ..isLocal = true
+                              ..sourceCode =
                                   _sourceCodeLanguage == SourceCodeLanguage.dart
-                                      ? 'mangayomi-$_lang.$_name'.hashCode
-                                      : 'mangayomi-js-$_lang.$_name'.hashCode;
-                              final checkIfExist = isar.sources.getSync(id);
-                              if (checkIfExist == null) {
-                                Source source = Source(
-                                  id: id,
-                                  name: _name,
-                                  lang: _lang,
-                                  baseUrl: _baseUrl,
-                                  apiUrl: _apiUrl,
-                                  iconUrl: _iconUrl,
-                                  typeSource: _sourceTypes[_sourceTypeIndex],
-                                  itemType: ItemType.values.elementAt(
-                                    _itemTypeIndex,
-                                  ),
-                                  isAdded: true,
-                                  isActive: true,
-                                  version: "0.0.1",
-                                  isNsfw: _isNsfw,
-                                )..sourceCodeLanguage = _sourceCodeLanguage;
-                                source =
-                                    source
-                                      ..isLocal = true
-                                      ..sourceCode =
-                                          _sourceCodeLanguage ==
-                                                  SourceCodeLanguage.dart
-                                              ? _dartTemplate
-                                              : _jsSample(source);
-                                isar.writeTxnSync(() {
-                                  isar.sources.putSync(source);
-                                  ref
-                                      .read(
-                                        synchingProvider(syncId: 1).notifier,
-                                      )
-                                      .addChangedPart(
-                                        ActionType.addExtension,
-                                        source.id,
-                                        source.toJson(),
-                                        false,
-                                      );
-                                });
-                                Navigator.pop(context);
-                                botToast("Source created successfully");
-                              } else {
-                                botToast("Source already exists");
-                              }
-                            } catch (e) {
-                              botToast("Error when creating source");
-                            }
+                                  ? _dartTemplate
+                                  : _jsSample(source);
+                            isar.writeTxnSync(() {
+                              isar.sources.putSync(source);
+                              ref
+                                  .read(synchingProvider(syncId: 1).notifier)
+                                  .addChangedPart(
+                                    ActionType.addExtension,
+                                    source.id,
+                                    source.toJson(),
+                                    false,
+                                  );
+                            });
+                            Navigator.pop(context);
+                            botToast("Source created successfully");
+                          } else {
+                            botToast("Source already exists");
                           }
-                        },
-                        child: Text(context.l10n.save),
-                      ),
+                        } catch (e) {
+                          botToast("Error when creating source");
+                        }
+                      }
+                    },
+                    child: Text(context.l10n.save),
+                  ),
                 ),
               ),
             ],
@@ -309,7 +313,7 @@ class TestSource extends MProvider {
 
   MSource source;
 
-  final Client client = Client(source);
+  final Client client = Client();
 
   @override
   bool get supportsLatest => true;
@@ -339,7 +343,7 @@ class TestSource extends MProvider {
   
   // For novel html content
   @override
-  Future<String> getHtmlContent(String url) async {
+  Future<String> getHtmlContent(String name, String url) async {
     // TODO: implement
   }
   
@@ -376,7 +380,8 @@ TestSource main(MSource source) {
   return TestSource(source:source);
 }''';
 
-String _jsSample(Source source) => '''
+String _jsSample(Source source) =>
+    '''
 const mangayomiSources = [{
     "name": "${source.name}",
     "lang": "${source.lang}",
@@ -387,7 +392,8 @@ const mangayomiSources = [{
     "itemType": ${source.itemType.index},
     "isNsfw": ${source.isNsfw},
     "version": "${source.version}",
-    "pkgPath": ""
+    "pkgPath": "",
+    "notes": ""
 }];
 
 class DefaultExtension extends MProvider {
@@ -410,7 +416,7 @@ class DefaultExtension extends MProvider {
         throw new Error("getDetail not implemented");
     }
     // For novel html content
-    async getHtmlContent(url) {
+    async getHtmlContent(name, url) {
         throw new Error("getHtmlContent not implemented");
     }
     // Clean html up for reader

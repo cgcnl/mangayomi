@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_installer/flutter_app_installer.dart';
+// import 'package:flutter_app_installer/flutter_app_installer.dart';
 import 'package:flutter_qjs/quickjs/ffi.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -41,20 +43,20 @@ class _DownloadFileScreenState extends ConsumerState<DownloadFileScreen> {
             ),
             _total > 0
                 ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Flexible(
-                      child: LinearProgressIndicator(
-                        value: _total > 0 ? (_received * 1.0) / _total : 0.0,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Flexible(
+                        child: LinearProgressIndicator(
+                          value: _total > 0 ? (_received * 1.0) / _total : 0.0,
+                        ),
                       ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        '${(_received / 1048576.0).toStringAsFixed(2)}/${(_total / 1048576.0).toStringAsFixed(2)} MB',
+                      Flexible(
+                        child: Text(
+                          '${(_received / 1048576.0).toStringAsFixed(2)}/${(_total / 1048576.0).toStringAsFixed(2)} MB',
+                        ),
                       ),
-                    ),
-                  ],
-                )
+                    ],
+                  )
                 : SizedBox.shrink(),
           ],
         ),
@@ -65,7 +67,9 @@ class _DownloadFileScreenState extends ConsumerState<DownloadFileScreen> {
           children: [
             TextButton(
               onPressed: () async {
-                await _subscription?.cancel();
+                try {
+                  await _subscription?.cancel();
+                } catch (_) {}
                 if (context.mounted) {
                   Navigator.pop(context);
                 }
@@ -74,28 +78,27 @@ class _DownloadFileScreenState extends ConsumerState<DownloadFileScreen> {
             ),
             const SizedBox(width: 15),
             ElevatedButton(
-              onPressed:
-                  _total == 0
-                      ? () async {
-                        if (Platform.isAndroid) {
-                          final deviceInfo = DeviceInfoPlugin();
-                          final androidInfo = await deviceInfo.androidInfo;
-                          String apkUrl = "";
-                          for (String abi in androidInfo.supportedAbis) {
-                            final url = updateAvailable.$4.firstWhereOrNull(
-                              (apk) => (apk as String).contains(abi),
-                            );
-                            if (url != null) {
-                              apkUrl = url;
-                              break;
-                            }
+              onPressed: _total == 0
+                  ? () async {
+                      if (Platform.isAndroid) {
+                        final deviceInfo = DeviceInfoPlugin();
+                        final androidInfo = await deviceInfo.androidInfo;
+                        String apkUrl = "";
+                        for (String abi in androidInfo.supportedAbis) {
+                          final url = updateAvailable.$4.firstWhereOrNull(
+                            (apk) => (apk as String).contains(abi),
+                          );
+                          if (url != null) {
+                            apkUrl = url;
+                            break;
                           }
-                          await _downloadApk(apkUrl);
-                        } else {
-                          _launchInBrowser(Uri.parse(updateAvailable.$3));
                         }
+                        await _downloadApk(apkUrl);
+                      } else {
+                        _launchInBrowser(Uri.parse(updateAvailable.$3));
                       }
-                      : null,
+                    }
+                  : null,
               child: Text(l10n.download),
             ),
           ],
@@ -143,13 +146,25 @@ class _DownloadFileScreenState extends ConsumerState<DownloadFileScreen> {
     if (!status.isGranted) {
       await Permission.requestInstallPackages.request();
     }
-    final FlutterAppInstaller appInstaller = FlutterAppInstaller();
-    await appInstaller.installApk(filePath: file.path);
+    await ApkInstaller.installApk(file.path);
   }
 
   Future<void> _launchInBrowser(Uri url) async {
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
+    }
+  }
+}
+
+class ApkInstaller {
+  static const _platform = MethodChannel('com.kodjodevf.mangayomi.apk_install');
+  static Future<void> installApk(String filePath) async {
+    try {
+      await _platform.invokeMethod('installApk', {'filePath': filePath});
+    } catch (e) {
+      if (kDebugMode) {
+        log("Erreur d'installation : $e");
+      }
     }
   }
 }

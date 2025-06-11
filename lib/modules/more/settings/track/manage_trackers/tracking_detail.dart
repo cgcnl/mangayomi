@@ -22,10 +22,9 @@ class _TrackingDetailState extends State<TrackingDetail>
   late TabController _tabBarController;
   @override
   void initState() {
+    super.initState();
     _tabBarController = TabController(length: 2, vsync: this);
     _tabBarController.animateTo(0);
-
-    super.initState();
   }
 
   @override
@@ -46,7 +45,10 @@ class _TrackingDetailState extends State<TrackingDetail>
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             controller: _tabBarController,
-            tabs: [Tab(text: l10n.manga), Tab(text: l10n.anime)],
+            tabs: [
+              Tab(text: l10n.manga),
+              Tab(text: l10n.anime),
+            ],
           ),
         ),
         body: TabBarView(

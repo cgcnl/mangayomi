@@ -8,6 +8,7 @@
     "open_random_entry": "Abrir entrada aleatória",
     "import": "Importar",
     "filter": "Filtro",
+    "ignore_filters": "Ignorar filtros",
     "downloaded": "Baixado",
     "unread": "Não lido",
     "started": "Iniciado",
@@ -284,7 +285,7 @@
     "aniskip_button_timeout": "Timeout do botão",
     "fullscreen": "Tela cheia",
     "update_library": "Atualizar biblioteca",
-    "updating_library": "Atualizando biblioteca",
+    "updating_library": "Atualizando biblioteca ({cur} / {max}) - Falha: {failed}",
     "next_chapter": "Próximo capítulo",
     "next_5_chapters": "Próximos 5 capítulos",
     "next_10_chapters": "Próximos 10 capítulos",
@@ -462,5 +463,6 @@
     "genre_search_library": "Pesquisar gênero na biblioteca",
     "genre_search_source": "Explorar na fonte",
     "source_not_added": "A fonte não está instalada!",
-    "load_own_subtitles": "Carregar suas próprias legendas..."
+    "load_own_subtitles": "Carregar suas próprias legendas...",
+    "unsupported_repo": "Você tentou adicionar um repositório sem suporte. Consulte o servidor do Discord para obter suporte!"
 }

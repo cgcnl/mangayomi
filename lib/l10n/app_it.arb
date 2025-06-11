@@ -8,6 +8,7 @@
     "open_random_entry": "Apri voce casuale",
     "import": "Importa",
     "filter": "Filtro",
+    "ignore_filters": "Ignora filtri",
     "downloaded": "Scaricato",
     "unread": "Non letto",
     "started": "Iniziato",
@@ -284,7 +285,7 @@
     "aniskip_button_timeout": "Timeout del pulsante",
     "fullscreen": "Schermo intero",
     "update_library": "Aggiorna libreria",
-    "updating_library": "Aggiornamento della libreria",
+    "updating_library": "Aggiornamento della libreria ({cur} / {max}) - Fallito: {failed}",
     "next_chapter": "Capitolo successivo",
     "next_5_chapters": "Prossimi 5 capitoli",
     "next_10_chapters": "Prossimi 10 capitoli",
@@ -462,5 +463,6 @@
     "genre_search_library": "Cerca genere nella libreria",
     "genre_search_source": "Esplora nella fonte",
     "source_not_added": "La fonte non è installata!",
-    "load_own_subtitles": "Carica i tuoi sottotitoli..."
+    "load_own_subtitles": "Carica i tuoi sottotitoli...",
+    "unsupported_repo": "Hai provato ad aggiungere un repository non supportato. Controlla il server discord per ricevere supporto!"
 }
