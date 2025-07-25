@@ -25,6 +25,13 @@ class SourcesScreen extends ConsumerStatefulWidget {
 
 class _SourcesScreenState extends ConsumerState<SourcesScreen> {
   final controller = ScrollController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final showNSFW = ref.watch(showNSFWStateProvider);

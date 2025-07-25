@@ -8,6 +8,8 @@ part 'settings.g.dart';
 class Settings {
   Id? id;
 
+  int? updatedAt;
+
   @enumerated
   late DisplayType displayType;
 
@@ -244,8 +246,23 @@ class Settings {
 
   bool? clearChapterCacheOnAppLaunch;
 
+  String? lastTrackerLibraryLocation;
+
+  bool? mergeLibraryNavMobile;
+
+  bool? enableDiscordRpc;
+
+  bool? hideDiscordRpcInIncognito;
+
+  bool? rpcShowReadingWatchingProgress;
+
+  bool? rpcShowTitle;
+
+  bool? rpcShowCoverImage;
+
   Settings({
     this.id = 227,
+    this.updatedAt = 0,
     this.displayType = DisplayType.compactGrid,
     this.libraryFilterMangasDownloadType = 0,
     this.libraryFilterMangasUnreadType = 0,
@@ -352,9 +369,17 @@ class Settings {
     this.mangaExtensionsRepo,
     this.animeExtensionsRepo,
     this.novelExtensionsRepo,
+    this.lastTrackerLibraryLocation,
+    this.mergeLibraryNavMobile = false,
+    this.enableDiscordRpc = true,
+    this.hideDiscordRpcInIncognito = true,
+    this.rpcShowReadingWatchingProgress = true,
+    this.rpcShowTitle = true,
+    this.rpcShowCoverImage = true,
   });
 
   Settings.fromJson(Map<String, dynamic> json) {
+    updatedAt = json["updatedAt"];
     animatePageTransitions = json['animatePageTransitions'];
     animeDisplayType = DisplayType
         .values[json['animeDisplayType'] ?? DisplayType.compactGrid.index];
@@ -566,9 +591,17 @@ class Settings {
                 .map((e) => Repo.fromJson(e))
                 .toList();
     }
+    lastTrackerLibraryLocation = json['lastTrackerLibraryLocation'];
+    mergeLibraryNavMobile = json['mergeLibraryNavMobile'];
+    enableDiscordRpc = json['enableDiscordRpc'];
+    hideDiscordRpcInIncognito = json['hideDiscordRpcInIncognito'];
+    rpcShowReadingWatchingProgress = json['rpcShowReadingWatchingProgress'];
+    rpcShowTitle = json['rpcShowTitle'];
+    rpcShowCoverImage = json['rpcShowCoverImage'];
   }
 
   Map<String, dynamic> toJson() => {
+    'updatedAt': updatedAt,
     'animatePageTransitions': animatePageTransitions,
     'animeDisplayType': animeDisplayType.index,
     'animeLibraryDownloadedChapters': animeLibraryDownloadedChapters,
@@ -697,6 +730,13 @@ class Settings {
     'mangaExtensionsRepo': mangaExtensionsRepo?.map((e) => e.toJson()).toList(),
     'animeExtensionsRepo': animeExtensionsRepo?.map((e) => e.toJson()).toList(),
     'novelExtensionsRepo': novelExtensionsRepo?.map((e) => e.toJson()).toList(),
+    'lastTrackerLibraryLocation': lastTrackerLibraryLocation,
+    'mergeLibraryNavMobile': mergeLibraryNavMobile,
+    'enableDiscordRpc': enableDiscordRpc,
+    'hideDiscordRpcInIncognito': hideDiscordRpcInIncognito,
+    'rpcShowReadingWatchingProgress': rpcShowReadingWatchingProgress,
+    'rpcShowTitle': rpcShowTitle,
+    'rpcShowCoverImage': rpcShowCoverImage,
   };
 }
 

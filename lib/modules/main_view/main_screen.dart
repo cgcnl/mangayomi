@@ -27,6 +27,8 @@ import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
 import 'package:mangayomi/modules/library/providers/library_state_provider.dart';
 import 'package:mangayomi/modules/more/providers/incognito_mode_state_provider.dart';
 
+final libLocationRegex = RegExp(r"^/(Manga|Anime|Novel)Library$");
+
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key, required this.child});
 
@@ -49,6 +51,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   final Map<String, List<NavigationRailDestination>> _desktopDestinationsCache =
       {};
   final Map<String, List<Widget>> _mobileDestinationsCache = {};
+  void _clearCache() {
+    _hyphenatedLabelsCache.clear();
+    _desktopDestinationsCache.clear();
+    _mobileDestinationsCache.clear();
+  }
 
   String getHyphenatedUpdatesLabel(String languageCode, String defaultLabel) {
     final cacheKey = '$languageCode:$defaultLabel';
@@ -77,7 +84,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     _autoSyncFrequency = ref
         .read(synchingProvider(syncId: 1))
         .autoSyncFrequency;
-    _defaultLocation = _navigationOrder.first;
+    final hiddenItems = ref.read(hideItemsStateProvider);
+
+    _defaultLocation = _navigationOrder
+        .where((e) => !hiddenItems.contains(e))
+        .first;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -86,6 +97,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         _initializeProviders();
       }
     });
+
+    discordRpc?.connect(ref);
   }
 
   void _initializeTimers() {
@@ -148,16 +161,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void dispose() {
     _backupTimer?.cancel();
     _syncTimer?.cancel();
+    discordRpc?.disconnect();
     super.dispose();
   }
 
   int currentIndex = 0;
+  bool isLibSwitch = false;
   @override
   Widget build(BuildContext context) {
+    ref.listen<Locale>(l10nLocaleStateProvider, (previous, next) {
+      _clearCache();
+      setState(() {});
+    });
+
     final l10n = context.l10n;
     final route = GoRouter.of(context);
     final navigationOrder = ref.watch(navigationOrderStateProvider);
     final hideItems = ref.watch(hideItemsStateProvider);
+    final mergeLibraryNavMobile = ref.watch(mergeLibraryNavMobileStateProvider);
     final location = ref.watch(routerCurrentLocationStateProvider);
 
     return ref
@@ -166,13 +187,56 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           data: (_) => Consumer(
             builder: (context, ref, child) {
               final isReadingScreen = _isReadingScreen(location);
-              final dest = navigationOrder
-                  .where((nav) => !hideItems.contains(nav))
-                  .toList();
+              bool uniqueSwitch = false;
+              List<String> dest = !context.isTablet && isLibSwitch
+                  ? [
+                      "_disableLibSwitch",
+                      ...navigationOrder.where(
+                        (nav) => libLocationRegex.hasMatch(nav),
+                      ),
+                    ].where((nav) => !hideItems.contains(nav)).toList()
+                  : navigationOrder
+                        .where((nav) => !hideItems.contains(nav))
+                        .toList();
 
-              int currentIdx = dest.indexOf(location ?? _defaultLocation);
-              if (currentIdx != -1) {
-                currentIndex = currentIdx;
+              if (mergeLibraryNavMobile && !context.isTablet && !isLibSwitch) {
+                dest = dest
+                    .map((nav) {
+                      if ([
+                        "/MangaLibrary",
+                        "/AnimeLibrary",
+                        "/NovelLibrary",
+                      ].contains(nav)) {
+                        if (uniqueSwitch) return null;
+                        uniqueSwitch = true;
+                        return "_enableLibSwitch";
+                      }
+                      return nav;
+                    })
+                    .nonNulls
+                    .toList();
+              }
+
+              if (isLibSwitch &&
+                  (currentIndex >= dest.length ||
+                      !libLocationRegex.hasMatch(location ?? ""))) {
+                currentIndex = 0;
+              } else {
+                String? libLocation;
+                if (mergeLibraryNavMobile &&
+                    !context.isTablet &&
+                    !isLibSwitch) {
+                  libLocation = location?.replaceAll(
+                    libLocationRegex,
+                    "_enableLibSwitch",
+                  );
+                }
+                int currentIdx = dest.indexOf(
+                  libLocation ?? location ?? _defaultLocation,
+                );
+                if (currentIdx != -1) {
+                  currentIndex = currentIdx;
+                }
               }
 
               final incognitoMode = ref.watch(incognitoModeStateProvider);
@@ -208,6 +272,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                               ref: ref,
                               buildNavigationWidgetsMobile:
                                   _buildNavigationWidgetsMobile,
+                              onDestinationSelected: (destination) {
+                                if (destination == "_enableLibSwitch") {
+                                  setState(() {
+                                    isLibSwitch = true;
+                                  });
+                                } else if (destination == "_disableLibSwitch") {
+                                  setState(() {
+                                    isLibSwitch = false;
+                                  });
+                                } else {
+                                  route.go(destination);
+                                }
+                              },
                             ),
                     ),
                   ),
@@ -330,6 +407,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ),
       );
     }
+    if (dest.contains("/trackerLibrary")) {
+      destinations[dest.indexOf("/trackerLibrary")] = NavigationRailDestination(
+        selectedIcon: const Icon(Icons.account_tree),
+        icon: const Icon(Icons.account_tree_outlined),
+        label: Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Text(l10n.tracking),
+        ),
+      );
+    }
 
     final result = destinations.nonNulls.toList();
     _desktopDestinationsCache[cacheKey] = result;
@@ -352,6 +439,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       const SizedBox.shrink(),
     );
 
+    if (dest.contains("_disableLibSwitch")) {
+      destinations[dest.indexOf("_disableLibSwitch")] = NavigationDestination(
+        selectedIcon: const Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
+        label: l10n.go_back,
+      );
+    }
+    if (dest.contains("_enableLibSwitch")) {
+      destinations[dest.indexOf("_enableLibSwitch")] = NavigationDestination(
+        selectedIcon: const Icon(Icons.collections_bookmark),
+        icon: const Icon(Icons.collections_bookmark_outlined),
+        label: l10n.library,
+      );
+    }
     if (dest.contains("/MangaLibrary")) {
       destinations[dest.indexOf("/MangaLibrary")] = NavigationDestination(
         selectedIcon: const Icon(Icons.collections_bookmark),
@@ -411,6 +512,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         selectedIcon: const Icon(Icons.more_horiz),
         icon: const Icon(Icons.more_horiz_outlined),
         label: l10n.more,
+      );
+    }
+    if (dest.contains("/trackerLibrary")) {
+      destinations[dest.indexOf("/trackerLibrary")] = NavigationDestination(
+        selectedIcon: const Icon(Icons.account_tree),
+        icon: const Icon(Icons.account_tree_outlined),
+        label: l10n.tracking,
       );
     }
 
@@ -532,6 +640,7 @@ class _TabletLayout extends StatelessWidget {
       '/updates',
       '/browse',
       '/more',
+      '/trackerLibrary',
     };
 
     return (location == null || validLocations.contains(location)) ? 100 : 0;
@@ -547,6 +656,7 @@ class _MobileBottomNavigation extends StatelessWidget {
     required this.route,
     required this.ref,
     required this.buildNavigationWidgetsMobile,
+    required this.onDestinationSelected,
   });
 
   final bool isLongPressed;
@@ -557,6 +667,7 @@ class _MobileBottomNavigation extends StatelessWidget {
   final WidgetRef ref;
   final List<Widget> Function(WidgetRef, List<String>, BuildContext)
   buildNavigationWidgetsMobile;
+  final Function(String) onDestinationSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -578,7 +689,7 @@ class _MobileBottomNavigation extends StatelessWidget {
           selectedIndex: currentIndex,
           destinations: buildNavigationWidgetsMobile(ref, dest, context),
           onDestinationSelected: (newIndex) {
-            route.go(dest[newIndex]);
+            onDestinationSelected(dest[newIndex]);
           },
         ),
       ),
@@ -599,6 +710,7 @@ class _MobileBottomNavigation extends StatelessWidget {
       '/updates',
       '/browse',
       '/more',
+      '/trackerLibrary',
     };
 
     return (location == null || validLocations.contains(location)) ? null : 0;

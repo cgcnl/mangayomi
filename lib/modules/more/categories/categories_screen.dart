@@ -24,33 +24,38 @@ class CategoriesScreen extends ConsumerStatefulWidget {
 class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     with TickerProviderStateMixin {
   late TabController _tabBarController;
-  int tabs = 3;
+  late final List<String> _tabList;
   @override
   void initState() {
     super.initState();
-    _tabBarController = TabController(length: tabs, vsync: this);
+    final hideItems = ref.read(hideItemsStateProvider);
+    _tabList = [
+      if (!hideItems.contains("/MangaLibrary")) "/MangaLibrary",
+      if (!hideItems.contains("/AnimeLibrary")) "/AnimeLibrary",
+      if (!hideItems.contains("/NovelLibrary")) "/NovelLibrary",
+    ];
+    _tabBarController = TabController(length: _tabList.length, vsync: this);
     _tabBarController.animateTo(widget.data.$2);
   }
 
   @override
+  void dispose() {
+    _tabBarController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    int newTabs = 0;
-    final hideItems = ref.watch(hideItemsStateProvider);
-    if (!hideItems.contains("/MangaLibrary")) newTabs++;
-    if (!hideItems.contains("/AnimeLibrary")) newTabs++;
-    if (!hideItems.contains("/NovelLibrary")) newTabs++;
-    if (tabs != newTabs) {
-      _tabBarController.dispose();
-      _tabBarController = TabController(length: newTabs, vsync: this);
-      _tabBarController.animateTo(0);
-      setState(() {
-        tabs = newTabs;
-      });
+    if (_tabList.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(context.l10n.categories)),
+        body: Center(child: Text("EMPTY\nMPTY\nMTY\nMT\n\n")),
+      );
     }
     final l10n = l10nLocalizations(context)!;
     return DefaultTabController(
       animationDuration: Duration.zero,
-      length: newTabs,
+      length: _tabList.length,
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -62,23 +67,24 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.label,
             controller: _tabBarController,
-            tabs: [
-              if (!hideItems.contains("/MangaLibrary")) Tab(text: l10n.manga),
-              if (!hideItems.contains("/AnimeLibrary")) Tab(text: l10n.anime),
-              if (!hideItems.contains("/NovelLibrary")) Tab(text: l10n.novel),
-            ],
+            tabs: _tabList.map((route) {
+              if (route == "/MangaLibrary") return Tab(text: l10n.manga);
+              if (route == "/AnimeLibrary") return Tab(text: l10n.anime);
+              return Tab(text: l10n.novel);
+            }).toList(),
           ),
         ),
         body: TabBarView(
           controller: _tabBarController,
-          children: [
-            if (!hideItems.contains("/MangaLibrary"))
-              CategoriesTab(itemType: ItemType.manga),
-            if (!hideItems.contains("/AnimeLibrary"))
-              CategoriesTab(itemType: ItemType.anime),
-            if (!hideItems.contains("/NovelLibrary"))
-              CategoriesTab(itemType: ItemType.novel),
-          ],
+          children: _tabList.map((route) {
+            if (route == "/MangaLibrary") {
+              return CategoriesTab(itemType: ItemType.manga);
+            }
+            if (route == "/AnimeLibrary") {
+              return CategoriesTab(itemType: ItemType.anime);
+            }
+            return CategoriesTab(itemType: ItemType.novel);
+          }).toList(),
         ),
       ),
     );
@@ -236,18 +242,10 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
                                   onPressed: () {
                                     isar.writeTxnSync(() async {
                                       category.hide = !(category.hide ?? false);
+                                      category.updatedAt =
+                                          DateTime.now().millisecondsSinceEpoch;
                                       isar.categorys.putSync(category);
                                     });
-                                    ref
-                                        .read(
-                                          synchingProvider(syncId: 1).notifier,
-                                        )
-                                        .addChangedPartAsync(
-                                          ActionType.renameCategory,
-                                          category.id,
-                                          category.toJson(),
-                                          true,
-                                        );
                                   },
                                   icon: Icon(
                                     !(category.hide ?? false)
@@ -284,32 +282,10 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
                                                     const SizedBox(width: 15),
                                                     TextButton(
                                                       onPressed: () async {
-                                                        await isar.writeTxn(
-                                                          () async {
-                                                            await isar.categorys
-                                                                .delete(
-                                                                  category.id!,
-                                                                );
-                                                          },
+                                                        await _removeCategory(
+                                                          category,
+                                                          context,
                                                         );
-                                                        await ref
-                                                            .read(
-                                                              synchingProvider(
-                                                                syncId: 1,
-                                                              ).notifier,
-                                                            )
-                                                            .addChangedPartAsync(
-                                                              ActionType
-                                                                  .removeCategory,
-                                                              category.id,
-                                                              "{}",
-                                                              true,
-                                                            );
-                                                        if (context.mounted) {
-                                                          Navigator.pop(
-                                                            context,
-                                                          );
-                                                        }
                                                       },
                                                       child: Text(l10n.ok),
                                                     ),
@@ -416,6 +392,8 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
                                       final category = Category(
                                         forItemType: widget.itemType,
                                         name: controller.text,
+                                        updatedAt: DateTime.now()
+                                            .millisecondsSinceEpoch,
                                       );
                                       isar.writeTxnSync(() {
                                         isar.categorys.putSync(
@@ -432,18 +410,6 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
                                         }
                                       });
 
-                                      await ref
-                                          .read(
-                                            synchingProvider(
-                                              syncId: 1,
-                                            ).notifier,
-                                          )
-                                          .addChangedPartAsync(
-                                            ActionType.addCategory,
-                                            category.id,
-                                            category.toJson(),
-                                            true,
-                                          );
                                       if (context.mounted) {
                                         Navigator.pop(context);
                                       }
@@ -478,6 +444,41 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
         ),
       ),
     );
+  }
+
+  Future<void> _removeCategory(Category category, BuildContext context) async {
+    await isar.writeTxn(() async {
+      // All Items with this category
+      final allItems = await isar.mangas
+          .filter()
+          .categoriesElementEqualTo(category.id!)
+          .findAll();
+      // Remove the category ID from each item's category list
+      final updatedItems = allItems.map((manga) {
+        final cats = List<int>.from(manga.categories ?? []);
+        cats.remove(category.id!);
+        manga.categories = cats;
+        return manga;
+      }).toList();
+
+      // Save updated items back to the database
+      await isar.mangas.putAll(updatedItems);
+
+      // Delete category
+      await isar.categorys.delete(category.id!);
+    });
+
+    await ref
+        .read(synchingProvider(syncId: 1).notifier)
+        .addChangedPartAsync(
+          ActionType.removeCategory,
+          category.id,
+          "{}",
+          true,
+        );
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void _renameCategory(Category category) {
@@ -527,16 +528,10 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
                           : () async {
                               await isar.writeTxn(() async {
                                 category.name = controller.text;
+                                category.updatedAt =
+                                    DateTime.now().millisecondsSinceEpoch;
                                 await isar.categorys.put(category);
                               });
-                              await ref
-                                  .read(synchingProvider(syncId: 1).notifier)
-                                  .addChangedPartAsync(
-                                    ActionType.renameCategory,
-                                    category.id,
-                                    category.toJson(),
-                                    true,
-                                  );
                               if (context.mounted) {
                                 Navigator.pop(context);
                               }

@@ -25,6 +25,7 @@ final navigationItems = {
   "/history": "History",
   "/browse": "Browse",
   "/more": "More",
+  "/trackerLibrary": "Tracking",
 };
 
 class SettingsSection extends StatelessWidget {

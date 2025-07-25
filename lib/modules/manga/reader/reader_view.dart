@@ -11,7 +11,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/chapter.dart';
-import 'package:mangayomi/models/changed.dart' as changed;
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/page.dart';
 import 'package:mangayomi/models/settings.dart';
@@ -22,7 +21,6 @@ import 'package:mangayomi/modules/manga/reader/double_columm_view_center.dart';
 import 'package:mangayomi/modules/manga/reader/providers/color_filter_provider.dart';
 import 'package:mangayomi/modules/manga/reader/widgets/color_filter_widget.dart';
 import 'package:mangayomi/modules/more/settings/reader/providers/reader_state_provider.dart';
-import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:mangayomi/modules/widgets/custom_draggable_tabbar.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/providers/storage_provider.dart';
@@ -128,7 +126,7 @@ class MangaChapterPageGallery extends ConsumerStatefulWidget {
 
 class _MangaChapterPageGalleryState
     extends ConsumerState<MangaChapterPageGallery>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _scaleAnimationController;
   late Animation<double> _animation;
   late ReaderController _readerController = ref.read(
@@ -138,6 +136,7 @@ class _MangaChapterPageGalleryState
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _readerController.setMangaHistoryUpdate();
     final index = _uChapDataPreload[_currentIndex!].index;
     if (index != null) {
@@ -146,7 +145,15 @@ class _MangaChapterPageGalleryState
 
     _rebuildDetail.close();
     _doubleClickAnimationController.dispose();
+    _scaleAnimationController.dispose();
+    _failedToLoadImage.dispose();
     _autoScroll.value = false;
+    _autoScroll.dispose();
+    _autoScrollPage.dispose();
+    _itemPositionsListener.itemPositions.removeListener(_readProgressListener);
+    _photoViewController.dispose();
+    _photoViewScaleStateController.dispose();
+    _extendedController.dispose();
     clearGestureDetailsCache();
     if (isDesktop) {
       setFullScreen(value: false);
@@ -156,7 +163,19 @@ class _MangaChapterPageGalleryState
         overlays: SystemUiOverlay.values,
       );
     }
+    discordRpc?.showIdleText();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      final index = _uChapDataPreload[_currentIndex!].index;
+      if (index != null) {
+        _readerController.setPageIndex(_geCurrentIndex(index), true);
+      }
+    }
   }
 
   late final _autoScroll = ValueNotifier(
@@ -203,11 +222,13 @@ class _MangaChapterPageGalleryState
     _animation.addListener(() => _photoViewController.scale = _animation.value);
     _itemPositionsListener.itemPositions.addListener(_readProgressListener);
     _initCurrentIndex();
+    discordRpc?.showChapterDetails(ref, chapter);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   final double _horizontalScaleValue = 1.0;
 
-  late int pagePreloadAmount = ref.watch(pagePreloadAmountStateProvider);
+  late int pagePreloadAmount = ref.read(pagePreloadAmountStateProvider);
   late bool _isBookmarked = _readerController.getChapterBookmarked();
 
   final _currentReaderMode = StateProvider<ReaderMode?>((ref) => null);
@@ -351,22 +372,10 @@ class _MangaChapterPageGalleryState
                                               isar.mangas.putSync(
                                                 manga
                                                   ..customCoverImage =
-                                                      imageBytes,
+                                                      imageBytes
+                                                  ..updatedAt = DateTime.now()
+                                                      .millisecondsSinceEpoch,
                                               );
-                                              ref
-                                                  .read(
-                                                    synchingProvider(
-                                                      syncId: 1,
-                                                    ).notifier,
-                                                  )
-                                                  .addChangedPart(
-                                                    changed
-                                                        .ActionType
-                                                        .updateItem,
-                                                    manga.id,
-                                                    manga.toJson(),
-                                                    false,
-                                                  );
                                             });
                                             if (mounted) {
                                               Navigator.pop(context, "ok");

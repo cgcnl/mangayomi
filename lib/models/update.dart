@@ -15,6 +15,8 @@ class Update {
 
   String? date;
 
+  int? updatedAt;
+
   bool? isNsfw;
 
   Update({
@@ -22,6 +24,7 @@ class Update {
     required this.mangaId,
     required this.chapterName,
     required this.date,
+    this.updatedAt = 0,
     required this.isNsfw,
   });
 
@@ -30,6 +33,7 @@ class Update {
     mangaId = json['mangaId'];
     chapterName = json['chapterName'];
     date = json['date'];
+    updatedAt = json['updatedAt'];
     isNsfw = json['isNsfw'];
   }
 
@@ -38,6 +42,7 @@ class Update {
     'mangaId': mangaId,
     'chapterName': chapterName,
     'date': date,
-    'isNsfw': isNsfw,
+    'updatedAt': updatedAt ?? 0,
+    'isNsfw': isNsfw ?? false,
   };
 }

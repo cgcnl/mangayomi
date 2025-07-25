@@ -5,15 +5,18 @@ import 'package:app_links/app_links.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:isar/isar.dart';
 import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/settings.dart';
 import 'package:mangayomi/models/source.dart';
+import 'package:mangayomi/models/track_search.dart';
 import 'package:mangayomi/modules/more/data_and_storage/providers/storage_usage.dart';
 import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
@@ -23,6 +26,7 @@ import 'package:mangayomi/modules/more/settings/appearance/providers/theme_mode_
 import 'package:mangayomi/l10n/generated/app_localizations.dart';
 import 'package:mangayomi/services/http/m_client.dart';
 import 'package:mangayomi/src/rust/frb_generated.dart';
+import 'package:mangayomi/utils/discord_rpc.dart';
 import 'package:mangayomi/utils/url_protocol/api.dart';
 import 'package:mangayomi/modules/more/settings/appearance/providers/theme_provider.dart';
 import 'package:mangayomi/modules/library/providers/file_scanner.dart';
@@ -32,6 +36,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:path/path.dart' as p;
 
 late Isar isar;
+DiscordRPC? discordRpc;
 WebViewEnvironment? webViewEnvironment;
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,6 +61,12 @@ void main(List<String> args) async {
     }
   }
   isar = await StorageProvider().initDB(null, inspector: kDebugMode);
+  await Hive.initFlutter();
+  Hive.registerAdapter(TrackSearchAdapter());
+  if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
+    discordRpc = DiscordRPC(applicationId: "1395040506677039157");
+    await discordRpc?.initialize();
+  }
 
   runApp(const ProviderScope(child: MyApp()));
   unawaited(_postLaunchInit()); // Defer non-essential async operations
@@ -117,12 +128,14 @@ class _MyAppState extends ConsumerState<MyApp> {
       routerDelegate: router.routerDelegate,
       routeInformationProvider: router.routeInformationProvider,
       title: 'MangaYomi',
+      scrollBehavior: AllowScrollBehavior(),
     );
   }
 
   @override
   void dispose() {
     _linkSubscription?.cancel();
+    discordRpc?.destroy();
     super.dispose();
   }
 
@@ -229,4 +242,23 @@ class _MyAppState extends ConsumerState<MyApp> {
     }
     return true;
   }
+}
+
+class AllowScrollBehavior extends MaterialScrollBehavior {
+  // This allows the scrollable widgets to be scrolled with touch, mouse, stylus,
+  // inverted stylus, trackpad, and unknown pointer devices.
+  // This is useful for accessibility purposes, such as when using VoiceAccess,
+  // which sends pointer events with unknown type when scrolling scrollables.
+  // This is also useful for desktop platforms, where touch, stylus, and trackpad
+  // interactions are common, and we want to ensure a consistent scrolling experience
+  // across all devices.
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.invertedStylus,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.unknown,
+  };
 }

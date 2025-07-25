@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/source.dart';
 import 'package:mangayomi/models/track_preference.dart';
+import 'package:mangayomi/models/track_search.dart';
 import 'package:mangayomi/modules/anime/anime_player_view.dart';
 import 'package:mangayomi/modules/browse/extension/edit_code.dart';
 import 'package:mangayomi/modules/browse/extension/extension_detail.dart';
@@ -18,6 +19,7 @@ import 'package:mangayomi/modules/more/settings/browse/source_repositories.dart'
 import 'package:mangayomi/modules/more/settings/reader/providers/reader_state_provider.dart';
 import 'package:mangayomi/modules/more/statistics/statistics_screen.dart';
 import 'package:mangayomi/modules/novel/novel_reader_view.dart';
+import 'package:mangayomi/modules/tracker_library/tracker_library_screen.dart';
 import 'package:mangayomi/modules/updates/updates_screen.dart';
 import 'package:mangayomi/modules/more/categories/categories_screen.dart';
 import 'package:mangayomi/modules/more/settings/downloads/downloads_screen.dart';
@@ -53,7 +55,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 @riverpod
 GoRouter router(Ref ref) {
   final router = RouterNotifier();
-  final initLocation = ref.watch(navigationOrderStateProvider).first;
+  final hiddenItems = ref.read(hideItemsStateProvider);
+  final initLocation = ref
+      .watch(navigationOrderStateProvider)
+      .where((e) => !hiddenItems.contains(e))
+      .first;
 
   return GoRouter(
     observers: [BotToastNavigatorObserver()],
@@ -121,6 +127,10 @@ class RouterNotifier extends ChangeNotifier {
           name: "NovelLibrary",
           builder: (id) =>
               LibraryScreen(itemType: ItemType.novel, presetInput: id),
+        ),
+        _genericRoute<String?>(
+          name: "trackerLibrary",
+          builder: (id) => TrackerLibraryScreen(presetInput: id),
         ),
         _genericRoute(name: "history", child: const HistoryScreen()),
         _genericRoute(name: "updates", child: const UpdatesScreen()),
@@ -207,6 +217,10 @@ class RouterNotifier extends ChangeNotifier {
     _genericRoute<Manga>(
       name: "migrate",
       builder: (manga) => MigrationScreen(manga: manga),
+    ),
+    _genericRoute<(Manga, TrackSearch)>(
+      name: "migrate/tracker",
+      builder: (data) => MigrationScreen(manga: data.$1, trackSearch: data.$2),
     ),
   ];
 

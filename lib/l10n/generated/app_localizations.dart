@@ -234,6 +234,29 @@ abstract class AppLocalizations {
   /// **'Last update check'**
   String get last_update_check;
 
+  /// Warning when deleting all entries (chapters/episodes) of a manga/anime.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You are deleting the only {entryType} of this {mediaType} from the library.} other{You are deleting all {count} {entryTypePlural} of this {mediaType} from the library.}}\nThis will also remove the whole {mediaType} from your library.\n\nNote: The files themselves will not be deleted.'**
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  );
+
+  /// No description provided for @chapter.
+  ///
+  /// In en, this message translates to:
+  /// **'chapter'**
+  String get chapter;
+
+  /// No description provided for @episode.
+  ///
+  /// In en, this message translates to:
+  /// **'episode'**
+  String get episode;
+
   /// No description provided for @unread_count.
   ///
   /// In en, this message translates to:
@@ -1341,26 +1364,26 @@ abstract class AppLocalizations {
   /// No description provided for @syncing_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sync your progress across multiple devices via a self-hosted \nserver. Make sure to upload first if this is your first time \nsyncing or download before using (auto) sync on this device!'**
+  /// **'Sync your progress across multiple devices via a self-hosted \nserver. Check out our discord server for more info!'**
   String get syncing_subtitle;
 
-  /// No description provided for @last_sync.
+  /// No description provided for @last_sync_manga.
   ///
   /// In en, this message translates to:
-  /// **'Last sync at: '**
-  String get last_sync;
+  /// **'Last manga sync at: '**
+  String get last_sync_manga;
 
-  /// No description provided for @last_upload.
+  /// No description provided for @last_sync_history.
   ///
   /// In en, this message translates to:
-  /// **'Last upload at: '**
-  String get last_upload;
+  /// **'Last history sync at: '**
+  String get last_sync_history;
 
-  /// No description provided for @last_download.
+  /// No description provided for @last_sync_update.
   ///
   /// In en, this message translates to:
-  /// **'Last download at: '**
-  String get last_download;
+  /// **'Last update sync at: '**
+  String get last_sync_update;
 
   /// No description provided for @sync_server.
   ///
@@ -1374,53 +1397,23 @@ abstract class AppLocalizations {
   /// **'Invalid email or password'**
   String get sync_login_invalid_creds;
 
-  /// No description provided for @sync_checking.
+  /// No description provided for @sync_starting.
   ///
   /// In en, this message translates to:
-  /// **'Checking for sync...'**
-  String get sync_checking;
+  /// **'Starting sync...'**
+  String get sync_starting;
 
-  /// No description provided for @sync_uploading.
+  /// No description provided for @sync_finished.
   ///
   /// In en, this message translates to:
-  /// **'Upload started...'**
-  String get sync_uploading;
+  /// **'Sync finished'**
+  String get sync_finished;
 
-  /// No description provided for @sync_downloading.
+  /// No description provided for @sync_failed.
   ///
   /// In en, this message translates to:
-  /// **'Download started...'**
-  String get sync_downloading;
-
-  /// No description provided for @sync_upload_finished.
-  ///
-  /// In en, this message translates to:
-  /// **'Upload finished'**
-  String get sync_upload_finished;
-
-  /// No description provided for @sync_download_finished.
-  ///
-  /// In en, this message translates to:
-  /// **'Download finished'**
-  String get sync_download_finished;
-
-  /// No description provided for @sync_up_to_date.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync up to date'**
-  String get sync_up_to_date;
-
-  /// No description provided for @sync_upload_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Upload failed'**
-  String get sync_upload_failed;
-
-  /// No description provided for @sync_download_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Download failed'**
-  String get sync_download_failed;
+  /// **'Sync failed'**
+  String get sync_failed;
 
   /// No description provided for @sync_button_sync.
   ///
@@ -1428,143 +1421,11 @@ abstract class AppLocalizations {
   /// **'Sync progress'**
   String get sync_button_sync;
 
-  /// No description provided for @sync_button_snapshot.
-  ///
-  /// In en, this message translates to:
-  /// **'Create snapshot'**
-  String get sync_button_snapshot;
-
-  /// No description provided for @sync_button_upload.
-  ///
-  /// In en, this message translates to:
-  /// **'Full upload'**
-  String get sync_button_upload;
-
-  /// No description provided for @sync_button_download.
-  ///
-  /// In en, this message translates to:
-  /// **'Full download'**
-  String get sync_button_download;
-
-  /// No description provided for @sync_confirm_snapshot.
-  ///
-  /// In en, this message translates to:
-  /// **'Request the server to create a remote copy of the current backup!'**
-  String get sync_confirm_snapshot;
-
-  /// No description provided for @sync_confirm_upload.
-  ///
-  /// In en, this message translates to:
-  /// **'A full upload will completely replace the remote data with your current one!'**
-  String get sync_confirm_upload;
-
-  /// No description provided for @sync_confirm_download.
-  ///
-  /// In en, this message translates to:
-  /// **'A full download will completely replace your current data with the remote one!'**
-  String get sync_confirm_download;
-
   /// No description provided for @sync_on.
   ///
   /// In en, this message translates to:
   /// **'Enable sync'**
   String get sync_on;
-
-  /// No description provided for @sync_pending_manga.
-  ///
-  /// In en, this message translates to:
-  /// **'Manga changes pending'**
-  String get sync_pending_manga;
-
-  /// No description provided for @sync_pending_category.
-  ///
-  /// In en, this message translates to:
-  /// **'Category changes pending'**
-  String get sync_pending_category;
-
-  /// No description provided for @sync_pending_chapter.
-  ///
-  /// In en, this message translates to:
-  /// **'Chapter changes pending'**
-  String get sync_pending_chapter;
-
-  /// No description provided for @sync_pending_history.
-  ///
-  /// In en, this message translates to:
-  /// **'History changes pending'**
-  String get sync_pending_history;
-
-  /// No description provided for @sync_pending_update.
-  ///
-  /// In en, this message translates to:
-  /// **'Update changes pending'**
-  String get sync_pending_update;
-
-  /// No description provided for @sync_pending_extension.
-  ///
-  /// In en, this message translates to:
-  /// **'Extension changes pending'**
-  String get sync_pending_extension;
-
-  /// No description provided for @sync_pending_track.
-  ///
-  /// In en, this message translates to:
-  /// **'Track changes pending'**
-  String get sync_pending_track;
-
-  /// No description provided for @sync_snapshot_creating.
-  ///
-  /// In en, this message translates to:
-  /// **'Creating snapshot...'**
-  String get sync_snapshot_creating;
-
-  /// No description provided for @sync_snapshot_created.
-  ///
-  /// In en, this message translates to:
-  /// **'Snapshot created!'**
-  String get sync_snapshot_created;
-
-  /// No description provided for @sync_snapshot_deleting.
-  ///
-  /// In en, this message translates to:
-  /// **'Deleting snapshot...'**
-  String get sync_snapshot_deleting;
-
-  /// No description provided for @sync_snapshot_deleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Snapshot deleted!'**
-  String get sync_snapshot_deleted;
-
-  /// No description provided for @sync_snapshot_no_data.
-  ///
-  /// In en, this message translates to:
-  /// **'No data to create a snapshot! Do a full upload first!'**
-  String get sync_snapshot_no_data;
-
-  /// No description provided for @sync_browse_snapshots.
-  ///
-  /// In en, this message translates to:
-  /// **'Browse older backups'**
-  String get sync_browse_snapshots;
-
-  /// No description provided for @sync_snapshots.
-  ///
-  /// In en, this message translates to:
-  /// **'Snapshots'**
-  String get sync_snapshots;
-
-  /// No description provided for @sync_load_snapshot.
-  ///
-  /// In en, this message translates to:
-  /// **'Load snapshot'**
-  String get sync_load_snapshot;
-
-  /// No description provided for @sync_delete_snapshot.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete snapshot'**
-  String get sync_delete_snapshot;
 
   /// No description provided for @sync_auto.
   ///
@@ -1583,18 +1444,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off'**
   String get sync_auto_off;
-
-  /// No description provided for @sync_auto_30_seconds.
-  ///
-  /// In en, this message translates to:
-  /// **'Every 30 seconds'**
-  String get sync_auto_30_seconds;
-
-  /// No description provided for @sync_auto_1_minute.
-  ///
-  /// In en, this message translates to:
-  /// **'Every 1 minute'**
-  String get sync_auto_1_minute;
 
   /// No description provided for @sync_auto_5_minutes.
   ///
@@ -2969,6 +2818,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hardware Decoder'**
   String get hwdec;
+
+  /// No description provided for @track_library_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to local library'**
+  String get track_library_add;
+
+  /// No description provided for @track_library_add_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tracked item to local library'**
+  String get track_library_add_confirm;
+
+  /// No description provided for @track_library_not_logged.
+  ///
+  /// In en, this message translates to:
+  /// **'Login to the corresponding tracker to use this feature!'**
+  String get track_library_not_logged;
+
+  /// No description provided for @track_library_switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to another tracker'**
+  String get track_library_switch;
+
+  /// No description provided for @go_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get go_back;
+
+  /// No description provided for @merge_library_nav_mobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge library navigation on mobile'**
+  String get merge_library_nav_mobile;
+
+  /// No description provided for @enable_discord_rpc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Discord RPC'**
+  String get enable_discord_rpc;
+
+  /// No description provided for @hide_discord_rpc_incognito.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Discord RPC while in Incognito'**
+  String get hide_discord_rpc_incognito;
+
+  /// No description provided for @rpc_show_reading_watching_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Show current chapter in Discord (requires a restart)'**
+  String get rpc_show_reading_watching_progress;
+
+  /// No description provided for @rpc_show_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Show current title in Discord'**
+  String get rpc_show_title;
+
+  /// No description provided for @rpc_show_cover_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Show current cover image in Discord'**
+  String get rpc_show_cover_image;
+
+  /// No description provided for @sync_enable_histories.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync history data'**
+  String get sync_enable_histories;
+
+  /// No description provided for @sync_enable_updates.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync update data'**
+  String get sync_enable_updates;
+
+  /// No description provided for @sync_enable_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync settings'**
+  String get sync_enable_settings;
 }
 
 class _AppLocalizationsDelegate

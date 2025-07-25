@@ -51,6 +51,8 @@ class Manga {
 
   String? customCoverFromTracker;
 
+  int? updatedAt;
+
   @Backlink(to: "manga")
   final chapters = IsarLinks<Chapter>();
 
@@ -77,6 +79,7 @@ class Manga {
     this.isLocalArchive = false,
     this.customCoverImage,
     this.customCoverFromTracker,
+    this.updatedAt = 0,
   });
 
   Manga.fromJson(Map<String, dynamic> json) {
@@ -102,6 +105,7 @@ class Manga {
     source = json['source'];
     status = Status.values[json['status']];
     customCoverFromTracker = json['customCoverFromTracker'];
+    updatedAt = json['updatedAt'];
   }
 
   Map<String, dynamic> toJson() => {
@@ -126,6 +130,7 @@ class Manga {
     'source': source,
     'status': status.index,
     'customCoverFromTracker': customCoverFromTracker,
+    'updatedAt': updatedAt ?? 0,
   };
 }
 

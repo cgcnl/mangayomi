@@ -66,6 +66,30 @@ class AppLocalizationsDe extends AppLocalizations {
   String get last_update_check => 'Letzte Aktualisierungsprüfung';
 
   @override
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Du löschst alle $count $entryTypePlural dieses ${mediaType}s aus deiner Bibliothek.',
+      one:
+          'Du löschst das einzige $entryType dieses ${mediaType}s aus deiner Bibliothek.',
+    );
+    return '$_temp0\nDadurch wird auch der ganze $mediaType aus deiner Bibliothek entfernt.\n\nHinweis: Die Dateien selbst werden nicht gelöscht.';
+  }
+
+  @override
+  String get chapter => 'Kapitel';
+
+  @override
+  String get episode => 'Episode';
+
+  @override
   String get unread_count => 'Ungelesene Anzahl';
 
   @override
@@ -647,16 +671,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get syncing_subtitle =>
-      'Synchronisiere deinen Fortschritt über mehrere Geräte mithilfe \neines selbstgehosteten Servers. Beim ersten synchronisieren \nsolltest du zuerst \"Alles hochladen\" oder \"Alles herunterladen\" \nbevor du die (Auto-)Synchronisation auf diesem Gerät aktivierst!';
+      'Synchronisiere deinen Fortschritt über mehrere Geräte mithilfe \neines selbstgehosteten Servers. Mehr Info gibt es bei unserem Discord Server!';
 
   @override
-  String get last_sync => 'Zuletzt synchronisiert: ';
+  String get last_sync_manga => 'Manga zuletzt synchronisiert: ';
 
   @override
-  String get last_upload => 'Zuletzt hochgeladen: ';
+  String get last_sync_history => 'Verlauf zuletzt synchronisiert: ';
 
   @override
-  String get last_download => 'Zuletzt heruntergeladen: ';
+  String get last_sync_update => 'Update zuletzt synchronisiert: ';
 
   @override
   String get sync_server => 'Sync Server IP Adresse / Domain';
@@ -665,105 +689,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sync_login_invalid_creds => 'Ungültiger Email oder Passwort';
 
   @override
-  String get sync_checking => 'Synchronisierung wird vorbereitet...';
+  String get sync_starting => 'Sync gestartet...';
 
   @override
-  String get sync_uploading => 'Hochladen...';
+  String get sync_finished => 'Sync erfolgreich abgeschlossen!';
 
   @override
-  String get sync_downloading => 'Herunterladen...';
-
-  @override
-  String get sync_upload_finished => 'Hochladen erfolgreich';
-
-  @override
-  String get sync_download_finished => 'Herunterladen erfolgreich';
-
-  @override
-  String get sync_up_to_date => 'Synchronisierung ist auf den neuesten Stand';
-
-  @override
-  String get sync_upload_failed => 'Hochladen fehlgeschlagen';
-
-  @override
-  String get sync_download_failed => 'Herunterladen fehlgeschlagen';
+  String get sync_failed => 'Sync fehlgeschlagen!';
 
   @override
   String get sync_button_sync => 'Jetzt synchronisieren';
 
   @override
-  String get sync_button_snapshot => 'Snapshot erstellen';
-
-  @override
-  String get sync_button_upload => 'Alles hochladen';
-
-  @override
-  String get sync_button_download => 'Alles herunterladen';
-
-  @override
-  String get sync_confirm_snapshot =>
-      'Erstelle eine Kopie des derzeiten Backups auf den Server!';
-
-  @override
-  String get sync_confirm_upload =>
-      'Deine Daten auf dem Server werden jetzt durch deinen lokalen Daten ersetzt!';
-
-  @override
-  String get sync_confirm_download =>
-      'Deine lokalen Daten werden jetzt durch den Daten vom Server ersetzt!';
-
-  @override
   String get sync_on => 'Sync aktivieren';
-
-  @override
-  String get sync_pending_manga => 'Ausstehende Änderungen für Manga';
-
-  @override
-  String get sync_pending_category => 'Ausstehende Änderungen für Kategorien';
-
-  @override
-  String get sync_pending_chapter => 'Ausstehende Änderungen für Kapiteln';
-
-  @override
-  String get sync_pending_history => 'Ausstehende Änderungen für Fortschritte';
-
-  @override
-  String get sync_pending_update => 'Ausstehende Änderungen für Updates';
-
-  @override
-  String get sync_pending_extension =>
-      'Ausstehende Änderungen für Erweiterungen';
-
-  @override
-  String get sync_pending_track => 'Ausstehende Änderungen für Trackings';
-
-  @override
-  String get sync_snapshot_creating => 'Erstelle Snapshot...';
-
-  @override
-  String get sync_snapshot_created => 'Snapshot wurde erstellt!';
-
-  @override
-  String get sync_snapshot_deleting => 'Lösche Snapshot...';
-
-  @override
-  String get sync_snapshot_deleted => 'Snapshot wurde gelöscht!';
-
-  @override
-  String get sync_snapshot_no_data =>
-      'Keine Daten zum Sichern! Lade erstmal alles hoch!';
-
-  @override
-  String get sync_browse_snapshots => 'Durchsuche ältere Backups';
-
-  @override
-  String get sync_snapshots => 'Snapshots';
-
-  @override
-  String get sync_load_snapshot => 'Snapshot laden';
-
-  @override
-  String get sync_delete_snapshot => 'Snapshot löschen';
 
   @override
   String get sync_auto => 'Auto Sync';
@@ -774,12 +712,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sync_auto_off => 'Aus';
-
-  @override
-  String get sync_auto_30_seconds => 'Alle 30 Sekunden';
-
-  @override
-  String get sync_auto_1_minute => 'Jede Minute';
 
   @override
   String get sync_auto_5_minutes => 'Alle 5 Minuten';
@@ -1508,24 +1440,71 @@ class AppLocalizationsDe extends AppLocalizations {
       'Du hast gerade versucht, ein ungültiges Repository hinzuzufügen. Bitte schau mal beim Discord Server vorbei!';
 
   @override
-  String get end_of_chapter => 'End of chapter';
+  String get end_of_chapter => 'Ende des Kapitels';
 
   @override
-  String get chapter_completed => 'Chapter completed';
+  String get chapter_completed => 'Kapitel abgeschlossen';
 
   @override
   String get continue_to_next_chapter =>
-      'Continue scrolling to read the next chapter';
+      'Scrolle weiter, um an das nächste Kapitel zu gelangen';
 
   @override
-  String get no_next_chapter => 'No next chapter';
+  String get no_next_chapter => 'Keine weiteren Kapiteln';
 
   @override
-  String get you_have_finished_reading => 'You have finished reading';
+  String get you_have_finished_reading => 'Du hast es fertig gelesen';
 
   @override
-  String get return_to_the_list_of_chapters => 'Return to the list of chapters';
+  String get return_to_the_list_of_chapters =>
+      'Gehe zur Auflistung der Kapiteln';
 
   @override
   String get hwdec => 'Hardware Decoder';
+
+  @override
+  String get track_library_add => 'Zur lokalen Bibliothek hinzufügen';
+
+  @override
+  String get track_library_add_confirm =>
+      'Eintrag zur lokalen Bibliothek hinzufügen';
+
+  @override
+  String get track_library_not_logged =>
+      'Du musst dich zuerst beim entsprechenden Tracker anmelden, bevor du diese Funktion nutzen kannst!';
+
+  @override
+  String get track_library_switch => 'Zu einen anderen Tracker wechseln';
+
+  @override
+  String get go_back => 'Zurück';
+
+  @override
+  String get merge_library_nav_mobile => 'Merge library navigation on mobile';
+
+  @override
+  String get enable_discord_rpc => 'Enable Discord RPC';
+
+  @override
+  String get hide_discord_rpc_incognito =>
+      'Hide Discord RPC while in Incognito';
+
+  @override
+  String get rpc_show_reading_watching_progress =>
+      'Show current chapter in Discord (requires a restart)';
+
+  @override
+  String get rpc_show_title => 'Show current title in Discord';
+
+  @override
+  String get rpc_show_cover_image => 'Show current cover image in Discord';
+
+  @override
+  String get sync_enable_histories => 'Sync history data';
+
+  @override
+  String get sync_enable_updates => 'Sync update data';
+
+  @override
+  String get sync_enable_settings => 'Sync settings';
 }

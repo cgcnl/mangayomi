@@ -1,12 +1,10 @@
 import 'package:isar/isar.dart';
 import 'package:mangayomi/main.dart';
-import 'package:mangayomi/models/changed.dart';
 import 'package:mangayomi/models/chapter.dart';
 import 'package:mangayomi/models/download.dart';
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/settings.dart';
 import 'package:mangayomi/modules/manga/download/providers/download_provider.dart';
-import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'state_providers.g.dart';
 
@@ -105,7 +103,11 @@ class SortChapterState extends _$SortChapterState {
     }
     sortChapterList.add(value);
     isar.writeTxnSync(() {
-      isar.settings.putSync(settings..sortChapterList = sortChapterList);
+      isar.settings.putSync(
+        settings
+          ..sortChapterList = sortChapterList
+          ..updatedAt = DateTime.now().millisecondsSinceEpoch,
+      );
     });
 
     state = value;
@@ -154,7 +156,9 @@ class ChapterFilterDownloadedState extends _$ChapterFilterDownloadedState {
     chapterFilterDownloadedList.add(value);
     isar.writeTxnSync(() {
       isar.settings.putSync(
-        settings..chapterFilterDownloadedList = chapterFilterDownloadedList,
+        settings
+          ..chapterFilterDownloadedList = chapterFilterDownloadedList
+          ..updatedAt = DateTime.now().millisecondsSinceEpoch,
       );
     });
 
@@ -205,7 +209,9 @@ class ChapterFilterUnreadState extends _$ChapterFilterUnreadState {
     chapterFilterUnreadList.add(value);
     isar.writeTxnSync(() {
       isar.settings.putSync(
-        settings..chapterFilterUnreadList = chapterFilterUnreadList,
+        settings
+          ..chapterFilterUnreadList = chapterFilterUnreadList
+          ..updatedAt = DateTime.now().millisecondsSinceEpoch,
       );
     });
     state = type;
@@ -255,7 +261,9 @@ class ChapterFilterBookmarkedState extends _$ChapterFilterBookmarkedState {
     chapterFilterBookmarkedList.add(value);
     isar.writeTxnSync(() {
       isar.settings.putSync(
-        settings..chapterFilterBookmarkedList = chapterFilterBookmarkedList,
+        settings
+          ..chapterFilterBookmarkedList = chapterFilterBookmarkedList
+          ..updatedAt = DateTime.now().millisecondsSinceEpoch,
       );
     });
     state = type;
@@ -300,22 +308,15 @@ class ChapterSetIsBookmarkState extends _$ChapterSetIsBookmarkState {
   void build({required Manga manga}) {}
 
   set() {
+    final allChapters = <Chapter>[];
     final chapters = ref.watch(chaptersListStateProvider);
-    isar.writeTxnSync(() {
-      for (var chapter in chapters) {
-        chapter.isBookmarked = !chapter.isBookmarked!;
-        isar.chapters.putSync(chapter..manga.value = manga);
-        chapter.manga.saveSync();
-        ref
-            .read(synchingProvider(syncId: 1).notifier)
-            .addChangedPart(
-              ActionType.updateChapter,
-              chapter.id,
-              chapter.toJson(),
-              false,
-            );
-      }
-    });
+    for (var chapter in chapters) {
+      chapter.isBookmarked = !chapter.isBookmarked!;
+      chapter.updatedAt = DateTime.now().millisecondsSinceEpoch;
+      chapter.manga.value = manga;
+      allChapters.add(chapter);
+    }
+    isar.writeTxnSync(() => isar.chapters.putAllSync(allChapters));
     ref.read(isLongPressedStateProvider.notifier).update(false);
     ref.read(chaptersListStateProvider.notifier).clear();
   }
@@ -327,22 +328,15 @@ class ChapterSetIsReadState extends _$ChapterSetIsReadState {
   void build({required Manga manga}) {}
 
   set() {
+    final allChapters = <Chapter>[];
     final chapters = ref.watch(chaptersListStateProvider);
-    isar.writeTxnSync(() {
-      for (var chapter in chapters) {
-        chapter.isRead = !chapter.isRead!;
-        isar.chapters.putSync(chapter..manga.value = manga);
-        chapter.manga.saveSync();
-        ref
-            .read(synchingProvider(syncId: 1).notifier)
-            .addChangedPart(
-              ActionType.updateChapter,
-              chapter.id,
-              chapter.toJson(),
-              false,
-            );
-      }
-    });
+    for (var chapter in chapters) {
+      chapter.isRead = !chapter.isRead!;
+      chapter.updatedAt = DateTime.now().millisecondsSinceEpoch;
+      chapter.manga.value = manga;
+      allChapters.add(chapter);
+    }
+    isar.writeTxnSync(() => isar.chapters.putAllSync(allChapters));
     ref.read(isLongPressedStateProvider.notifier).update(false);
     ref.read(chaptersListStateProvider.notifier).clear();
   }
@@ -421,7 +415,9 @@ class ScanlatorsFilterState extends _$ScanlatorsFilterState {
     filterScanlatorList.add(value);
     isar.writeTxnSync(() {
       isar.settings.putSync(
-        settings..filterScanlatorList = filterScanlatorList,
+        settings
+          ..filterScanlatorList = filterScanlatorList
+          ..updatedAt = DateTime.now().millisecondsSinceEpoch,
       );
     });
     state = (_getScanlators(), _getFilterScanlator()!, filterScanlators);

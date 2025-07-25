@@ -23,6 +23,8 @@ class History {
 
   String? date;
 
+  int? updatedAt;
+
   History({
     this.id = Isar.autoIncrement,
     this.isManga,
@@ -31,6 +33,7 @@ class History {
     required this.mangaId,
     required this.date,
     required this.isNsfw,
+    this.updatedAt = 0,
   });
 
   History.fromJson(Map<String, dynamic> json) {
@@ -41,6 +44,7 @@ class History {
     itemType = ItemType.values[json['itemType'] ?? 0];
     mangaId = json['mangaId'];
     isNsfw = json['isNsfw'];
+    updatedAt = json['updatedAt'];
   }
 
   Map<String, dynamic> toJson() => {
@@ -50,5 +54,6 @@ class History {
     'itemType': itemType.index,
     'isNsfw': isNsfw,
     'mangaId': mangaId,
+    'updatedAt': updatedAt ?? 0,
   };
 }

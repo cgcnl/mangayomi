@@ -10,6 +10,7 @@ import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/chapter.dart';
 import 'package:mangayomi/models/download.dart';
 import 'package:mangayomi/models/settings.dart';
+import 'package:mangayomi/models/video.dart';
 import 'package:mangayomi/modules/manga/download/providers/convert_to_cbz.dart';
 import 'package:mangayomi/modules/more/settings/downloads/providers/downloads_state_provider.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
@@ -55,7 +56,7 @@ Future<void> downloadChapter(
   bool? useWifi,
   VoidCallback? callback,
 }) async {
-  bool onlyOnWifi = useWifi ?? ref.watch(onlyOnWifiStateProvider);
+  bool onlyOnWifi = useWifi ?? ref.read(onlyOnWifiStateProvider);
   final connectivity = await Connectivity().checkConnectivity();
   final isOnWifi =
       connectivity.contains(ConnectivityResult.wifi) ||
@@ -75,7 +76,7 @@ Future<void> downloadChapter(
   final mangaMainDirectory = await storageProvider.getMangaMainDirectory(
     chapter,
   );
-
+  List<Track>? subtitles;
   bool isOk = false;
   final manga = chapter.manga.value!;
   final chapterName = chapter.name!.replaceForbiddenCharacters(' ');
@@ -96,8 +97,9 @@ Future<void> downloadChapter(
   M3u8Downloader? m3u8Downloader;
 
   Future<void> processConvert() async {
-    if (ref.watch(saveAsCBZArchiveStateProvider)) {
-      await ref.watch(
+    if (!ref.read(saveAsCBZArchiveStateProvider)) return;
+    try {
+      await ref.read(
         convertToCBZProvider(
           chapterDirectory.path,
           mangaMainDirectory!.path,
@@ -105,6 +107,8 @@ Future<void> downloadChapter(
           pages.map((e) => e.fileName!).toList(),
         ).future,
       );
+    } catch (error) {
+      botToast("Failed to create CBZ: $error");
     }
   }
 
@@ -168,7 +172,9 @@ Future<void> downloadChapter(
     );
     isar.writeTxnSync(
       () => isar.settings.putSync(
-        settings..chapterPageUrlsList = chapterPageUrls,
+        settings
+          ..chapterPageUrlsList = chapterPageUrls
+          ..updatedAt = DateTime.now().millisecondsSinceEpoch,
       ),
     );
   }
@@ -196,11 +202,13 @@ Future<void> downloadChapter(
       hasM3U8File = nonM3U8File ? false : m3u8Urls.isNotEmpty;
       final videosUrls = nonM3U8File ? nonM3u8Urls : m3u8Urls;
       if (videosUrls.isNotEmpty) {
+        subtitles = videosUrls.first.subtitles;
         if (hasM3U8File) {
           m3u8Downloader = M3u8Downloader(
             m3u8Url: videosUrls.first.url,
             downloadDir: chapterDirectory.path,
             headers: videosUrls.first.headers ?? {},
+            subtitles: subtitles,
             fileName: p.join(mangaMainDirectory!.path, "$chapterName.mp4"),
             chapter: chapter,
           );
@@ -213,11 +221,7 @@ Future<void> downloadChapter(
     });
   } else if (itemType == ItemType.novel && chapter.url != null) {
     final cookie = MClient.getCookiesPref(chapter.url!);
-    final headers = itemType == ItemType.manga
-        ? ref.watch(headersProvider(source: manga.source!, lang: manga.lang!))
-        : itemType == ItemType.anime
-        ? videoHeader
-        : htmlHeader;
+    final headers = htmlHeader;
     if (cookie.isNotEmpty) {
       final userAgent = isar.settings.getSync(227)!.userAgent!;
       headers.addAll(cookie);
@@ -245,7 +249,7 @@ Future<void> downloadChapter(
         await File(
           p.join(mangaMainDirectory!.path, "${chapter.name}.cbz"),
         ).exists() &&
-        ref.watch(saveAsCBZArchiveStateProvider);
+        ref.read(saveAsCBZArchiveStateProvider);
     bool mp4FileExist = await File(
       p.join(mangaMainDirectory.path, "$chapterName.mp4"),
     ).exists();
@@ -265,7 +269,7 @@ Future<void> downloadChapter(
         final page = pageUrls[index];
         final cookie = MClient.getCookiesPref(page.url);
         final headers = itemType == ItemType.manga
-            ? ref.watch(
+            ? ref.read(
                 headersProvider(source: manga.source!, lang: manga.lang!),
               )
             : itemType == ItemType.anime
@@ -340,7 +344,12 @@ Future<void> downloadChapter(
       });
     } else {
       savePageUrls();
-      await MDownloader(chapter: chapter, pageUrls: pages).download((progress) {
+      await MDownloader(
+        chapter: chapter,
+        pageUrls: pages,
+        subtitles: subtitles,
+        subDownloadDir: chapterDirectory.path,
+      ).download((progress) {
         setProgress(progress);
       });
     }

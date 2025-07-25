@@ -66,6 +66,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get last_update_check => 'Last update check';
 
   @override
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You are deleting all $count $entryTypePlural of this $mediaType from the library.',
+      one:
+          'You are deleting the only $entryType of this $mediaType from the library.',
+    );
+    return '$_temp0\nThis will also remove the whole $mediaType from your library.\n\nNote: The files themselves will not be deleted.';
+  }
+
+  @override
+  String get chapter => 'chapter';
+
+  @override
+  String get episode => 'episode';
+
+  @override
   String get unread_count => 'Unread count';
 
   @override
@@ -645,16 +669,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncing_subtitle =>
-      'Sync your progress across multiple devices via a self-hosted \nserver. Make sure to upload first if this is your first time \nsyncing or download before using (auto) sync on this device!';
+      'Sync your progress across multiple devices via a self-hosted \nserver. Check out our discord server for more info!';
 
   @override
-  String get last_sync => 'Last sync at: ';
+  String get last_sync_manga => 'Last manga sync at: ';
 
   @override
-  String get last_upload => 'Last upload at: ';
+  String get last_sync_history => 'Last history sync at: ';
 
   @override
-  String get last_download => 'Last download at: ';
+  String get last_sync_update => 'Last update sync at: ';
 
   @override
   String get sync_server => 'Sync Server Address';
@@ -663,104 +687,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sync_login_invalid_creds => 'Invalid email or password';
 
   @override
-  String get sync_checking => 'Checking for sync...';
+  String get sync_starting => 'Starting sync...';
 
   @override
-  String get sync_uploading => 'Upload started...';
+  String get sync_finished => 'Sync finished';
 
   @override
-  String get sync_downloading => 'Download started...';
-
-  @override
-  String get sync_upload_finished => 'Upload finished';
-
-  @override
-  String get sync_download_finished => 'Download finished';
-
-  @override
-  String get sync_up_to_date => 'Sync up to date';
-
-  @override
-  String get sync_upload_failed => 'Upload failed';
-
-  @override
-  String get sync_download_failed => 'Download failed';
+  String get sync_failed => 'Sync failed';
 
   @override
   String get sync_button_sync => 'Sync progress';
 
   @override
-  String get sync_button_snapshot => 'Create snapshot';
-
-  @override
-  String get sync_button_upload => 'Full upload';
-
-  @override
-  String get sync_button_download => 'Full download';
-
-  @override
-  String get sync_confirm_snapshot =>
-      'Request the server to create a remote copy of the current backup!';
-
-  @override
-  String get sync_confirm_upload =>
-      'A full upload will completely replace the remote data with your current one!';
-
-  @override
-  String get sync_confirm_download =>
-      'A full download will completely replace your current data with the remote one!';
-
-  @override
   String get sync_on => 'Enable sync';
-
-  @override
-  String get sync_pending_manga => 'Manga changes pending';
-
-  @override
-  String get sync_pending_category => 'Category changes pending';
-
-  @override
-  String get sync_pending_chapter => 'Chapter changes pending';
-
-  @override
-  String get sync_pending_history => 'History changes pending';
-
-  @override
-  String get sync_pending_update => 'Update changes pending';
-
-  @override
-  String get sync_pending_extension => 'Extension changes pending';
-
-  @override
-  String get sync_pending_track => 'Track changes pending';
-
-  @override
-  String get sync_snapshot_creating => 'Creating snapshot...';
-
-  @override
-  String get sync_snapshot_created => 'Snapshot created!';
-
-  @override
-  String get sync_snapshot_deleting => 'Deleting snapshot...';
-
-  @override
-  String get sync_snapshot_deleted => 'Snapshot deleted!';
-
-  @override
-  String get sync_snapshot_no_data =>
-      'No data to create a snapshot! Do a full upload first!';
-
-  @override
-  String get sync_browse_snapshots => 'Browse older backups';
-
-  @override
-  String get sync_snapshots => 'Snapshots';
-
-  @override
-  String get sync_load_snapshot => 'Load snapshot';
-
-  @override
-  String get sync_delete_snapshot => 'Delete snapshot';
 
   @override
   String get sync_auto => 'Auto Sync';
@@ -771,12 +710,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sync_auto_off => 'Off';
-
-  @override
-  String get sync_auto_30_seconds => 'Every 30 seconds';
-
-  @override
-  String get sync_auto_1_minute => 'Every 1 minute';
 
   @override
   String get sync_auto_5_minutes => 'Every 5 minutes';
@@ -1517,4 +1450,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hwdec => 'Hardware Decoder';
+
+  @override
+  String get track_library_add => 'Add to local library';
+
+  @override
+  String get track_library_add_confirm => 'Add tracked item to local library';
+
+  @override
+  String get track_library_not_logged =>
+      'Login to the corresponding tracker to use this feature!';
+
+  @override
+  String get track_library_switch => 'Switch to another tracker';
+
+  @override
+  String get go_back => 'Go back';
+
+  @override
+  String get merge_library_nav_mobile => 'Merge library navigation on mobile';
+
+  @override
+  String get enable_discord_rpc => 'Enable Discord RPC';
+
+  @override
+  String get hide_discord_rpc_incognito =>
+      'Hide Discord RPC while in Incognito';
+
+  @override
+  String get rpc_show_reading_watching_progress =>
+      'Show current chapter in Discord (requires a restart)';
+
+  @override
+  String get rpc_show_title => 'Show current title in Discord';
+
+  @override
+  String get rpc_show_cover_image => 'Show current cover image in Discord';
+
+  @override
+  String get sync_enable_histories => 'Sync history data';
+
+  @override
+  String get sync_enable_updates => 'Sync update data';
+
+  @override
+  String get sync_enable_settings => 'Sync settings';
 }

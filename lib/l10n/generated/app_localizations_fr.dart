@@ -66,6 +66,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get last_update_check => 'Dernière mise à jour';
 
   @override
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Tu es en train de supprimer les $count $entryTypePlural de ce $mediaType de ta bibliothèque.',
+      one:
+          'Tu es en train de supprimer le seul $entryType de ce $mediaType de ta bibliothèque.',
+    );
+    return '$_temp0\nÇa va aussi supprimer tout le $mediaType de ta bibliothèque.\n\nNote : Les fichiers ne seront pas supprimés.';
+  }
+
+  @override
+  String get chapter => 'chapitre';
+
+  @override
+  String get episode => 'épisode';
+
+  @override
   String get unread_count => 'Nombre de non-lus';
 
   @override
@@ -651,16 +675,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncing_subtitle =>
-      'Synchronisez vos progrès sur plusieurs appareils via un serveur auto-hébergé. Assurez-vous de télécharger d\'abord si c\'est votre première synchronisation ou de télécharger avant d\'utiliser la synchronisation (auto) sur cet appareil !';
+      'Synchronisez votre progression sur plusieurs appareils via un serveur auto-hébergé. Consultez notre serveur discord pour plus d\'informations !';
 
   @override
-  String get last_sync => 'Dernière synchronisation : ';
+  String get last_sync_manga => 'Dernière synchro du manga à :';
 
   @override
-  String get last_upload => 'Dernier téléversement : ';
+  String get last_sync_history => 'Dernière synchro historique au :';
 
   @override
-  String get last_download => 'Dernier téléchargement : ';
+  String get last_sync_update =>
+      'Dernière mise à jour de la synchronisation au :';
 
   @override
   String get sync_server => 'Adresse du serveur de synchronisation';
@@ -669,109 +694,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sync_login_invalid_creds => 'E-mail ou mot de passe invalide';
 
   @override
-  String get sync_checking => 'Vérification de la synchronisation...';
+  String get sync_starting => 'Synchronisation de départ...';
 
   @override
-  String get sync_uploading => 'Téléversement en cours...';
+  String get sync_finished => 'Synchronisation terminée';
 
   @override
-  String get sync_downloading => 'Téléchargement en cours...';
-
-  @override
-  String get sync_upload_finished => 'Téléversement terminé';
-
-  @override
-  String get sync_download_finished => 'Téléchargement terminé';
-
-  @override
-  String get sync_up_to_date => 'Synchronisation à jour';
-
-  @override
-  String get sync_upload_failed => 'Échec du téléversement';
-
-  @override
-  String get sync_download_failed => 'Échec du téléchargement';
+  String get sync_failed => 'Échec de la synchronisation';
 
   @override
   String get sync_button_sync => 'Synchroniser les progrès';
 
   @override
-  String get sync_button_snapshot => 'Créer un instantané';
-
-  @override
-  String get sync_button_upload => 'Téléversement complet';
-
-  @override
-  String get sync_button_download => 'Téléchargement complet';
-
-  @override
-  String get sync_confirm_snapshot =>
-      'Demandez au serveur de créer une copie de sauvegarde distante !';
-
-  @override
-  String get sync_confirm_upload =>
-      'Un téléversement complet remplacera entièrement les données distantes par vos données actuelles !';
-
-  @override
-  String get sync_confirm_download =>
-      'Un téléchargement complet remplacera entièrement vos données actuelles par les données distantes !';
-
-  @override
   String get sync_on => 'Activer la synchronisation';
-
-  @override
-  String get sync_pending_manga => 'Modifications en attente pour les mangas';
-
-  @override
-  String get sync_pending_category =>
-      'Modifications en attente pour les catégories';
-
-  @override
-  String get sync_pending_chapter =>
-      'Modifications en attente pour les chapitres';
-
-  @override
-  String get sync_pending_history =>
-      'Modifications en attente pour l\'historique';
-
-  @override
-  String get sync_pending_update =>
-      'Modifications en attente pour les mises à jour';
-
-  @override
-  String get sync_pending_extension =>
-      'Modifications en attente pour les extensions';
-
-  @override
-  String get sync_pending_track => 'Modifications en attente pour le suivi';
-
-  @override
-  String get sync_snapshot_creating => 'Création de l\'instantané...';
-
-  @override
-  String get sync_snapshot_created => 'Instantané créé !';
-
-  @override
-  String get sync_snapshot_deleting => 'Suppression de l\'instantané...';
-
-  @override
-  String get sync_snapshot_deleted => 'Instantané supprimé !';
-
-  @override
-  String get sync_snapshot_no_data =>
-      'Aucune donnée pour créer un instantané ! Effectuez d\'abord un téléchargement complet !';
-
-  @override
-  String get sync_browse_snapshots => 'Parcourir les sauvegardes précédentes';
-
-  @override
-  String get sync_snapshots => 'Instantanés';
-
-  @override
-  String get sync_load_snapshot => 'Charger l\'instantané';
-
-  @override
-  String get sync_delete_snapshot => 'Supprimer l\'instantané';
 
   @override
   String get sync_auto => 'Synchronisation automatique';
@@ -782,12 +717,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sync_auto_off => 'Désactivé';
-
-  @override
-  String get sync_auto_30_seconds => 'Toutes les 30 secondes';
-
-  @override
-  String get sync_auto_1_minute => 'Toutes les 1 minute';
 
   @override
   String get sync_auto_5_minutes => 'Toutes les 5 minutes';
@@ -1539,4 +1468,49 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hwdec => 'Hardware Decoder';
+
+  @override
+  String get track_library_add => 'Add to local library';
+
+  @override
+  String get track_library_add_confirm => 'Add tracked item to local library';
+
+  @override
+  String get track_library_not_logged =>
+      'Login to the corresponding tracker to use this feature!';
+
+  @override
+  String get track_library_switch => 'Switch to another tracker';
+
+  @override
+  String get go_back => 'Go back';
+
+  @override
+  String get merge_library_nav_mobile => 'Merge library navigation on mobile';
+
+  @override
+  String get enable_discord_rpc => 'Enable Discord RPC';
+
+  @override
+  String get hide_discord_rpc_incognito =>
+      'Hide Discord RPC while in Incognito';
+
+  @override
+  String get rpc_show_reading_watching_progress =>
+      'Show current chapter in Discord (requires a restart)';
+
+  @override
+  String get rpc_show_title => 'Show current title in Discord';
+
+  @override
+  String get rpc_show_cover_image => 'Show current cover image in Discord';
+
+  @override
+  String get sync_enable_histories => 'Sync history data';
+
+  @override
+  String get sync_enable_updates => 'Sync update data';
+
+  @override
+  String get sync_enable_settings => 'Sync settings';
 }

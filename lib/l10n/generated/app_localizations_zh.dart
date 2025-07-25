@@ -66,6 +66,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get last_update_check => '最后更新检查';
 
   @override
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '你正在从你的库中删除此$mediaType的全部$count$entryTypePlural。',
+      one: '你正在从你的库中删除此$mediaType的唯一$entryType。',
+    );
+    return '$_temp0\n这也会将整个$mediaType从你的库中移除。\n\n注意：文件本身不会被删除。';
+  }
+
+  @override
+  String get chapter => '章节';
+
+  @override
+  String get episode => '剧集';
+
+  @override
   String get unread_count => '未读计数';
 
   @override
@@ -639,16 +661,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get syncing_subtitle =>
-      '通过自托管服务器在多个设备间同步您的进度。首次同步时，请先上传；或者在设备上启用（自动）同步之前先下载！';
+      '通过自托管的 \n服务器在多个设备上同步你的进度。查看我们的 discord 服务器，了解更多信息！';
 
   @override
-  String get last_sync => '上次同步时间：';
+  String get last_sync_manga => '最新漫画同步于: ';
 
   @override
-  String get last_upload => '上次上传时间：';
+  String get last_sync_history => '最后历史同步时间：';
 
   @override
-  String get last_download => '上次下载时间：';
+  String get last_sync_update => '最后更新同步于: ';
 
   @override
   String get sync_server => '同步服务器地址';
@@ -657,100 +679,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sync_login_invalid_creds => '无效的电子邮件或密码';
 
   @override
-  String get sync_checking => '检查同步状态...';
+  String get sync_starting => '开始同步...';
 
   @override
-  String get sync_uploading => '上传开始...';
+  String get sync_finished => '同步完成';
 
   @override
-  String get sync_downloading => '下载开始...';
-
-  @override
-  String get sync_upload_finished => '上传完成';
-
-  @override
-  String get sync_download_finished => '下载完成';
-
-  @override
-  String get sync_up_to_date => '同步已是最新';
-
-  @override
-  String get sync_upload_failed => '上传失败';
-
-  @override
-  String get sync_download_failed => '下载失败';
+  String get sync_failed => '同步失败';
 
   @override
   String get sync_button_sync => '同步进度';
 
   @override
-  String get sync_button_snapshot => '创建快照';
-
-  @override
-  String get sync_button_upload => '完整上传';
-
-  @override
-  String get sync_button_download => '完整下载';
-
-  @override
-  String get sync_confirm_snapshot => '请求服务器创建当前备份的远程副本！';
-
-  @override
-  String get sync_confirm_upload => '完整上传将用您当前的数据完全替换远程数据！';
-
-  @override
-  String get sync_confirm_download => '完整下载将用远程数据完全替换您当前的数据！';
-
-  @override
   String get sync_on => '启用同步';
-
-  @override
-  String get sync_pending_manga => '漫画更改待处理';
-
-  @override
-  String get sync_pending_category => '类别更改待处理';
-
-  @override
-  String get sync_pending_chapter => '章节更改待处理';
-
-  @override
-  String get sync_pending_history => '历史更改待处理';
-
-  @override
-  String get sync_pending_update => '更新更改待处理';
-
-  @override
-  String get sync_pending_extension => '扩展更改待处理';
-
-  @override
-  String get sync_pending_track => '追踪更改待处理';
-
-  @override
-  String get sync_snapshot_creating => '正在创建快照...';
-
-  @override
-  String get sync_snapshot_created => '快照已创建！';
-
-  @override
-  String get sync_snapshot_deleting => '正在删除快照...';
-
-  @override
-  String get sync_snapshot_deleted => '快照已删除！';
-
-  @override
-  String get sync_snapshot_no_data => '没有数据可创建快照！请先进行完整上传！';
-
-  @override
-  String get sync_browse_snapshots => '浏览旧备份';
-
-  @override
-  String get sync_snapshots => '快照';
-
-  @override
-  String get sync_load_snapshot => '加载快照';
-
-  @override
-  String get sync_delete_snapshot => '删除快照';
 
   @override
   String get sync_auto => '自动同步';
@@ -760,12 +701,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sync_auto_off => '关闭';
-
-  @override
-  String get sync_auto_30_seconds => '每30秒';
-
-  @override
-  String get sync_auto_1_minute => '每1分钟';
 
   @override
   String get sync_auto_5_minutes => '每5分钟';
@@ -1486,4 +1421,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get hwdec => 'Hardware Decoder';
+
+  @override
+  String get track_library_add => 'Add to local library';
+
+  @override
+  String get track_library_add_confirm => 'Add tracked item to local library';
+
+  @override
+  String get track_library_not_logged =>
+      'Login to the corresponding tracker to use this feature!';
+
+  @override
+  String get track_library_switch => 'Switch to another tracker';
+
+  @override
+  String get go_back => 'Go back';
+
+  @override
+  String get merge_library_nav_mobile => 'Merge library navigation on mobile';
+
+  @override
+  String get enable_discord_rpc => 'Enable Discord RPC';
+
+  @override
+  String get hide_discord_rpc_incognito =>
+      'Hide Discord RPC while in Incognito';
+
+  @override
+  String get rpc_show_reading_watching_progress =>
+      'Show current chapter in Discord (requires a restart)';
+
+  @override
+  String get rpc_show_title => 'Show current title in Discord';
+
+  @override
+  String get rpc_show_cover_image => 'Show current cover image in Discord';
+
+  @override
+  String get sync_enable_histories => 'Sync history data';
+
+  @override
+  String get sync_enable_updates => 'Sync update data';
+
+  @override
+  String get sync_enable_settings => 'Sync settings';
 }

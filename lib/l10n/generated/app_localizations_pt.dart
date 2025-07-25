@@ -66,6 +66,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String get last_update_check => 'Última verificação de atualização';
 
   @override
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Estás a eliminar todos os $count $entryTypePlural deste $mediaType da tua biblioteca.',
+      one:
+          'Estás a eliminar o único $entryType deste $mediaType da tua biblioteca.',
+    );
+    return '$_temp0\nIsto vai também remover todo o $mediaType da tua biblioteca.\n\nNota: Os ficheiros em si não vão ser eliminados.';
+  }
+
+  @override
+  String get chapter => 'capítulo';
+
+  @override
+  String get episode => 'episódio';
+
+  @override
   String get unread_count => 'Contagem de não lidos';
 
   @override
@@ -649,16 +673,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get syncing_subtitle =>
-      'Sincronize seu progresso entre vários dispositivos via um servidor auto-hospedado. Certifique-se de fazer o upload primeiro se for sua primeira vez sincronizando ou baixe antes de usar a sincronização (automática) neste dispositivo!';
+      'Sincroniza o teu progresso em vários dispositivos através de um \nserver auto-hospedado. Consulta o nosso servidor discord para mais informações!';
 
   @override
-  String get last_sync => 'Última sincronização em: ';
+  String get last_sync_manga => 'Última sincronização da manga em:';
 
   @override
-  String get last_upload => 'Último upload em: ';
+  String get last_sync_history => 'Última sincronização da história em:';
 
   @override
-  String get last_download => 'Último download em: ';
+  String get last_sync_update => 'Última atualização sincronizada em:';
 
   @override
   String get sync_server => 'Endereço do servidor de sincronização';
@@ -667,104 +691,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sync_login_invalid_creds => 'E-mail ou senha inválidos';
 
   @override
-  String get sync_checking => 'Verificando sincronização...';
+  String get sync_starting => 'Iniciar a sincronização...';
 
   @override
-  String get sync_uploading => 'Upload iniciado...';
+  String get sync_finished => 'Sincronização concluída';
 
   @override
-  String get sync_downloading => 'Download iniciado...';
-
-  @override
-  String get sync_upload_finished => 'Upload concluído';
-
-  @override
-  String get sync_download_finished => 'Download concluído';
-
-  @override
-  String get sync_up_to_date => 'Sincronização atualizada';
-
-  @override
-  String get sync_upload_failed => 'Upload falhou';
-
-  @override
-  String get sync_download_failed => 'Download falhou';
+  String get sync_failed => 'A sincronização falhou';
 
   @override
   String get sync_button_sync => 'Sincronizar progresso';
 
   @override
-  String get sync_button_snapshot => 'Criar instantâneo';
-
-  @override
-  String get sync_button_upload => 'Upload completo';
-
-  @override
-  String get sync_button_download => 'Download completo';
-
-  @override
-  String get sync_confirm_snapshot =>
-      'Solicite ao servidor para criar um backup remoto!';
-
-  @override
-  String get sync_confirm_upload =>
-      'Um upload completo substituirá completamente os dados remotos pelos seus dados atuais!';
-
-  @override
-  String get sync_confirm_download =>
-      'Um download completo substituirá completamente seus dados atuais pelos dados remotos!';
-
-  @override
   String get sync_on => 'Ativar sincronização';
-
-  @override
-  String get sync_pending_manga => 'Alterações pendentes para mangás';
-
-  @override
-  String get sync_pending_category => 'Alterações pendentes para categorias';
-
-  @override
-  String get sync_pending_chapter => 'Alterações pendentes para capítulos';
-
-  @override
-  String get sync_pending_history => 'Alterações pendentes para histórico';
-
-  @override
-  String get sync_pending_update => 'Alterações pendentes para atualizações';
-
-  @override
-  String get sync_pending_extension => 'Alterações pendentes para extensões';
-
-  @override
-  String get sync_pending_track => 'Alterações pendentes para rastreamento';
-
-  @override
-  String get sync_snapshot_creating => 'Criando instantâneo...';
-
-  @override
-  String get sync_snapshot_created => 'Instantâneo criado!';
-
-  @override
-  String get sync_snapshot_deleting => 'Excluindo instantâneo...';
-
-  @override
-  String get sync_snapshot_deleted => 'Instantâneo excluído!';
-
-  @override
-  String get sync_snapshot_no_data =>
-      'Sem dados para criar um instantâneo! Faça um upload completo primeiro!';
-
-  @override
-  String get sync_browse_snapshots => 'Explorar backups antigos';
-
-  @override
-  String get sync_snapshots => 'Instantâneos';
-
-  @override
-  String get sync_load_snapshot => 'Carregar instantâneo';
-
-  @override
-  String get sync_delete_snapshot => 'Excluir instantâneo';
 
   @override
   String get sync_auto => 'Sincronização automática';
@@ -775,12 +714,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get sync_auto_off => 'Desativado';
-
-  @override
-  String get sync_auto_30_seconds => 'A cada 30 segundos';
-
-  @override
-  String get sync_auto_1_minute => 'A cada 1 minuto';
 
   @override
   String get sync_auto_5_minutes => 'A cada 5 minutos';
@@ -1531,6 +1464,51 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get hwdec => 'Hardware Decoder';
+
+  @override
+  String get track_library_add => 'Add to local library';
+
+  @override
+  String get track_library_add_confirm => 'Add tracked item to local library';
+
+  @override
+  String get track_library_not_logged =>
+      'Login to the corresponding tracker to use this feature!';
+
+  @override
+  String get track_library_switch => 'Switch to another tracker';
+
+  @override
+  String get go_back => 'Go back';
+
+  @override
+  String get merge_library_nav_mobile => 'Merge library navigation on mobile';
+
+  @override
+  String get enable_discord_rpc => 'Enable Discord RPC';
+
+  @override
+  String get hide_discord_rpc_incognito =>
+      'Hide Discord RPC while in Incognito';
+
+  @override
+  String get rpc_show_reading_watching_progress =>
+      'Show current chapter in Discord (requires a restart)';
+
+  @override
+  String get rpc_show_title => 'Show current title in Discord';
+
+  @override
+  String get rpc_show_cover_image => 'Show current cover image in Discord';
+
+  @override
+  String get sync_enable_histories => 'Sync history data';
+
+  @override
+  String get sync_enable_updates => 'Sync update data';
+
+  @override
+  String get sync_enable_settings => 'Sync settings';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1593,6 +1571,30 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get last_update_check => 'Última verificação de atualização';
+
+  @override
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Você está deletando todos os $count $entryTypePlural deste $mediaType da sua biblioteca.',
+      one:
+          'Você está deletando o único $entryType deste $mediaType da sua biblioteca.',
+    );
+    return '$_temp0\nIsso também vai remover todo o $mediaType da sua biblioteca.\n\nObs: Os arquivos em si não serão deletados.';
+  }
+
+  @override
+  String get chapter => 'capítulo';
+
+  @override
+  String get episode => 'episódio';
 
   @override
   String get unread_count => 'Contagem de não lidos';
@@ -2175,16 +2177,16 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get syncing_subtitle =>
-      'Sincronize seu progresso em vários dispositivos por meio de um servidor auto-hospedado.\nCertifique-se de fazer upload primeiro se for sua primeira sincronização ou de baixar antes de usar a sincronização (automática) neste dispositivo!';
+      'Sincronize seu progresso em vários dispositivos por meio de um \nservidor auto-hospedado. Confira nosso servidor discord para obter mais informações!';
 
   @override
-  String get last_sync => 'Última sincronização em: ';
+  String get last_sync_manga => 'Última sincronização do mangá em:';
 
   @override
-  String get last_upload => 'Último upload em: ';
+  String get last_sync_history => 'Última sincronização do histórico em:';
 
   @override
-  String get last_download => 'Último download em: ';
+  String get last_sync_update => 'Última atualização sincronizada em:';
 
   @override
   String get sync_server => 'Endereço do servidor de sincronização';
@@ -2193,104 +2195,19 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get sync_login_invalid_creds => 'E-mail ou senha inválidos';
 
   @override
-  String get sync_checking => 'Verificando sincronização...';
+  String get sync_starting => 'Iniciando a sincronização...';
 
   @override
-  String get sync_uploading => 'Iniciando upload...';
+  String get sync_finished => 'Sincronização concluída';
 
   @override
-  String get sync_downloading => 'Iniciando download...';
-
-  @override
-  String get sync_upload_finished => 'Upload concluído';
-
-  @override
-  String get sync_download_finished => 'Download concluído';
-
-  @override
-  String get sync_up_to_date => 'Sincronização em dia';
-
-  @override
-  String get sync_upload_failed => 'Falha no upload';
-
-  @override
-  String get sync_download_failed => 'Falha no download';
+  String get sync_failed => 'Falha na sincronização';
 
   @override
   String get sync_button_sync => 'Sincronizar progresso';
 
   @override
-  String get sync_button_snapshot => 'Criar instantâneo';
-
-  @override
-  String get sync_button_upload => 'Upload completo';
-
-  @override
-  String get sync_button_download => 'Download completo';
-
-  @override
-  String get sync_confirm_snapshot =>
-      'Solicite ao servidor para criar um backup remoto!';
-
-  @override
-  String get sync_confirm_upload =>
-      'Um upload completo substituirá completamente os dados remotos pelos atuais!';
-
-  @override
-  String get sync_confirm_download =>
-      'Um download completo substituirá completamente seus dados atuais pelos dados remotos!';
-
-  @override
   String get sync_on => 'Ativar sincronização';
-
-  @override
-  String get sync_pending_manga => 'Alterações pendentes para mangás';
-
-  @override
-  String get sync_pending_category => 'Alterações pendentes para categorias';
-
-  @override
-  String get sync_pending_chapter => 'Alterações pendentes para capítulos';
-
-  @override
-  String get sync_pending_history => 'Alterações pendentes para histórico';
-
-  @override
-  String get sync_pending_update => 'Alterações pendentes para atualizações';
-
-  @override
-  String get sync_pending_extension => 'Alterações pendentes para extensões';
-
-  @override
-  String get sync_pending_track => 'Alterações pendentes para rastreamento';
-
-  @override
-  String get sync_snapshot_creating => 'Criando instantâneo...';
-
-  @override
-  String get sync_snapshot_created => 'Instantâneo criado!';
-
-  @override
-  String get sync_snapshot_deleting => 'Excluindo instantâneo...';
-
-  @override
-  String get sync_snapshot_deleted => 'Instantâneo excluído!';
-
-  @override
-  String get sync_snapshot_no_data =>
-      'Sem dados para criar um instantâneo! Faça um upload completo primeiro!';
-
-  @override
-  String get sync_browse_snapshots => 'Explorar backups antigos';
-
-  @override
-  String get sync_snapshots => 'Instantâneos';
-
-  @override
-  String get sync_load_snapshot => 'Carregar instantâneo';
-
-  @override
-  String get sync_delete_snapshot => 'Excluir instantâneo';
 
   @override
   String get sync_auto => 'Sincronização automática';
@@ -2301,12 +2218,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get sync_auto_off => 'Desativado';
-
-  @override
-  String get sync_auto_30_seconds => 'A cada 30 segundos';
-
-  @override
-  String get sync_auto_1_minute => 'A cada 1 minuto';
 
   @override
   String get sync_auto_5_minutes => 'A cada 5 minutos';

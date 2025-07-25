@@ -28,6 +28,7 @@ import 'package:mangayomi/modules/more/settings/reader/providers/reader_state_pr
 import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/router/router.dart';
+import 'package:protobuf/protobuf.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 part 'restore.g.dart';
@@ -62,6 +63,8 @@ void doRestore(Ref ref, {required String path, required BuildContext context}) {
     }
   } catch (e, s) {
     botToast('$e\n$s');
+  } finally {
+    inputStream.close();
   }
 }
 
@@ -230,16 +233,10 @@ void restoreBackup(Ref ref, Map<String, dynamic> backup, {bool full = true}) {
             isar.trackPreferences.clearSync();
             isar.trackPreferences.putAllSync(trackPreferences);
           }
-        }
-
-        if (full) {
           isar.sources.clearSync();
           if (extensions != null) {
             isar.sources.putAllSync(extensions);
           }
-        }
-
-        if (full) {
           isar.sourcePreferences.clearSync();
           if (sourcesPrefs != null) {
             isar.sourcePreferences.putAllSync(sourcesPrefs);
@@ -248,22 +245,7 @@ void restoreBackup(Ref ref, Map<String, dynamic> backup, {bool full = true}) {
           if (settings != null) {
             isar.settings.putAllSync(settings);
           }
-        }
-        if (full) {
-          ref
-              .read(synchingProvider(syncId: 1).notifier)
-              .clearAllChangedParts(false);
-          ref.invalidate(followSystemThemeStateProvider);
-          ref.invalidate(themeModeStateProvider);
-          ref.invalidate(blendLevelStateProvider);
-          ref.invalidate(flexSchemeColorStateProvider);
-          ref.invalidate(pureBlackDarkModeStateProvider);
-          ref.invalidate(l10nLocaleStateProvider);
-          ref.invalidate(navigationOrderStateProvider);
-          ref.invalidate(hideItemsStateProvider);
-          ref.invalidate(extensionsRepoStateProvider(ItemType.manga));
-          ref.invalidate(extensionsRepoStateProvider(ItemType.anime));
-          ref.invalidate(extensionsRepoStateProvider(ItemType.novel));
+          _invalidateCommonState(ref);
           ref.read(routerCurrentLocationStateProvider.notifier).refresh();
         }
       });
@@ -358,19 +340,7 @@ void restoreKotatsuBackup(Ref ref, Archive archive) {
       isar.updates.clearSync();
       isar.tracks.clearSync();
       isar.trackPreferences.clearSync();
-      ref
-          .read(synchingProvider(syncId: 1).notifier)
-          .clearAllChangedParts(false);
-      ref.invalidate(themeModeStateProvider);
-      ref.invalidate(blendLevelStateProvider);
-      ref.invalidate(flexSchemeColorStateProvider);
-      ref.invalidate(pureBlackDarkModeStateProvider);
-      ref.invalidate(l10nLocaleStateProvider);
-      ref.invalidate(navigationOrderStateProvider);
-      ref.invalidate(hideItemsStateProvider);
-      ref.invalidate(extensionsRepoStateProvider(ItemType.manga));
-      ref.invalidate(extensionsRepoStateProvider(ItemType.anime));
-      ref.invalidate(extensionsRepoStateProvider(ItemType.novel));
+      _invalidateCommonState(ref);
     });
   } catch (e) {
     rethrow;
@@ -379,10 +349,13 @@ void restoreKotatsuBackup(Ref ref, Archive archive) {
 
 @riverpod
 void restoreTachiBkBackup(Ref ref, String path, BackupType bkType) {
-  final content = GZipDecoder().decodeBytes(
-    InputFileStream(path).toUint8List(),
+  final inputStream = InputFileStream(path);
+  final content = GZipDecoder().decodeBytes(inputStream.toUint8List());
+  inputStream.close();
+  final backup = BackupMihon.create();
+  backup.mergeFromCodedBufferReader(
+    CodedBufferReader(content, sizeLimit: 250 << 20),
   );
-  final backup = BackupMihon.fromBuffer(content);
   List<Category> cats = [];
   isar.writeTxnSync(() {
     isar.categorys.clearSync();
@@ -544,18 +517,23 @@ void restoreTachiBkBackup(Ref ref, String path, BackupType bkType) {
     isar.updates.clearSync();
     isar.tracks.clearSync();
     isar.trackPreferences.clearSync();
-    ref.read(synchingProvider(syncId: 1).notifier).clearAllChangedParts(false);
-    ref.invalidate(themeModeStateProvider);
-    ref.invalidate(blendLevelStateProvider);
-    ref.invalidate(flexSchemeColorStateProvider);
-    ref.invalidate(pureBlackDarkModeStateProvider);
-    ref.invalidate(l10nLocaleStateProvider);
-    ref.invalidate(navigationOrderStateProvider);
-    ref.invalidate(hideItemsStateProvider);
-    ref.invalidate(extensionsRepoStateProvider(ItemType.manga));
-    ref.invalidate(extensionsRepoStateProvider(ItemType.anime));
-    ref.invalidate(extensionsRepoStateProvider(ItemType.novel));
+    _invalidateCommonState(ref);
   });
+}
+
+void _invalidateCommonState(Ref ref) {
+  ref.read(synchingProvider(syncId: 1).notifier).clearAllChangedParts(false);
+  ref.invalidate(followSystemThemeStateProvider);
+  ref.invalidate(themeModeStateProvider);
+  ref.invalidate(blendLevelStateProvider);
+  ref.invalidate(flexSchemeColorStateProvider);
+  ref.invalidate(pureBlackDarkModeStateProvider);
+  ref.invalidate(l10nLocaleStateProvider);
+  ref.invalidate(navigationOrderStateProvider);
+  ref.invalidate(hideItemsStateProvider);
+  ref.invalidate(extensionsRepoStateProvider(ItemType.manga));
+  ref.invalidate(extensionsRepoStateProvider(ItemType.anime));
+  ref.invalidate(extensionsRepoStateProvider(ItemType.novel));
 }
 
 Status _convertStatusFromTachiBk(int idx) {

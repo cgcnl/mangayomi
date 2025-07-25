@@ -1,14 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:json_view/json_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mangayomi/eval/lib.dart';
 import 'package:mangayomi/main.dart';
-import 'package:mangayomi/models/changed.dart';
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/source.dart';
 import 'package:mangayomi/modules/manga/home/widget/filter_widget.dart';
 import 'package:mangayomi/modules/more/settings/appearance/providers/app_font_family.dart';
-import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/services/get_detail.dart';
 import 'package:mangayomi/services/get_filter_list.dart';
@@ -61,13 +61,14 @@ class _CodeEditorPageState extends ConsumerState<CodeEditorPage> {
     [],
   );
   late final _logStreamController = Logger.logStreamController;
+  late final StreamSubscription _logSubscription;
   final _scrollController = ScrollController();
   @override
   void initState() {
     super.initState();
     _controller.text = source?.sourceCode ?? "";
     useLogger = true;
-    _logStreamController.stream.asBroadcastStream().listen((event) async {
+    _logSubscription = _logStreamController.stream.listen((event) async {
       _logsNotifier.value.add(event);
       try {
         await Future.delayed(const Duration(milliseconds: 5));
@@ -135,11 +136,12 @@ class _CodeEditorPageState extends ConsumerState<CodeEditorPage> {
 
   @override
   void dispose() {
-    super.dispose();
+    _logSubscription.cancel();
     _logsNotifier.value.clear();
     _scrollController.dispose();
     _controller.dispose();
     useLogger = false;
+    super.dispose();
   }
 
   @override
@@ -153,15 +155,9 @@ class _CodeEditorPageState extends ConsumerState<CodeEditorPage> {
         leading: BackButton(
           onPressed: () {
             isar.writeTxnSync(() {
-              isar.sources.putSync(source!);
-              ref
-                  .read(synchingProvider(syncId: 1).notifier)
-                  .addChangedPart(
-                    ActionType.updateExtension,
-                    source!.id,
-                    source!.toJson(),
-                    false,
-                  );
+              isar.sources.putSync(
+                source!..updatedAt = DateTime.now().millisecondsSinceEpoch,
+              );
             });
             Navigator.pop(context, source);
           },
@@ -194,15 +190,11 @@ class _CodeEditorPageState extends ConsumerState<CodeEditorPage> {
                       source?.sourceCode = _controller.text;
                       if (source != null && context.mounted) {
                         isar.writeTxnSync(() {
-                          isar.sources.putSync(source!);
-                          ref
-                              .read(synchingProvider(syncId: 1).notifier)
-                              .addChangedPart(
-                                ActionType.updateExtension,
-                                source!.id,
-                                source!.toJson(),
-                                false,
-                              );
+                          isar.sources.putSync(
+                            source!
+                              ..updatedAt =
+                                  DateTime.now().millisecondsSinceEpoch,
+                          );
                         });
                       }
                     },
@@ -306,19 +298,11 @@ class _CodeEditorPageState extends ConsumerState<CodeEditorPage> {
                                   source?.sourceCode = _controller.text;
                                   if (source != null && context.mounted) {
                                     isar.writeTxnSync(() {
-                                      isar.sources.putSync(source!);
-                                      ref
-                                          .read(
-                                            synchingProvider(
-                                              syncId: 1,
-                                            ).notifier,
-                                          )
-                                          .addChangedPart(
-                                            ActionType.updateExtension,
-                                            source!.id,
-                                            source!.toJson(),
-                                            false,
-                                          );
+                                      isar.sources.putSync(
+                                        source!
+                                          ..updatedAt = DateTime.now()
+                                              .millisecondsSinceEpoch,
+                                      );
                                     });
                                   }
                                   setState(() {

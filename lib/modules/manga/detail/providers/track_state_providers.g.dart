@@ -6,7 +6,7 @@ part of 'track_state_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$trackStateHash() => r'4d31a8a939412cabd800f9747bff7a1ac0ef1996';
+String _$trackStateHash() => r'b70770f8524a0d9059ffd3f52b42634c16672a0f';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -193,5 +193,23 @@ class _TrackStateProviderElement
   @override
   ItemType? get itemType => (origin as TrackStateProvider).itemType;
 }
+
+String _$lastTrackerLibraryLocationStateHash() =>
+    r'c09efe7fe4f8dda723c31bc6543dbaa571718342';
+
+/// See also [LastTrackerLibraryLocationState].
+@ProviderFor(LastTrackerLibraryLocationState)
+final lastTrackerLibraryLocationStateProvider = AutoDisposeNotifierProvider<
+    LastTrackerLibraryLocationState, (int, bool)>.internal(
+  LastTrackerLibraryLocationState.new,
+  name: r'lastTrackerLibraryLocationStateProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$lastTrackerLibraryLocationStateHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$LastTrackerLibraryLocationState = AutoDisposeNotifier<(int, bool)>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

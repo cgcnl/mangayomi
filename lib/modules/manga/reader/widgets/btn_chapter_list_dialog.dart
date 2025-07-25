@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mangayomi/main.dart';
-import 'package:mangayomi/models/changed.dart';
 import 'package:mangayomi/models/chapter.dart';
 import 'package:mangayomi/modules/manga/reader/providers/push_router.dart';
 import 'package:mangayomi/modules/manga/reader/providers/reader_controller_provider.dart';
-import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:mangayomi/utils/date.dart';
 import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
@@ -15,6 +13,7 @@ Widget btnToShowChapterListDialog(
   String title,
   Chapter chapter, {
   void Function(bool)? onChanged,
+  Color? iconColor,
 }) {
   return IconButton(
     onPressed: () async {
@@ -33,7 +32,7 @@ Widget btnToShowChapterListDialog(
       );
       onChanged?.call(true);
     },
-    icon: const Icon(Icons.format_list_numbered_outlined),
+    icon: Icon(Icons.format_list_numbered_outlined, color: iconColor),
   );
 }
 
@@ -59,6 +58,12 @@ class _ChapterListWidgetState extends State<ChapterListWidget> {
   void initState() {
     super.initState();
     _jumpTo();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 
   Future<void> _jumpTo() async {
@@ -187,15 +192,11 @@ class _ChapterListTileState extends State<ChapterListTile> {
               });
               isar.writeTxnSync(
                 () => {
-                  isar.chapters.putSync(chapter..isBookmarked = isBookmarked),
-                  ref
-                      .read(synchingProvider(syncId: 1).notifier)
-                      .addChangedPart(
-                        ActionType.updateChapter,
-                        chapter.id,
-                        chapter.toJson(),
-                        false,
-                      ),
+                  isar.chapters.putSync(
+                    chapter
+                      ..isBookmarked = isBookmarked
+                      ..updatedAt = DateTime.now().millisecondsSinceEpoch,
+                  ),
                 },
               );
             },

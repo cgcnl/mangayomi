@@ -66,6 +66,29 @@ class AppLocalizationsTh extends AppLocalizations {
   String get last_update_check => 'ตรวจการอัพเดท';
 
   @override
+  String last_entry_delete_warning(
+    num count,
+    Object entryType,
+    Object entryTypePlural,
+    Object mediaType,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'คุณกำลังลบทั้งหมด $count $entryTypePluralของ$mediaTypeนี้ออกจากคลังของคุณ',
+      one: 'คุณกำลังลบ$entryTypeเดียวของ$mediaTypeนี้ออกจากคลังของคุณ',
+    );
+    return '$_temp0\nสิ่งนี้จะลบ$mediaTypeทั้งหมดออกจากคลังของคุณด้วย\n\nหมายเหตุ: ไฟล์จะไม่ถูกลบ';
+  }
+
+  @override
+  String get chapter => 'บท';
+
+  @override
+  String get episode => 'ตอน';
+
+  @override
   String get unread_count => 'ที่ยังไม่อ่าน';
 
   @override
@@ -646,16 +669,16 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get syncing_subtitle =>
-      'ซิงค์ความคืบหน้าของคุณระหว่างอุปกรณ์หลายเครื่องผ่านเซิร์ฟเวอร์ที่โฮสต์เอง ตรวจสอบให้แน่ใจว่าได้อัปโหลดก่อนหากเป็นครั้งแรกที่คุณซิงค์ หรือดาวน์โหลดก่อนที่จะใช้การซิงค์ (อัตโนมัติ) บนอุปกรณ์นี้!';
+      'ซิงค์ความคืบหน้าของคุณระหว่างอุปกรณ์ต่างๆ ผ่านเซิร์ฟเวอร์ที่โฮสต์ด้วยตนเอง ดูข้อมูลเพิ่มเติมได้ที่เซิร์ฟเวอร์ Discord ของเรา';
 
   @override
-  String get last_sync => 'ซิงค์ล่าสุดที่: ';
+  String get last_sync_manga => 'ซิงค์มังงะล่าสุดเมื่อ:';
 
   @override
-  String get last_upload => 'อัปโหลดล่าสุดที่: ';
+  String get last_sync_history => 'ประวัติการซิงค์ครั้งล่าสุด:';
 
   @override
-  String get last_download => 'ดาวน์โหลดล่าสุดที่: ';
+  String get last_sync_update => 'อัปเดตข้อมูลล่าสุดเมื่อ:';
 
   @override
   String get sync_server => 'ที่อยู่เซิร์ฟเวอร์ซิงค์';
@@ -664,104 +687,19 @@ class AppLocalizationsTh extends AppLocalizations {
   String get sync_login_invalid_creds => 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
 
   @override
-  String get sync_checking => 'กำลังตรวจสอบการซิงค์...';
+  String get sync_starting => 'กำลังเริ่มการซิงค์...';
 
   @override
-  String get sync_uploading => 'เริ่มการอัปโหลด...';
+  String get sync_finished => 'การซิงค์เสร็จสิ้น';
 
   @override
-  String get sync_downloading => 'เริ่มการดาวน์โหลด...';
-
-  @override
-  String get sync_upload_finished => 'การอัปโหลดเสร็จสิ้น';
-
-  @override
-  String get sync_download_finished => 'การดาวน์โหลดเสร็จสิ้น';
-
-  @override
-  String get sync_up_to_date => 'ซิงค์ล่าสุด';
-
-  @override
-  String get sync_upload_failed => 'การอัปโหลดล้มเหลว';
-
-  @override
-  String get sync_download_failed => 'การดาวน์โหลดล้มเหลว';
+  String get sync_failed => 'การซิงค์ล้มเหลว';
 
   @override
   String get sync_button_sync => 'ซิงค์ความคืบหน้า';
 
   @override
-  String get sync_button_snapshot => 'สร้างภาพรวม';
-
-  @override
-  String get sync_button_upload => 'อัปโหลดทั้งหมด';
-
-  @override
-  String get sync_button_download => 'ดาวน์โหลดทั้งหมด';
-
-  @override
-  String get sync_confirm_snapshot =>
-      'ขอให้เซิร์ฟเวอร์สร้างข้อมูลสำรองระยะไกล!';
-
-  @override
-  String get sync_confirm_upload =>
-      'การอัปโหลดทั้งหมดจะทำการแทนที่ข้อมูลระยะไกลด้วยข้อมูลปัจจุบันของคุณ!';
-
-  @override
-  String get sync_confirm_download =>
-      'การดาวน์โหลดทั้งหมดจะทำการแทนที่ข้อมูลปัจจุบันของคุณด้วยข้อมูลจากระยะไกล!';
-
-  @override
   String get sync_on => 'เปิดการซิงค์';
-
-  @override
-  String get sync_pending_manga => 'การเปลี่ยนแปลงมังงะที่รอดำเนินการ';
-
-  @override
-  String get sync_pending_category => 'การเปลี่ยนแปลงหมวดหมู่ที่รอดำเนินการ';
-
-  @override
-  String get sync_pending_chapter => 'การเปลี่ยนแปลงบทที่รอดำเนินการ';
-
-  @override
-  String get sync_pending_history => 'การเปลี่ยนแปลงประวัติที่รอดำเนินการ';
-
-  @override
-  String get sync_pending_update => 'การเปลี่ยนแปลงการอัปเดตที่รอดำเนินการ';
-
-  @override
-  String get sync_pending_extension => 'การเปลี่ยนแปลงส่วนขยายที่รอดำเนินการ';
-
-  @override
-  String get sync_pending_track => 'การเปลี่ยนแปลงการติดตามที่รอดำเนินการ';
-
-  @override
-  String get sync_snapshot_creating => 'กำลังสร้างภาพรวม...';
-
-  @override
-  String get sync_snapshot_created => 'สร้างภาพรวมแล้ว!';
-
-  @override
-  String get sync_snapshot_deleting => 'กำลังลบภาพรวม...';
-
-  @override
-  String get sync_snapshot_deleted => 'ลบภาพรวมแล้ว!';
-
-  @override
-  String get sync_snapshot_no_data =>
-      'ไม่มีข้อมูลสำหรับสร้างภาพรวม! โปรดอัปโหลดทั้งหมดก่อน!';
-
-  @override
-  String get sync_browse_snapshots => 'เรียกดูข้อมูลสำรองเก่า';
-
-  @override
-  String get sync_snapshots => 'ภาพรวม';
-
-  @override
-  String get sync_load_snapshot => 'โหลดภาพรวม';
-
-  @override
-  String get sync_delete_snapshot => 'ลบภาพรวม';
 
   @override
   String get sync_auto => 'การซิงค์อัตโนมัติ';
@@ -771,12 +709,6 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get sync_auto_off => 'ปิด';
-
-  @override
-  String get sync_auto_30_seconds => 'ทุก 30 วินาที';
-
-  @override
-  String get sync_auto_1_minute => 'ทุก 1 นาที';
 
   @override
   String get sync_auto_5_minutes => 'ทุก 5 นาที';
@@ -1518,4 +1450,49 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get hwdec => 'Hardware Decoder';
+
+  @override
+  String get track_library_add => 'Add to local library';
+
+  @override
+  String get track_library_add_confirm => 'Add tracked item to local library';
+
+  @override
+  String get track_library_not_logged =>
+      'Login to the corresponding tracker to use this feature!';
+
+  @override
+  String get track_library_switch => 'Switch to another tracker';
+
+  @override
+  String get go_back => 'Go back';
+
+  @override
+  String get merge_library_nav_mobile => 'Merge library navigation on mobile';
+
+  @override
+  String get enable_discord_rpc => 'Enable Discord RPC';
+
+  @override
+  String get hide_discord_rpc_incognito =>
+      'Hide Discord RPC while in Incognito';
+
+  @override
+  String get rpc_show_reading_watching_progress =>
+      'Show current chapter in Discord (requires a restart)';
+
+  @override
+  String get rpc_show_title => 'Show current title in Discord';
+
+  @override
+  String get rpc_show_cover_image => 'Show current cover image in Discord';
+
+  @override
+  String get sync_enable_histories => 'Sync history data';
+
+  @override
+  String get sync_enable_updates => 'Sync update data';
+
+  @override
+  String get sync_enable_settings => 'Sync settings';
 }
