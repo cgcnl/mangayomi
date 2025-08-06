@@ -979,7 +979,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       mangas = data
           .where((element) => matchesSearchQuery(element, searchQuery))
           .where((element) =>
-            ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false
+        ref.watch(showNSFWStateProvider) ? true : element.isNsfw == false
           )
           .toList();
     } else {

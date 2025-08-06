@@ -664,7 +664,6 @@ class _MigrationMangaGlobalImageCardState
       widget.oldManga.status = preview.status ?? widget.oldManga.status;
       widget.oldManga.description = preview.description;
       widget.oldManga.genre = preview.genre;
-      widget.oldManga.isNsfw = preview.isNsfw ?? false;
       widget.oldManga.updatedAt = DateTime.now().millisecondsSinceEpoch;
       isar.mangas.putSync(widget.oldManga);
     });
