@@ -12,11 +12,13 @@ import 'package:mangayomi/models/track_search.dart';
 import 'package:mangayomi/modules/more/settings/track/myanimelist/model.dart';
 import 'package:mangayomi/modules/more/settings/track/providers/track_providers.dart';
 import 'package:mangayomi/services/http/m_client.dart';
+import 'package:mangayomi/utils/log/logger.dart';
+import 'base_tracker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'myanimelist.g.dart';
 
 @riverpod
-class MyAnimeList extends _$MyAnimeList {
+class MyAnimeList extends _$MyAnimeList implements BaseTracker {
   final http = MClient.init(reqcopyWith: {'useDartHttpClient': true});
   static const _baseOAuthUrl = 'https://myanimelist.net/v1/oauth2';
   static const _baseApiUrl = 'https://api.myanimelist.net/v2';
@@ -58,13 +60,18 @@ class MyAnimeList extends _$MyAnimeList {
     }
   }
 
-  Future<String> _getAccessToken() async {
+  Future<String> _getAccessToken({bool bypass = false}) async {
     final track = ref.read(tracksProvider(syncId: syncId));
     final mALOAuth = OAuth.fromJson(
       jsonDecode(track!.oAuth!) as Map<String, dynamic>,
     );
     final expiresIn = DateTime.fromMillisecondsSinceEpoch(mALOAuth.expiresIn!);
     if (DateTime.now().isBefore(expiresIn)) return mALOAuth.accessToken!;
+    if (!bypass &&
+        (ref.read(tracksProvider(syncId: syncId))?.refreshing ?? false)) {
+      return mALOAuth.accessToken!;
+    }
+    ref.read(tracksProvider(syncId: syncId).notifier).setRefreshing(true);
     final refreshed = await _tryRefreshToken(mALOAuth);
     if (refreshed == null) {
       ref.read(tracksProvider(syncId: syncId).notifier).logout();
@@ -73,6 +80,8 @@ class MyAnimeList extends _$MyAnimeList {
     }
     final username = await _getUserName(refreshed.accessToken!);
     _saveOAuth(username, refreshed);
+    await Future.delayed(Duration(seconds: 3));
+    ref.read(tracksProvider(syncId: syncId).notifier).setRefreshing(false);
     return refreshed.accessToken!;
   }
 
@@ -118,6 +127,7 @@ class MyAnimeList extends _$MyAnimeList {
         );
   }
 
+  @override
   Future<List<TrackSearch>> search(String query, isManga) async {
     final accessToken = await _getAccessToken();
     final url = Uri.parse(
@@ -159,7 +169,7 @@ class MyAnimeList extends _$MyAnimeList {
       mediaId: res["id"],
       summary: res["synopsis"] ?? "",
       totalChapter: res[contentUnit],
-      coverUrl: res["main_picture"]["large"] ?? "",
+      coverUrl: res["main_picture"]?["large"] ?? "",
       title: res["title"],
       startDate: res["start_date"] ?? "",
       publishingType: res["media_type"].toString().replaceAll("_", " "),
@@ -170,6 +180,7 @@ class MyAnimeList extends _$MyAnimeList {
     );
   }
 
+  @override
   Future<List<TrackSearch>> fetchGeneralData({
     bool isManga = true,
     String rankingType = "airing",
@@ -197,7 +208,7 @@ class MyAnimeList extends _$MyAnimeList {
               mediaId: node["id"],
               summary: node["synopsis"] ?? "",
               totalChapter: node[contentUnit],
-              coverUrl: node["main_picture"]["large"] ?? "",
+              coverUrl: node["main_picture"]?["large"] ?? "",
               title: node["title"],
               score: (node["mean"] as num?)?.toDouble(),
               startDate: node["start_date"] ?? "",
@@ -209,6 +220,7 @@ class MyAnimeList extends _$MyAnimeList {
           }).toList();
   }
 
+  @override
   Future<List<TrackSearch>> fetchUserData({bool isManga = true}) async {
     final accessToken = await _getAccessToken();
     final item = isManga ? "mangalist" : "animelist";
@@ -237,7 +249,7 @@ class MyAnimeList extends _$MyAnimeList {
               mediaId: node["id"],
               summary: node["synopsis"] ?? "",
               totalChapter: node[contentUnit],
-              coverUrl: node["main_picture"]["large"] ?? "",
+              coverUrl: node["main_picture"]?["large"] ?? "",
               title: node["title"],
               score: (node["mean"] as num?)?.toDouble(),
               startDate: node["start_date"] ?? "",
@@ -292,6 +304,7 @@ class MyAnimeList extends _$MyAnimeList {
     };
   }
 
+  @override
   List<TrackStatus> statusList(bool isManga) => [
     isManga ? TrackStatus.reading : TrackStatus.watching,
     TrackStatus.completed,
@@ -349,7 +362,8 @@ class MyAnimeList extends _$MyAnimeList {
     return jsonDecode(response.body)['name'];
   }
 
-  Future<Track> findLibItem(Track track, bool isManga) async {
+  @override
+  Future<Track?> findLibItem(Track track, bool isManga) async {
     final type = isManga ? "manga" : "anime";
     final contentUnit = isManga ? 'num_chapters' : 'num_episodes';
     final accessToken = await _getAccessToken();
@@ -391,6 +405,7 @@ class MyAnimeList extends _$MyAnimeList {
     return date.millisecondsSinceEpoch;
   }
 
+  @override
   Future<Track> update(Track track, bool isManga) async {
     final accessToken = await _getAccessToken();
     final formBody = {
@@ -430,5 +445,30 @@ class MyAnimeList extends _$MyAnimeList {
       url,
       headers: {'Authorization': 'Bearer $accessToken'},
     );
+  }
+
+  @override
+  String displayScore(int score) {
+    throw UnimplementedError();
+  }
+
+  @override
+  (int, int) getScoreValue() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> checkRefresh() async {
+    try {
+      await _getAccessToken(bypass: true);
+      AppLogger.log("Refreshed MAL token!");
+      return true;
+    } catch (e) {
+      AppLogger.log("Failed to refresh MAL token:", logLevel: LogLevel.error);
+      AppLogger.log(e.toString(), logLevel: LogLevel.error);
+      return false;
+    } finally {
+      ref.read(tracksProvider(syncId: syncId).notifier).setRefreshing(false);
+    }
   }
 }

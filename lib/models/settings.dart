@@ -171,6 +171,8 @@ class Settings {
 
   int? aniSkipTimeoutLength;
 
+  String? customDns;
+
   String? btServerAddress;
 
   int? btServerPort;
@@ -203,12 +205,16 @@ class Settings {
 
   List<Repo>? novelExtensionsRepo;
 
+  String? androidProxyServer;
+
   @enumerated
   late SectionType disableSectionType;
 
   bool? useLibass;
 
   String? hwdecMode;
+
+  bool? enableHardwareAcceleration;
 
   int? libraryFilterNovelDownloadType;
 
@@ -259,6 +265,30 @@ class Settings {
   bool? rpcShowTitle;
 
   bool? rpcShowCoverImage;
+
+  bool? useMpvConfig;
+
+  @enumerated
+  late DebandingType debandingType;
+
+  bool? enableGpuNext;
+
+  bool? useYUV420P;
+
+  String? audioPreferredLanguages;
+
+  bool? enableAudioPitchCorrection;
+
+  @enumerated
+  late AudioChannel audioChannels;
+
+  int? volumeBoostCap;
+  
+  bool? downloadedOnlyMode;
+
+  late AlgorithmWeights? algorithmWeights;
+
+  List<String>? localFolders;
 
   Settings({
     this.id = 227,
@@ -335,6 +365,7 @@ class Settings {
     this.enableAniSkip,
     this.enableAutoSkip,
     this.aniSkipTimeoutLength,
+    this.customDns = "",
     this.btServerAddress = "127.0.0.1",
     this.btServerPort,
     this.fullScreenReader = true,
@@ -349,6 +380,7 @@ class Settings {
     this.disableSectionType = SectionType.all,
     this.useLibass = true,
     this.hwdecMode = "auto",
+    this.enableHardwareAcceleration,
     this.libraryFilterNovelDownloadType = 0,
     this.libraryFilterNovelUnreadType = 0,
     this.libraryFilterNovelStartedType = 0,
@@ -369,6 +401,7 @@ class Settings {
     this.mangaExtensionsRepo,
     this.animeExtensionsRepo,
     this.novelExtensionsRepo,
+    this.androidProxyServer,
     this.lastTrackerLibraryLocation,
     this.mergeLibraryNavMobile = false,
     this.enableDiscordRpc = true,
@@ -376,6 +409,17 @@ class Settings {
     this.rpcShowReadingWatchingProgress = true,
     this.rpcShowTitle = true,
     this.rpcShowCoverImage = true,
+    this.useMpvConfig = true,
+    this.debandingType = DebandingType.none,
+    this.enableGpuNext = false,
+    this.useYUV420P = false,
+    this.audioPreferredLanguages,
+    this.enableAudioPitchCorrection,
+    this.audioChannels = AudioChannel.autoSafe,
+    this.volumeBoostCap,
+    this.downloadedOnlyMode = false,
+    this.algorithmWeights,
+    this.localFolders,
   });
 
   Settings.fromJson(Map<String, dynamic> json) {
@@ -520,6 +564,7 @@ class Settings {
     enableAniSkip = json['enableAniSkip'];
     enableAutoSkip = json['enableAutoSkip'];
     aniSkipTimeoutLength = json['aniSkipTimeoutLength'];
+    customDns = json['customDns'];
     btServerAddress = json['btServerAddress'];
     btServerPort = json['btServerPort'];
     customColorFilter = json['customColorFilter'] != null
@@ -542,6 +587,7 @@ class Settings {
         SectionType.values[json['disableSectionType'] ?? SectionType.all.index];
     useLibass = json['useLibass'];
     hwdecMode = json['hwdecMode'];
+    enableHardwareAcceleration = json['enableHardwareAcceleration'];
     libraryFilterNovelBookMarkedType = json['libraryFilterNovelBookMarkedType'];
     libraryFilterNovelDownloadType = json['libraryFilterNovelDownloadType'];
     libraryFilterNovelStartedType = json['libraryFilterNovelStartedType'];
@@ -591,6 +637,7 @@ class Settings {
                 .map((e) => Repo.fromJson(e))
                 .toList();
     }
+    androidProxyServer = json['androidProxyServer'];
     lastTrackerLibraryLocation = json['lastTrackerLibraryLocation'];
     mergeLibraryNavMobile = json['mergeLibraryNavMobile'];
     enableDiscordRpc = json['enableDiscordRpc'];
@@ -598,6 +645,21 @@ class Settings {
     rpcShowReadingWatchingProgress = json['rpcShowReadingWatchingProgress'];
     rpcShowTitle = json['rpcShowTitle'];
     rpcShowCoverImage = json['rpcShowCoverImage'];
+    useMpvConfig = json['useMpvConfig'];
+    debandingType =
+        DebandingType.values[json['debandingType'] ?? DebandingType.none.index];
+    enableGpuNext = json['enableGpuNext'];
+    useYUV420P = json['useYUV420P'];
+    audioPreferredLanguages = json['audioPreferredLanguages'];
+    enableAudioPitchCorrection = json['enableAudioPitchCorrection'];
+    audioChannels = AudioChannel
+        .values[json['audioChannels'] ?? AudioChannel.autoSafe.index];
+    volumeBoostCap = json['volumeBoostCap'];
+    downloadedOnlyMode = json['downloadedOnlyMode'];
+    algorithmWeights = json['algorithmWeights'] != null
+        ? AlgorithmWeights.fromJson(json['algorithmWeights'])
+        : null;
+    localFolders = json['localFolders'];
   }
 
   Map<String, dynamic> toJson() => {
@@ -693,6 +755,7 @@ class Settings {
     'enableAniSkip': enableAniSkip,
     'enableAutoSkip': enableAutoSkip,
     'aniSkipTimeoutLength': aniSkipTimeoutLength,
+    'customDns': customDns,
     'btServerAddress': btServerAddress,
     'btServerPort': btServerPort,
     'fullScreenReader': fullScreenReader,
@@ -709,6 +772,7 @@ class Settings {
     'disableSectionType': disableSectionType.index,
     'useLibass': useLibass,
     'hwdecMode': hwdecMode,
+    'enableHardwareAcceleration': enableHardwareAcceleration,
     'libraryFilterNovelBookMarkedType': libraryFilterNovelBookMarkedType,
     'libraryFilterNovelDownloadType': libraryFilterNovelDownloadType,
     'libraryFilterNovelStartedType': libraryFilterNovelStartedType,
@@ -730,6 +794,7 @@ class Settings {
     'mangaExtensionsRepo': mangaExtensionsRepo?.map((e) => e.toJson()).toList(),
     'animeExtensionsRepo': animeExtensionsRepo?.map((e) => e.toJson()).toList(),
     'novelExtensionsRepo': novelExtensionsRepo?.map((e) => e.toJson()).toList(),
+    'androidProxyServer': androidProxyServer,
     'lastTrackerLibraryLocation': lastTrackerLibraryLocation,
     'mergeLibraryNavMobile': mergeLibraryNavMobile,
     'enableDiscordRpc': enableDiscordRpc,
@@ -737,7 +802,33 @@ class Settings {
     'rpcShowReadingWatchingProgress': rpcShowReadingWatchingProgress,
     'rpcShowTitle': rpcShowTitle,
     'rpcShowCoverImage': rpcShowCoverImage,
+    'useMpvConfig': useMpvConfig,
+    'debandingType': debandingType.index,
+    'enableGpuNext': enableGpuNext,
+    'useYUV420P': useYUV420P,
+    'audioPreferredLanguages': audioPreferredLanguages,
+    'enableAudioPitchCorrection': enableAudioPitchCorrection,
+    'audioChannels': audioChannels.index,
+    'volumeBoostCap': volumeBoostCap,
+    'downloadedOnlyMode': downloadedOnlyMode,
+    if (algorithmWeights != null)
+      'algorithmWeights': algorithmWeights!.toJson(),
+    'localFolders': localFolders,
   };
+}
+
+enum DebandingType { none, cpu, gpu }
+
+enum AudioChannel {
+  auto(mpvName: "auto"),
+  autoSafe(mpvName: "auto-safe"),
+  mono(mpvName: "mono"),
+  stereo(mpvName: "stereo"),
+  reverseStereo(mpvName: "pan=[stereo|c0=c1|c1=c0]");
+
+  final String mpvName;
+
+  const AudioChannel({required this.mpvName});
 }
 
 enum SectionType { all, anime, manga }
@@ -923,20 +1014,34 @@ class Repo {
   String? name;
   String? website;
   String? jsonUrl;
+  bool? hidden;
 
-  Repo({this.name, this.website, this.jsonUrl});
+  Repo({this.name, this.website, this.jsonUrl, this.hidden});
 
   Repo.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    website = json['website'];
+    name = json['meta']?['name'] ?? json['name'];
+    website = json['meta']?['website'] ?? json['website'];
     jsonUrl = json['jsonUrl'];
+    hidden = json['hidden'];
   }
 
   Map<String, dynamic> toJson() => {
     'name': name,
     'website': website,
     'jsonUrl': jsonUrl,
+    'hidden': hidden,
   };
+
+  @override
+  bool operator ==(Object other) {
+    return other is Repo &&
+        name == other.name &&
+        website == other.website &&
+        jsonUrl == other.jsonUrl;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, website, jsonUrl);
 }
 
 @embedded
@@ -1090,6 +1195,35 @@ class PlayerSubtitleSettings {
     'backgroundColorR': backgroundColorR,
     'backgroundColorG': backgroundColorG,
     'backgroundColorB': backgroundColorB,
+  };
+}
+
+@embedded
+class AlgorithmWeights {
+  int? genre;
+  int? setting;
+  int? synopsis;
+  int? theme;
+
+  AlgorithmWeights({
+    this.genre = 30,
+    this.setting = 15,
+    this.synopsis = 40,
+    this.theme = 20,
+  });
+
+  AlgorithmWeights.fromJson(Map<String, dynamic> json) {
+    genre = json['genre'];
+    setting = json['setting'];
+    synopsis = json['synopsis'];
+    theme = json['theme'];
+  }
+
+  Map<String, dynamic> toJson() => {
+    'genre': genre,
+    'setting': setting,
+    'synopsis': synopsis,
+    'theme': theme,
   };
 }
 
