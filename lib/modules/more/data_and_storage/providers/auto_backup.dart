@@ -4,7 +4,6 @@ import 'package:mangayomi/models/settings.dart';
 import 'package:mangayomi/modules/more/data_and_storage/providers/backup.dart';
 import 'package:mangayomi/providers/storage_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 part 'auto_backup.g.dart';
 
@@ -46,6 +45,7 @@ class BackupFrequencyOptionsState extends _$BackupFrequencyOptionsState {
 class AutoBackupLocationState extends _$AutoBackupLocationState {
   @override
   (String, String) build() {
+    ref.keepAlive();
     _refresh();
     return ("", isar.settings.getSync(227)!.autoBackupLocation ?? "");
   }
@@ -80,43 +80,37 @@ class AutoBackupLocationState extends _$AutoBackupLocationState {
 
 @riverpod
 Future<void> checkAndBackup(Ref ref) async {
+  ref.keepAlive();
   final settings = isar.settings.getSync(227);
-  if (settings!.backupFrequency != null) {
-    final backupFrequency = _duration(settings.backupFrequency);
-    if (backupFrequency != null) {
-      if (settings.startDatebackup != null) {
-        final startDatebackup = DateTime.fromMillisecondsSinceEpoch(
-          settings.startDatebackup!,
-        );
-        if (DateTime.now().isAfter(startDatebackup)) {
-          _setBackupFrequency(settings.backupFrequency!);
-          final storageProvider = StorageProvider();
-          await storageProvider.requestPermission();
-          final defaulteDirectory = await storageProvider.getDefaultDirectory();
-          final backupLocation = ref.watch(autoBackupLocationStateProvider).$2;
-          Directory? backupDirectory;
-          backupDirectory = Directory(
-            backupLocation.isEmpty
-                ? p.join(defaulteDirectory!.path, "backup")
-                : backupLocation,
-          );
-          if (Platform.isIOS) {
-            backupDirectory = await (storageProvider.getIosBackupDirectory());
-          }
-          if (!(await backupDirectory!.exists())) {
-            backupDirectory.create();
-          }
-          ref.watch(
-            doBackUpProvider(
-              list: ref.watch(backupFrequencyOptionsStateProvider),
-              path: backupDirectory.path,
-              context: null,
-            ),
-          );
-        }
-      }
-    }
+  final backupFrequency = _duration(settings!.backupFrequency);
+  if (backupFrequency == null || settings.startDatebackup == null) return;
+
+  final startDatebackup = DateTime.fromMillisecondsSinceEpoch(
+    settings.startDatebackup!,
+  );
+  if (!DateTime.now().isAfter(startDatebackup)) return;
+  _setBackupFrequency(settings.backupFrequency!);
+  final storageProvider = StorageProvider();
+  final backupLocation = ref.read(autoBackupLocationStateProvider).$2;
+  Directory? backupDirectory;
+  if (Platform.isIOS) {
+    backupDirectory = await (storageProvider.getIosBackupDirectory());
+  } else {
+    final defaultDirectory = await storageProvider.getDefaultDirectory();
+    backupDirectory = Directory(
+      backupLocation.isEmpty
+          ? p.join(defaultDirectory!.path, "backup")
+          : backupLocation,
+    );
   }
+  await storageProvider.createDirectorySafely(backupDirectory!.path);
+  ref.read(
+    doBackUpProvider(
+      list: ref.read(backupFrequencyOptionsStateProvider),
+      path: backupDirectory.path,
+      context: null,
+    ),
+  );
 }
 
 Duration? _duration(int? backupFrequency) {

@@ -112,7 +112,7 @@ const MangaSchema = CollectionSchema(
   getId: _mangaGetId,
   getLinks: _mangaGetLinks,
   attach: _mangaAttach,
-  version: '3.1.0+1',
+  version: '3.3.0',
 );
 
 int _mangaEstimateSize(

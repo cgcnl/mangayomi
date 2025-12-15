@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/changed.dart';
 import 'package:mangayomi/models/sync_preference.dart';
@@ -12,6 +12,7 @@ part 'sync_providers.g.dart';
 class Synching extends _$Synching {
   @override
   SyncPreference build({required int? syncId}) {
+    ref.keepAlive();
     return isar.syncPreferences.getSync(syncId!) ?? SyncPreference(syncId: 1);
   }
 

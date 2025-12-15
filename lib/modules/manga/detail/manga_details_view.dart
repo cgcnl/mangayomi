@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/category.dart';
 import 'package:mangayomi/models/chapter.dart';
@@ -100,15 +100,6 @@ class _MangaDetailsViewState extends ConsumerState<MangaDetailsView> {
                           onPressed: () {
                             chap.pushToReaderView(context);
                           },
-                          textWidth: measureText(
-                            l10n.resume,
-                            Theme.of(context).textTheme.labelLarge!,
-                          ).width,
-                          width: calculateDynamicButtonWidth(
-                            l10n.resume,
-                            Theme.of(context).textTheme.labelLarge!,
-                            50,
-                          ), // 50 Padding, else RenderFlex overflow Exception
                         );
                       }
                       return CustomFloatingActionBtn(
@@ -122,15 +113,6 @@ class _MangaDetailsViewState extends ConsumerState<MangaDetailsView> {
                               .last
                               .pushToReaderView(context);
                         },
-                        textWidth: measureText(
-                          buttonLabel,
-                          Theme.of(context).textTheme.labelLarge!,
-                        ).width,
-                        width: calculateDynamicButtonWidth(
-                          buttonLabel,
-                          Theme.of(context).textTheme.labelLarge!,
-                          50,
-                        ), // 50 Padding, else RenderFlex overflow Exception
                       );
                     }
                     return CustomFloatingActionBtn(
@@ -144,15 +126,6 @@ class _MangaDetailsViewState extends ConsumerState<MangaDetailsView> {
                             .last
                             .pushToReaderView(context);
                       },
-                      textWidth: measureText(
-                        buttonLabel,
-                        Theme.of(context).textTheme.labelLarge!,
-                      ).width,
-                      width: calculateDynamicButtonWidth(
-                        buttonLabel,
-                        Theme.of(context).textTheme.labelLarge!,
-                        50,
-                      ), // 50 Padding, else RenderFlex overflow Exception
                     );
                   },
                 )
@@ -163,9 +136,18 @@ class _MangaDetailsViewState extends ConsumerState<MangaDetailsView> {
         titleDescription: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.manga.author ?? "Unknown",
-              style: const TextStyle(fontWeight: FontWeight.w500),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Icon(Icons.person_outline, size: 14),
+                const SizedBox(width: 4),
+                Text(
+                  (widget.manga.author?.isEmpty ?? false)
+                      ? l10n.unknown
+                      : widget.manga.author!,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+              ],
             ),
             Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,

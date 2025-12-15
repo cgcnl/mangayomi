@@ -523,8 +523,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get share => 'Share';
 
   @override
-  String n_chapters(Object number) {
-    return '$number chapters';
+  String n_chapters(Object n) {
+    return '$n chapters';
   }
 
   @override
@@ -1432,6 +1432,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get get_apk_bridge => 'Get ApkBridge';
 
   @override
+  String get get_sync_server => 'Get Sync Server here';
+
+  @override
   String get undefined => 'undefined';
 
   @override
@@ -1752,4 +1755,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exported => 'Exported';
+
+  @override
+  String get text_size => 'Text Size :';
+
+  @override
+  String get text_align => 'Text Align';
+
+  @override
+  String get line_height => 'Line Height';
+
+  @override
+  String get show_scroll_percentage => 'Show Scroll Percentage';
+
+  @override
+  String get remove_extra_paragraph_spacing => 'Remove Extra Paragraph Spacing';
+
+  @override
+  String select_label_color(Object label) {
+    return 'Select $label Color';
+  }
+
+  @override
+  String get default_user_agent => 'Defaul user agent';
 }

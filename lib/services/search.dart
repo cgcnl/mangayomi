@@ -1,15 +1,13 @@
 import 'dart:math';
-
-import 'package:isar/isar.dart';
-import 'package:mangayomi/eval/lib.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/eval/model/m_manga.dart';
 import 'package:mangayomi/eval/model/m_pages.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/source.dart';
 import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
+import 'package:mangayomi/services/isolate_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 part 'search.g.dart';
 
 @riverpod
@@ -41,8 +39,12 @@ Future<MPages?> search(
             .toList();
     return MPages(list: result, hasNextPage: true);
   }
-  return getExtensionService(
-    source,
-    ref.read(androidProxyServerStateProvider),
-  ).search(query, page, filterList);
+  return getIsolateService.get<MPages?>(
+    query: query,
+    filterList: filterList,
+    source: source,
+    page: page,
+    serviceType: 'search',
+    proxyServer: ref.read(androidProxyServerStateProvider),
+  );
 }

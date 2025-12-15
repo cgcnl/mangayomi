@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/changed.dart';
@@ -59,37 +61,38 @@ class BrowseSScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  ListTile(
-                    onTap: () => _showAndroidProxyServerDialog(
-                      context,
-                      ref,
-                      androidProxyServer,
-                    ),
-                    title: Text(l10n.android_proxy_server),
-                    subtitle: Text(
-                      androidProxyServer,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.secondaryColor,
+                  if (!Platform.isAndroid)
+                    ListTile(
+                      onTap: () => _showAndroidProxyServerDialog(
+                        context,
+                        ref,
+                        androidProxyServer,
+                      ),
+                      title: Text(l10n.android_proxy_server),
+                      subtitle: Text(
+                        androidProxyServer,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: context.secondaryColor,
+                        ),
+                      ),
+                      trailing: OutlinedButton.icon(
+                        onPressed: () async {
+                          if (!await launchUrl(
+                            Uri.parse(apkUrl),
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            AppLogger.log(
+                              'Could not launch $apkUrl',
+                              logLevel: LogLevel.error,
+                            );
+                            botToast('Could not launch $apkUrl');
+                          }
+                        },
+                        label: Text(l10n.get_apk_bridge),
+                        icon: const Icon(Icons.download_outlined),
                       ),
                     ),
-                    trailing: OutlinedButton.icon(
-                      onPressed: () async {
-                        if (!await launchUrl(
-                          Uri.parse(apkUrl),
-                          mode: LaunchMode.externalApplication,
-                        )) {
-                          AppLogger.log(
-                            'Could not launch $apkUrl',
-                            logLevel: LogLevel.error,
-                          );
-                          botToast('Could not launch $apkUrl');
-                        }
-                      },
-                      label: Text(l10n.get_apk_bridge),
-                      icon: const Icon(Icons.download_outlined),
-                    ),
-                  ),
                   ListTile(
                     onTap: () {
                       context.push(

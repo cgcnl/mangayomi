@@ -14,6 +14,7 @@ import 'app_localizations_fr.dart';
 import 'app_localizations_hi.dart';
 import 'app_localizations_id.dart';
 import 'app_localizations_it.dart';
+import 'app_localizations_ja.dart';
 import 'app_localizations_pt.dart';
 import 'app_localizations_ru.dart';
 import 'app_localizations_th.dart';
@@ -116,6 +117,7 @@ abstract class AppLocalizations {
     Locale('hi'),
     Locale('id'),
     Locale('it'),
+    Locale('ja'),
     Locale('pt'),
     Locale('pt', 'BR'),
     Locale('ru'),
@@ -1104,8 +1106,8 @@ abstract class AppLocalizations {
   /// No description provided for @n_chapters.
   ///
   /// In en, this message translates to:
-  /// **'{number} chapters'**
-  String n_chapters(Object number);
+  /// **'{n} chapters'**
+  String n_chapters(Object n);
 
   /// No description provided for @no_description.
   ///
@@ -2787,6 +2789,12 @@ abstract class AppLocalizations {
   /// **'Get ApkBridge'**
   String get get_apk_bridge;
 
+  /// No description provided for @get_sync_server.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Sync Server here'**
+  String get get_sync_server;
+
   /// No description provided for @undefined.
   ///
   /// In en, this message translates to:
@@ -3386,6 +3394,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exported'**
   String get exported;
+
+  /// No description provided for @text_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Size :'**
+  String get text_size;
+
+  /// No description provided for @text_align.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Align'**
+  String get text_align;
+
+  /// No description provided for @line_height.
+  ///
+  /// In en, this message translates to:
+  /// **'Line Height'**
+  String get line_height;
+
+  /// No description provided for @show_scroll_percentage.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Scroll Percentage'**
+  String get show_scroll_percentage;
+
+  /// No description provided for @remove_extra_paragraph_spacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Extra Paragraph Spacing'**
+  String get remove_extra_paragraph_spacing;
+
+  /// No description provided for @select_label_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {label} Color'**
+  String select_label_color(Object label);
+
+  /// No description provided for @default_user_agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaul user agent'**
+  String get default_user_agent;
 }
 
 class _AppLocalizationsDelegate
@@ -3408,6 +3458,7 @@ class _AppLocalizationsDelegate
     'hi',
     'id',
     'it',
+    'ja',
     'pt',
     'ru',
     'th',
@@ -3460,6 +3511,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsId();
     case 'it':
       return AppLocalizationsIt();
+    case 'ja':
+      return AppLocalizationsJa();
     case 'pt':
       return AppLocalizationsPt();
     case 'ru':

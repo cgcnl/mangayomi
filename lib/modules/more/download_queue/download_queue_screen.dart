@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/chapter.dart';
 import 'package:mangayomi/models/download.dart';
@@ -173,15 +173,6 @@ class DownloadQueueScreen extends ConsumerWidget {
               onPressed: () {
                 ref.read(processDownloadsProvider());
               },
-              textWidth: measureText(
-                l10n.download_queue,
-                Theme.of(context).textTheme.labelLarge!,
-              ).width,
-              width: calculateDynamicButtonWidth(
-                l10n.download_queue,
-                Theme.of(context).textTheme.labelLarge!,
-                50,
-              ), // 50 Padding, else RenderFlex overflow Exception
             ),
           );
         }

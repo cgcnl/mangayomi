@@ -8,9 +8,9 @@ import 'package:mangayomi/models/update.dart';
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/services/get_detail.dart';
 import 'package:mangayomi/utils/extensions/others.dart';
+import 'package:mangayomi/utils/extensions/string_extensions.dart';
 import 'package:mangayomi/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 part 'update_manga_detail_providers.g.dart';
 
 @riverpod
@@ -35,29 +35,29 @@ Future<dynamic> updateMangaDetail(
 
     final genre =
         getManga.genre
-            ?.map((e) => e.toString().trim().trimLeft().trimRight())
+            ?.map((e) => e.toString().trim())
             .toList()
             .toSet()
             .toList() ??
         [];
-    final tempName = getManga.name?.trim().trimLeft().trimRight();
-    final tempLink = getManga.link?.trim().trimLeft().trimRight();
+
+    final imgUrl = getManga.imageUrl.trimmedOrDefault(manga.imageUrl);
     manga
-      ..imageUrl = getManga.imageUrl ?? manga.imageUrl
-      ..name = tempName != null && tempName.isNotEmpty ? tempName : manga.name
+      ..imageUrl = imgUrl == null
+          ? null
+          : imgUrl.startsWith('http')
+          ? imgUrl
+          : '${source.baseUrl ?? ''}/${imgUrl.getUrlWithoutDomain}'
+      ..name = getManga.name.trimmedOrDefault(manga.name)
       ..genre = (genre.isEmpty ? null : genre) ?? manga.genre ?? []
-      ..author =
-          getManga.author?.trim().trimLeft().trimRight() ?? manga.author ?? ""
-      ..artist =
-          getManga.artist?.trim().trimLeft().trimRight() ?? manga.artist ?? ""
+      ..author = getManga.author.trimmedOrDefault(manga.author) ?? ""
+      ..artist = getManga.artist.trimmedOrDefault(manga.artist) ?? ""
       ..status = getManga.status == Status.unknown
           ? manga.status
           : getManga.status ?? Status.unknown
       ..description =
-          getManga.description?.trim().trimLeft().trimRight() ??
-          manga.description ??
-          ""
-      ..link = tempLink != null && tempLink.isNotEmpty ? tempLink : manga.link
+          getManga.description.trimmedOrDefault(manga.description) ?? ""
+      ..link = getManga.link.trimmedOrDefault(manga.link)
       ..source = manga.source
       ..lang = manga.lang
       ..itemType = source.itemType
@@ -80,7 +80,7 @@ Future<dynamic> updateMangaDetail(
         for (var i = 0; i < newChapsIndex; i++) {
           final chapter = Chapter(
             name: chaps[i].name!,
-            url: chaps[i].url!.trim().trimLeft().trimRight(),
+            url: chaps[i].url!.trim(),
             dateUpload: chaps[i].dateUpload == null
                 ? DateTime.now().millisecondsSinceEpoch.toString()
                 : chaps[i].dateUpload.toString(),
@@ -161,7 +161,20 @@ Future<dynamic> updateMangaDetail(
       }
     });
   } catch (e, s) {
-    if (showToast) botToast('$e\n$s');
+    if (showToast) {
+      botToast('$e\n$s');
+    } else {
+      rethrow;
+    }
     return;
+  }
+}
+
+extension DefaultValueExtension on String? {
+  String? trimmedOrDefault(String? defaultValue) {
+    if (this?.trim().isNotEmpty ?? false) {
+      return this!.trim();
+    }
+    return defaultValue;
   }
 }

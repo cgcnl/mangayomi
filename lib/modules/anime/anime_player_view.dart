@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_qjs/quickjs/ffi.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riv;
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/chapter.dart';
@@ -23,12 +24,12 @@ import 'package:mangayomi/modules/anime/providers/anime_player_controller_provid
 import 'package:mangayomi/modules/anime/widgets/aniskip_countdown_btn.dart';
 import 'package:mangayomi/modules/anime/widgets/desktop.dart';
 import 'package:mangayomi/modules/anime/widgets/play_or_pause_button.dart';
+import 'package:mangayomi/modules/library/providers/local_archive.dart';
 import 'package:mangayomi/modules/manga/reader/widgets/btn_chapter_list_dialog.dart';
 import 'package:mangayomi/modules/anime/widgets/mobile.dart';
 import 'package:mangayomi/modules/anime/widgets/subtitle_view.dart';
 import 'package:mangayomi/modules/anime/widgets/subtitle_setting_widget.dart';
 import 'package:mangayomi/modules/manga/reader/providers/push_router.dart';
-import 'package:mangayomi/modules/more/settings/player/providers/custom_buttons_provider.dart';
 import 'package:mangayomi/modules/more/settings/player/providers/player_audio_state_provider.dart';
 import 'package:mangayomi/modules/more/settings/player/providers/player_decoder_state_provider.dart';
 import 'package:mangayomi/modules/more/settings/player/providers/player_state_provider.dart';
@@ -52,6 +53,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
+import 'package:window_manager/window_manager.dart' show windowManager;
 
 import 'widgets/search_subtitles.dart';
 
@@ -192,7 +194,10 @@ enum _AniSkipPhase { none, opening, ending }
 bool _firstTime = true;
 
 class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+    with
+        _AlwaysOnTopStateMixin,
+        TickerProviderStateMixin,
+        WidgetsBindingObserver {
   late final GlobalKey<VideoState> _key = GlobalKey<VideoState>();
   late final useLibass = ref.read(useLibassStateProvider);
   late final useMpvConfig = ref.read(useMpvConfigStateProvider);
@@ -666,7 +671,11 @@ class _AnimeStreamPageState extends riv.ConsumerState<AnimeStreamPage>
 
   Future<void> _initCustomButton() async {
     if (!useMpvConfig) return;
-    final customButtons = await ref.read(getCustomButtonsStreamProvider.future);
+    final customButtons = isar.customButtons
+        .filter()
+        .idIsNotNull()
+        .sortByPos()
+        .findAllSync();
     if (customButtons.isEmpty) return;
     final primaryButton =
         customButtons.firstWhereOrNull((e) => e.isFavourite ?? false) ??
@@ -963,29 +972,31 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
   @override
   void dispose() {
     _currentPosition.removeListener(_updateRpcTimestamp);
+    _subDelayController.removeListener(_onSubDelayChanged);
+    _subSpeedController.removeListener(_onSubSpeedChanged);
     WidgetsBinding.instance.removeObserver(this);
     _setCurrentPosition(true);
-    _player.dispose();
+    _player.stop();
+    _completed.cancel();
     _currentPositionSub.cancel();
     _currentTotalDurationSub.cancel();
-    _completed.cancel();
+    _currentPosition.dispose();
+    _currentTotalDuration.dispose();
     _video.dispose();
     _playbackSpeed.dispose();
     _isDoubleSpeed.dispose();
-    _currentTotalDuration.dispose();
     _showFitLabel.dispose();
     _isCompleted.dispose();
     _tempPosition.dispose();
     _fit.dispose();
-    if (!_isDesktop) {
-      _setLandscapeMode(false);
-    }
     _skipPhase.dispose();
-    discordRpc?.showIdleText();
-    discordRpc?.showOriginalTimestamp();
-    _currentPosition.dispose();
     _subDelayController.dispose();
     _subSpeedController.dispose();
+    if (!_isDesktop) _setLandscapeMode(false);
+    discordRpc?.showIdleText();
+    discordRpc?.showOriginalTimestamp();
+    _streamController.keepAliveLink?.close();
+    _player.dispose();
     super.dispose();
   }
 
@@ -1342,8 +1353,8 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
                 }
                 if (!context.mounted) return;
                 Navigator.pop(context);
-              } catch (_) {
-                botToast("Error");
+              } catch (e) {
+                botToast("Error: $e");
                 Navigator.pop(context);
               }
             },
@@ -1956,6 +1967,17 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
           ),
           Row(
             children: [
+              if (_supportAlwaysOnTop())
+                IconButton(
+                  icon: Icon(
+                    _alwaysOnTop ? Icons.push_pin : Icons.push_pin_outlined,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    setState(() => _alwaysOnTop = !_alwaysOnTop);
+                    windowManager.setAlwaysOnTop(_alwaysOnTop);
+                  },
+                ),
               btnToShowChapterListDialog(
                 context,
                 context.l10n.episodes,
@@ -2222,7 +2244,8 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
                                                       ..updatedAt = DateTime.now()
                                                           .millisecondsSinceEpoch
                                                       ..customCoverImage =
-                                                          imageBytes,
+                                                          imageBytes
+                                                              ?.getCoverImage,
                                                   );
                                                 });
                                                 if (context.mounted) {
@@ -2260,17 +2283,19 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
                               if (context.mounted) {
                                 final box =
                                     context.findRenderObject() as RenderBox?;
-                                await Share.shareXFiles(
-                                  [
-                                    XFile.fromData(
-                                      imageBytes!,
-                                      name: name,
-                                      mimeType: 'image/png',
-                                    ),
-                                  ],
-                                  sharePositionOrigin:
-                                      box!.localToGlobal(Offset.zero) &
-                                      box.size,
+                                await SharePlus.instance.share(
+                                  ShareParams(
+                                    files: [
+                                      XFile.fromData(
+                                        imageBytes!,
+                                        name: name,
+                                        mimeType: 'image/png',
+                                      ),
+                                    ],
+                                    sharePositionOrigin:
+                                        box!.localToGlobal(Offset.zero) &
+                                        box.size,
+                                  ),
                                 );
                               }
                             },
@@ -2363,4 +2388,45 @@ class VideoPrefs {
     this.audio,
     this.title,
   });
+}
+
+mixin _AlwaysOnTopStateMixin<T extends StatefulWidget> on State<T> {
+  // The original alwaysOnTop state.
+  // This will be used to restore the original state when the widget disposed.
+  bool? _savedAlwaysOnTop;
+
+  bool _alwaysOnTop = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initAlwaysOnTop();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _disposeAlwaysOnTop();
+  }
+
+  Future<void> _initAlwaysOnTop() async {
+    if (_supportAlwaysOnTop()) {
+      _savedAlwaysOnTop = await windowManager.isAlwaysOnTop();
+      if (mounted) {
+        setState(() => _alwaysOnTop = _savedAlwaysOnTop!);
+      }
+    }
+  }
+
+  Future<void> _disposeAlwaysOnTop() async {
+    if (_supportAlwaysOnTop()) {
+      if (_savedAlwaysOnTop != null) {
+        await windowManager.setAlwaysOnTop(_savedAlwaysOnTop!);
+      }
+    }
+  }
+
+  // Whether the platform support AlwaysOnTop feature.
+  bool _supportAlwaysOnTop() =>
+      !kIsWeb && (Platform.isLinux || Platform.isMacOS || Platform.isWindows);
 }

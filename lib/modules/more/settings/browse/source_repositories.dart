@@ -200,7 +200,7 @@ class _SourceRepositoriesState extends ConsumerState<SourceRepositories> {
                               icon: Stack(
                                 children: [
                                   const Icon(Icons.remove_red_eye_outlined),
-                                  if (!isHidden)
+                                  if (isHidden)
                                     Positioned(
                                       right: 8,
                                       child: Transform.scale(
@@ -265,7 +265,7 @@ class _SourceRepositoriesState extends ConsumerState<SourceRepositories> {
     );
   }
 
-  _showRemoveRepoDialog(BuildContext context, int index) {
+  void _showRemoveRepoDialog(BuildContext context, int index) {
     showDialog(
       context: context,
       builder: (context) {
@@ -316,7 +316,7 @@ class _SourceRepositoriesState extends ConsumerState<SourceRepositories> {
     );
   }
 
-  _showAddRepoDialog(BuildContext context) {
+  void _showAddRepoDialog(BuildContext context) {
     bool isLoading = false;
     final controller = TextEditingController();
     showDialog(

@@ -12,7 +12,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/models/custom_button.dart';
 import 'package:mangayomi/models/manga.dart';
@@ -22,6 +22,7 @@ import 'package:mangayomi/models/track.dart' as track;
 import 'package:mangayomi/models/track_preference.dart';
 import 'package:mangayomi/models/track_search.dart';
 import 'package:mangayomi/modules/manga/detail/providers/track_state_providers.dart';
+import 'package:mangayomi/modules/manga/reader/providers/crop_borders_provider.dart';
 import 'package:mangayomi/modules/more/data_and_storage/providers/storage_usage.dart';
 import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 import 'package:mangayomi/modules/more/settings/general/providers/general_state_provider.dart';
@@ -31,6 +32,8 @@ import 'package:mangayomi/router/router.dart';
 import 'package:mangayomi/modules/more/settings/appearance/providers/theme_mode_state_provider.dart';
 import 'package:mangayomi/l10n/generated/app_localizations.dart';
 import 'package:mangayomi/services/http/m_client.dart';
+import 'package:mangayomi/services/isolate_service.dart';
+import 'package:mangayomi/services/m_extension_server.dart';
 import 'package:mangayomi/src/rust/frb_generated.dart';
 import 'package:mangayomi/utils/discord_rpc.dart';
 import 'package:mangayomi/utils/log/logger.dart';
@@ -52,6 +55,8 @@ void main(List<String> args) async {
   if (Platform.isLinux && runWebViewTitleBarWidget(args)) return;
   MediaKit.ensureInitialized();
   await RustLib.init();
+  await imgCropIsolate.start();
+  await getIsolateService.start();
   if (!(Platform.isAndroid || Platform.isIOS)) {
     await windowManager.ensureInitialized();
   }
@@ -69,22 +74,26 @@ void main(List<String> args) async {
       );
     }
   }
-  isar = await StorageProvider().initDB(null, inspector: kDebugMode);
-  await Hive.initFlutter();
+  final storage = StorageProvider();
+  await storage.requestPermission();
+  isar = await storage.initDB(null, inspector: kDebugMode);
+  runApp(ProviderScope(child: MyApp(), retry: (retryCount, error) => null));
+  unawaited(_postLaunchInit(storage)); // Defer non-essential async operations
+}
+
+Future<void> _postLaunchInit(StorageProvider storage) async {
+  await AppLogger.init();
+  final hivePath = (Platform.isIOS || Platform.isMacOS)
+      ? "databases"
+      : p.join("Mangayomi", "databases");
+  await Hive.initFlutter(Platform.isAndroid ? "" : hivePath);
   Hive.registerAdapter(TrackSearchAdapter());
   if (Platform.isMacOS || Platform.isLinux || Platform.isWindows) {
     discordRpc = DiscordRPC(applicationId: "1395040506677039157");
     await discordRpc?.initialize();
   }
-
-  runApp(const ProviderScope(child: MyApp()));
-  unawaited(_postLaunchInit()); // Defer non-essential async operations
-}
-
-Future<void> _postLaunchInit() async {
-  await StorageProvider().requestPermission();
-  await StorageProvider().deleteBtDirectory();
-  await AppLogger.init();
+  await storage.deleteBtDirectory();
+  await cfResolutionWebviewServer();
 }
 
 class MyApp extends ConsumerStatefulWidget {
@@ -110,7 +119,10 @@ class _MyAppState extends ConsumerState<MyApp> {
     unawaited(ref.read(scanLocalLibraryProvider.future));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      MExtensionServerPlatform(ref).startServer();
       if (ref.read(clearChapterCacheOnAppLaunchStateProvider)) {
+        // Watch before calling clearcache to keep it alive, so that _getTotalDiskSpace completes safely
+        ref.watch(totalChapterCacheSizeStateProvider);
         ref
             .read(totalChapterCacheSizeStateProvider.notifier)
             .clearCache(showToast: false);
@@ -147,8 +159,10 @@ class _MyAppState extends ConsumerState<MyApp> {
 
   @override
   void dispose() {
+    MExtensionServerPlatform(ref).stopServer();
     _linkSubscription?.cancel();
     discordRpc?.destroy();
+    stopCfResolutionWebviewServer();
     AppLogger.dispose();
     super.dispose();
   }
@@ -356,7 +370,13 @@ class _MyAppState extends ConsumerState<MyApp> {
         status: track.TrackStatus.completed,
       );
       ref
-          .read(trackStateProvider(track: temp, itemType: null).notifier)
+          .read(
+            trackStateProvider(
+              track: temp,
+              itemType: null,
+              widgetRef: ref,
+            ).notifier,
+          )
           .checkRefresh();
     }
   }

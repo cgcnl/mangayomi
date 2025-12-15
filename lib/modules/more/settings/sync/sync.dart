@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
+import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/modules/more/settings/sync/providers/sync_providers.dart';
 import 'package:mangayomi/utils/date.dart';
@@ -9,9 +10,13 @@ import 'package:mangayomi/modules/more/settings/sync/widgets/sync_listile.dart';
 import 'package:mangayomi/providers/l10n_providers.dart';
 import 'package:mangayomi/services/sync_server.dart';
 import 'package:mangayomi/utils/extensions/build_context_extensions.dart';
+import 'package:mangayomi/utils/log/logger.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SyncScreen extends ConsumerWidget {
+  static const serverUrl = "https://github.com/Schnitzel5/mangayomi-server";
+
   const SyncScreen({super.key});
 
   @override
@@ -46,11 +51,11 @@ class SyncScreen extends ConsumerWidget {
                   title: Text(context.l10n.sync_on),
                   onChanged: (value) {
                     ref
-                        .read(SynchingProvider(syncId: 1).notifier)
+                        .read(synchingProvider(syncId: 1).notifier)
                         .setSyncOn(value);
                     if (!value) {
                       ref
-                          .read(SynchingProvider(syncId: 1).notifier)
+                          .read(synchingProvider(syncId: 1).notifier)
                           .setAutoSyncFrequency(0);
                     }
                   },
@@ -137,12 +142,14 @@ class SyncScreen extends ConsumerWidget {
                           color: context.secondaryColor,
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          l10n.sync_auto_warning,
-                          softWrap: true,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: context.secondaryColor,
+                        Expanded(
+                          child: Text(
+                            l10n.sync_auto_warning,
+                            softWrap: true,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.secondaryColor,
+                            ),
                           ),
                         ),
                       ],
@@ -155,7 +162,7 @@ class SyncScreen extends ConsumerWidget {
                   onChanged: syncPreference.syncOn
                       ? (value) {
                           ref
-                              .read(SynchingProvider(syncId: 1).notifier)
+                              .read(synchingProvider(syncId: 1).notifier)
                               .setSyncHistories(value);
                         }
                       : null,
@@ -166,7 +173,7 @@ class SyncScreen extends ConsumerWidget {
                   onChanged: syncPreference.syncOn
                       ? (value) {
                           ref
-                              .read(SynchingProvider(syncId: 1).notifier)
+                              .read(synchingProvider(syncId: 1).notifier)
                               .setSyncUpdates(value);
                         }
                       : null,
@@ -177,10 +184,38 @@ class SyncScreen extends ConsumerWidget {
                   onChanged: syncPreference.syncOn
                       ? (value) {
                           ref
-                              .read(SynchingProvider(syncId: 1).notifier)
+                              .read(synchingProvider(syncId: 1).notifier)
                               .setSyncSettings(value);
                         }
                       : null,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 15,
+                    right: 15,
+                    bottom: 10,
+                    top: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          if (!await launchUrl(
+                            Uri.parse(serverUrl),
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            AppLogger.log(
+                              'Could not launch $serverUrl',
+                              logLevel: LogLevel.error,
+                            );
+                            botToast('Could not launch $serverUrl');
+                          }
+                        },
+                        label: Text(l10n.get_sync_server),
+                        icon: const Icon(Icons.download_outlined),
+                      ),
+                    ],
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
@@ -219,12 +254,14 @@ class SyncScreen extends ConsumerWidget {
                           color: context.secondaryColor,
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          l10n.syncing_subtitle,
-                          softWrap: true,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: context.secondaryColor,
+                        Expanded(
+                          child: Text(
+                            l10n.syncing_subtitle,
+                            softWrap: true,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.secondaryColor,
+                            ),
                           ),
                         ),
                       ],
@@ -271,9 +308,10 @@ class SyncScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Row(
+                Wrap(
+                  spacing: 20,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    const SizedBox(width: 20),
                     Column(
                       children: [
                         IconButton(
@@ -296,7 +334,7 @@ class SyncScreen extends ConsumerWidget {
                         Text(l10n.sync_button_sync),
                       ],
                     ),
-                    const SizedBox(width: 20),
+
                     Column(
                       children: [
                         IconButton(
@@ -313,7 +351,7 @@ class SyncScreen extends ConsumerWidget {
                         Text(l10n.sync_button_upload),
                       ],
                     ),
-                    const SizedBox(width: 20),
+
                     Column(
                       children: [
                         IconButton(

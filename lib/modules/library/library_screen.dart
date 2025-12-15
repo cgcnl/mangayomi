@@ -6,7 +6,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/eval/model/m_bridge.dart';
 import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/changed.dart';
@@ -44,6 +44,7 @@ import 'package:mangayomi/utils/extensions/string_extensions.dart';
 import 'package:mangayomi/utils/global_style.dart';
 import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   final ItemType itemType;
@@ -96,13 +97,17 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     for (var manga in mangaList) {
       try {
         await ref.read(
-          updateMangaDetailProvider(mangaId: manga.id, isInit: false).future,
+          updateMangaDetailProvider(
+            mangaId: manga.id,
+            isInit: false,
+            showToast: false,
+          ).future,
         );
       } catch (_) {
         failed++;
       }
       numbers++;
-      if (context.mounted) {
+      if (mounted) {
         botToast(
           context.l10n.updating_library(numbers, failed, mangaList.length),
           fontSize: 13,
@@ -1133,30 +1138,32 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                             // Downloaded Chapters
                             if (downloadedChapsList.isNotEmpty) {
                               for (var manga in mangasList) {
-                                String mangaDirectory = "";
-                                if (manga.isLocalArchive ?? false) {
-                                  mangaDirectory = _deleteImport(
-                                    manga,
-                                    mangaDirectory,
-                                  );
-                                  // Also remove item from library
-                                  // else it has 0 chapters/episodes
-                                  // and when opened, shows exception
-                                  // "Null check operator"
-                                  isar.writeTxnSync(() {
-                                    _removeImport(ref, manga);
-                                  });
-                                } else {
-                                  mangaDirectory = await _deleteDownload(
-                                    manga,
-                                    mangaDirectory,
-                                  );
-                                }
-                                if (mangaDirectory.isNotEmpty) {
-                                  final path = Directory(mangaDirectory);
-                                  if (path.existsSync() &&
-                                      path.listSync().isEmpty) {
-                                    path.deleteSync(recursive: true);
+                                if (!(manga.isLocalArchive ?? false)) {
+                                  String mangaDirectory = "";
+                                  if (manga.isLocalArchive ?? false) {
+                                    mangaDirectory = _deleteImport(
+                                      manga,
+                                      mangaDirectory,
+                                    );
+                                    // Also remove item from library
+                                    // else it has 0 chapters/episodes
+                                    // and when opened, shows exception
+                                    // "Null check operator"
+                                    isar.writeTxnSync(() {
+                                      _removeImport(ref, manga);
+                                    });
+                                  } else {
+                                    mangaDirectory = await _deleteDownload(
+                                      manga,
+                                      mangaDirectory,
+                                    );
+                                  }
+                                  if (mangaDirectory.isNotEmpty) {
+                                    final path = Directory(mangaDirectory);
+                                    if (path.existsSync() &&
+                                        path.listSync().isEmpty) {
+                                      path.deleteSync(recursive: true);
+                                    }
                                   }
                                 }
                               }

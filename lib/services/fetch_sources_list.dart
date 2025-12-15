@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io';
 import 'package:http_interceptor/http_interceptor.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:mangayomi/eval/lib.dart';
 import 'package:mangayomi/eval/model/filter.dart';
 import 'package:mangayomi/eval/model/source_preference.dart';
@@ -9,14 +9,14 @@ import 'package:mangayomi/main.dart';
 import 'package:mangayomi/models/manga.dart';
 import 'package:mangayomi/models/settings.dart';
 import 'package:mangayomi/models/source.dart';
-import 'package:mangayomi/modules/more/settings/browse/providers/browse_state_provider.dart';
 import 'package:mangayomi/services/http/m_client.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 Future<void> fetchSourcesList({
   int? id,
   required bool refresh,
-  required Ref ref,
+  required String androidProxyServer,
+  required bool autoUpdateExtensions,
   required ItemType itemType,
   required Repo? repo,
 }) async {
@@ -70,11 +70,45 @@ Future<void> fetchSourcesList({
                   ? ItemType.anime
                   : ItemType.manga
               ..iconUrl = "$repoUrl/icon/${e['pkg']}.png"
-              ..notes =
-                  "Requires Android Proxy Server (ApkBridge) for installing and using the extensions!";
+              ..notes = Platform.isAndroid
+                  ? null
+                  : "Requires Android Proxy Server (ApkBridge) for installing and using the extensions!";
             src.id = 'mihon-${source['id']}'.hashCode;
             yield src;
           }
+        } else if (e['id'] is String &&
+            e['name'] != null &&
+            e['site'] != null &&
+            e['lang'] != null &&
+            e['version'] != null &&
+            e['url'] != null &&
+            e['iconUrl'] != null) {
+          final src = Source.fromJson(e)
+            ..apiUrl = ''
+            ..appMinVerReq = ''
+            ..dateFormat = ''
+            ..dateFormatLocale = ''
+            ..hasCloudflare = false
+            ..headers = ''
+            ..isActive = true
+            ..isAdded = false
+            ..isFullData = false
+            ..isNsfw = false
+            ..isPinned = false
+            ..lastUsed = false
+            ..sourceCode = ''
+            ..typeSource = ''
+            ..versionLast = '0.0.1'
+            ..isObsolete = false
+            ..isLocal = false
+            ..lang = _convertLang(e)
+            ..baseUrl = e['site']
+            ..sourceCodeUrl = e['url']
+            ..sourceCodeLanguage = SourceCodeLanguage.lnreader
+            ..itemType = ItemType.novel
+            ..notes = "Performance might be poor due to limited engine";
+          src.id = 'lnreader-plugin-"${src.name}"."${src.lang}"'.hashCode;
+          yield src;
         } else {
           yield Source.fromJson(e);
         }
@@ -93,21 +127,21 @@ Future<void> fetchSourcesList({
       orElse: () => Source(),
     );
     if (matchingSource.id != null && matchingSource.sourceCodeUrl!.isNotEmpty) {
-      await _updateSource(matchingSource, ref, repo, itemType);
+      await _updateSource(matchingSource, androidProxyServer, repo, itemType);
     }
   } else {
     for (var source in sourceList) {
       final existingSource = await isar.sources.get(source.id!);
       if (existingSource == null) {
-        await _addNewSource(source, ref, repo, itemType);
+        await _addNewSource(source, repo, itemType);
         continue;
       }
       final shouldUpdate =
           existingSource.isAdded! &&
           compareVersions(existingSource.version!, source.version!) < 0;
       if (!shouldUpdate) continue;
-      if (ref.read(autoUpdateExtensionsStateProvider)) {
-        await _updateSource(source, ref, repo, itemType);
+      if (autoUpdateExtensions) {
+        await _updateSource(source, androidProxyServer, repo, itemType);
       } else {
         await isar.writeTxn(() async {
           isar.sources.put(existingSource..versionLast = source.version);
@@ -116,12 +150,12 @@ Future<void> fetchSourcesList({
     }
   }
 
-  checkIfSourceIsObsolete(sourceList, repo!, itemType, ref);
+  checkIfSourceIsObsolete(sourceList, repo!, itemType);
 }
 
 Future<void> _updateSource(
   Source source,
-  Ref ref,
+  String androidProxyServer,
   Repo? repo,
   ItemType itemType,
 ) async {
@@ -130,7 +164,7 @@ Future<void> _updateSource(
   final sourceCode = source.sourceCodeLanguage == SourceCodeLanguage.mihon
       ? base64.encode(req.bodyBytes)
       : req.body;
-  final androidProxyServer = ref.read(androidProxyServerStateProvider);
+
   Map<String, String> headers = {};
   bool? supportLatest;
   FilterList? filterList;
@@ -199,12 +233,7 @@ Future<void> _updateSource(
   await isar.writeTxn(() async => isar.sources.put(updatedSource));
 }
 
-Future<void> _addNewSource(
-  Source source,
-  Ref ref,
-  Repo? repo,
-  ItemType itemType,
-) async {
+Future<void> _addNewSource(Source source, Repo? repo, ItemType itemType) async {
   final newSource = Source()
     ..sourceCodeUrl = source.sourceCodeUrl
     ..id = source.id
@@ -236,7 +265,6 @@ Future<void> checkIfSourceIsObsolete(
   List<Source> sourceList,
   Repo repo,
   ItemType itemType,
-  Ref ref,
 ) async {
   if (sourceList.isEmpty) return;
 
@@ -345,80 +373,85 @@ Future<FilterList?> fetchFilterListDalvik(
       body: jsonEncode({"method": "filters$name", "data": source.sourceCode}),
     );
     final data = jsonDecode(res.body) as List;
-    final filters = data.expand((e) sync* {
-      if (e['name'] is String &&
-          e['state'] is Map<String, dynamic> &&
-          e['values'] is List) {
-        yield SortFilter(
-          "${e['name']}Filter",
-          e['name'],
-          SortState(e['state']['index'], e['state']['ascending'], null),
-          (e['values'] as List)
-              .map((e) => SelectFilterOption(e, e, null))
-              .toList(),
-          null,
-        );
-      } else if (e['name'] is String &&
-          e['state'] is int &&
-          (e['values'] is List || e['vals'] is List)) {
-        yield SelectFilter(
-          "${e['name']}Filter",
-          e['name'],
-          e['state'],
-          e['vals'] is List
-              ? (e['vals'] as List)
-                    .map(
-                      (e) => SelectFilterOption(e['first'], e['second'], null),
-                    )
-                    .toList()
-              : e['values'] is List
-              ? (e['values'] as List)
-                    .map((e) => SelectFilterOption(e, e, null))
-                    .toList()
-              : [],
-          "SelectFilter",
-        );
-      } else if (e['name'] is String && e['state'] is List) {
-        yield GroupFilter(
-          "${e['name']}Filter",
-          e['name'],
-          (e['state'] as List).map((e) {
-            if (e['included'] is bool &&
-                e['ignored'] is bool &&
-                e['excluded'] is bool) {
-              return TriStateFilter(
-                null,
-                e['name'],
-                e['id'] ?? e['name'],
-                null,
-                state: e['state'],
-              );
-            }
-            return CheckBoxFilter(
-              null,
-              e['name'],
-              e['id'] ?? e['name'],
-              null,
-              state: e['state'],
-            );
-          }).toList(),
-          "GroupFilter",
-        );
-      } else if (e['name'] is String && e['state'] is String) {
-        yield TextFilter(
-          "${e['name']}Filter",
-          e['name'],
-          null,
-          state: e['state'],
-        );
-      } else if (e['name'] is String && e['state'] is int) {
-        yield HeaderFilter(e['name'], "${e['name']}Filter");
-      }
-    }).toList();
-    return FilterList(filters);
+
+    return FilterList(filtersFromJson(data));
   } catch (_) {
     return null;
   }
+}
+
+List<dynamic> filtersFromJson(List<dynamic> json) {
+  return json.expand((e) sync* {
+    if (e['name'] is String &&
+        e['state'] is Map<String, dynamic> &&
+        e['values'] is List) {
+      yield SortFilter(
+        "${e['name']}Filter",
+        e['name'],
+        SortState(e['state']['index'], e['state']['ascending'], null),
+        (e['values'] as List)
+            .map((e) => SelectFilterOption(e, e, null))
+            .toList(),
+        null,
+      );
+    } else if (e['name'] is String &&
+        e['state'] is int &&
+        (e['values'] is List || e['vals'] is List)) {
+      yield SelectFilter(
+        "${e['name']}Filter",
+        e['name'],
+        e['state'],
+        e['vals'] is List
+            ? (e['vals'] as List)
+                  .map((e) => SelectFilterOption(e['first'], e['second'], null))
+                  .toList()
+            : e['values'] is List
+            ? (e['values'] as List)
+                  .map(
+                    (e) => (e is Map)
+                        ? SelectFilterOption(e['value'], e['value'], null)
+                        : SelectFilterOption(e, e, null),
+                  )
+                  .toList()
+            : [],
+        "SelectFilter",
+      );
+    } else if (e['name'] is String && e['state'] is bool) {
+      yield CheckBoxFilter(
+        null,
+        e['name'],
+        e['id'] ?? e['name'],
+        null,
+        state: e['state'],
+      );
+    } else if (e['included'] is bool &&
+        e['ignored'] is bool &&
+        e['excluded'] is bool) {
+      yield TriStateFilter(
+        null,
+        e['name'],
+        e['id'] ?? e['name'],
+        null,
+        state: e['state'],
+      );
+    } else if (e['name'] is String && e['state'] is List) {
+      yield GroupFilter(
+        "${e['name']}Filter",
+        e['name'],
+        filtersFromJson((e['state'] as List)),
+        "GroupFilter",
+      );
+    } else if (e['name'] is String && e['state'] is String) {
+      yield TextFilter(
+        "${e['name']}Filter",
+        e['name'],
+        null,
+        state: e['state'],
+      );
+    } else if (e['name'] is String && e['state'] is int) {
+      yield HeaderFilter(e['name'], "${e['name']}Filter");
+    }
+  }).toList();
 }
 
 Future<List<SourcePreference>?> fetchPreferencesDalvik(
@@ -446,4 +479,45 @@ Future<List<SourcePreference>?> fetchPreferencesDalvik(
   } catch (_) {
     return null;
   }
+}
+
+String _convertLang(dynamic e) {
+  final lang = e['lang'];
+  if (lang is String) {
+    switch (lang) {
+      case "‎العربية":
+        return "ar";
+      case "中文, 汉语, 漢語":
+        return "zh";
+      case "English":
+        return "en";
+      case "Français":
+        return "fr";
+      case "Bahasa Indonesia":
+        return "id";
+      case "日本語":
+        return "ja";
+      case "조선말, 한국어":
+        return "ko";
+      case "Polski":
+        return "pl";
+      case "Português":
+        return "pt";
+      case "Русский":
+        return "ru";
+      case "Español":
+        return "es";
+      case "ไทย":
+        return "th";
+      case "Türkçe":
+        return "tr";
+      case "Українська":
+        return "uk";
+      case "Tiếng Việt":
+        return "vi";
+      default:
+        return "all";
+    }
+  }
+  return "all";
 }
