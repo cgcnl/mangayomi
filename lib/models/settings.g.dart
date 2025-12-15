@@ -690,86 +690,91 @@ const SettingsSchema = CollectionSchema(
       type: IsarType.byte,
       enumMap: _SettingsscaleTypeEnumValueMap,
     ),
-    r'showPagesNumber': PropertySchema(
+    r'showNSFW': PropertySchema(
       id: 125,
+      name: r'showNSFW',
+      type: IsarType.bool,
+    ),
+    r'showPagesNumber': PropertySchema(
+      id: 126,
       name: r'showPagesNumber',
       type: IsarType.bool,
     ),
     r'sortChapterList': PropertySchema(
-      id: 126,
+      id: 127,
       name: r'sortChapterList',
       type: IsarType.objectList,
 
       target: r'SortChapter',
     ),
     r'sortLibraryAnime': PropertySchema(
-      id: 127,
+      id: 128,
       name: r'sortLibraryAnime',
       type: IsarType.object,
 
       target: r'SortLibraryManga',
     ),
     r'sortLibraryManga': PropertySchema(
-      id: 128,
+      id: 129,
       name: r'sortLibraryManga',
       type: IsarType.object,
 
       target: r'SortLibraryManga',
     ),
     r'sortLibraryNovel': PropertySchema(
-      id: 129,
+      id: 130,
       name: r'sortLibraryNovel',
       type: IsarType.object,
 
       target: r'SortLibraryManga',
     ),
     r'startDatebackup': PropertySchema(
-      id: 130,
+      id: 131,
       name: r'startDatebackup',
       type: IsarType.long,
     ),
     r'themeIsDark': PropertySchema(
-      id: 131,
+      id: 132,
       name: r'themeIsDark',
       type: IsarType.bool,
     ),
     r'updateProgressAfterReading': PropertySchema(
-      id: 132,
+      id: 133,
       name: r'updateProgressAfterReading',
       type: IsarType.bool,
     ),
     r'updatedAt': PropertySchema(
-      id: 133,
+      id: 134,
       name: r'updatedAt',
       type: IsarType.long,
     ),
     r'useLibass': PropertySchema(
-      id: 134,
+      id: 135,
       name: r'useLibass',
       type: IsarType.bool,
     ),
     r'useMpvConfig': PropertySchema(
-      id: 135,
+      id: 136,
       name: r'useMpvConfig',
       type: IsarType.bool,
     ),
     r'usePageTapZones': PropertySchema(
-      id: 136,
+      id: 137,
       name: r'usePageTapZones',
       type: IsarType.bool,
     ),
     r'useYUV420P': PropertySchema(
-      id: 137,
+      id: 138,
       name: r'useYUV420P',
       type: IsarType.bool,
     ),
     r'userAgent': PropertySchema(
-      id: 138,
+      id: 139,
       name: r'userAgent',
       type: IsarType.string,
     ),
     r'volumeBoostCap': PropertySchema(
-      id: 139,
+      id: 140,
       name: r'volumeBoostCap',
       type: IsarType.long,
     ),
@@ -1483,41 +1488,42 @@ void _settingsSerialize(
   writer.writeBool(offsets[122], object.rpcShowTitle);
   writer.writeBool(offsets[123], object.saveAsCBZArchive);
   writer.writeByte(offsets[124], object.scaleType.index);
-  writer.writeBool(offsets[125], object.showPagesNumber);
+  writer.writeBool(offsets[125], object.showNSFW);
+  writer.writeBool(offsets[126], object.showPagesNumber);
   writer.writeObjectList<SortChapter>(
-    offsets[126],
+    offsets[127],
     allOffsets,
     SortChapterSchema.serialize,
     object.sortChapterList,
   );
   writer.writeObject<SortLibraryManga>(
-    offsets[127],
+    offsets[128],
     allOffsets,
     SortLibraryMangaSchema.serialize,
     object.sortLibraryAnime,
   );
   writer.writeObject<SortLibraryManga>(
-    offsets[128],
+    offsets[129],
     allOffsets,
     SortLibraryMangaSchema.serialize,
     object.sortLibraryManga,
   );
   writer.writeObject<SortLibraryManga>(
-    offsets[129],
+    offsets[130],
     allOffsets,
     SortLibraryMangaSchema.serialize,
     object.sortLibraryNovel,
   );
-  writer.writeLong(offsets[130], object.startDatebackup);
-  writer.writeBool(offsets[131], object.themeIsDark);
-  writer.writeBool(offsets[132], object.updateProgressAfterReading);
-  writer.writeLong(offsets[133], object.updatedAt);
-  writer.writeBool(offsets[134], object.useLibass);
-  writer.writeBool(offsets[135], object.useMpvConfig);
-  writer.writeBool(offsets[136], object.usePageTapZones);
-  writer.writeBool(offsets[137], object.useYUV420P);
-  writer.writeString(offsets[138], object.userAgent);
-  writer.writeLong(offsets[139], object.volumeBoostCap);
+  writer.writeLong(offsets[131], object.startDatebackup);
+  writer.writeBool(offsets[132], object.themeIsDark);
+  writer.writeBool(offsets[133], object.updateProgressAfterReading);
+  writer.writeLong(offsets[134], object.updatedAt);
+  writer.writeBool(offsets[135], object.useLibass);
+  writer.writeBool(offsets[136], object.useMpvConfig);
+  writer.writeBool(offsets[137], object.usePageTapZones);
+  writer.writeBool(offsets[138], object.useYUV420P);
+  writer.writeString(offsets[139], object.userAgent);
+  writer.writeLong(offsets[140], object.volumeBoostCap);
 }
 
 Settings _settingsDeserialize(
@@ -1753,38 +1759,39 @@ Settings _settingsDeserialize(
     scaleType:
         _SettingsscaleTypeValueEnumMap[reader.readByteOrNull(offsets[124])] ??
         ScaleType.fitScreen,
-    showPagesNumber: reader.readBoolOrNull(offsets[125]),
+    showNSFW: reader.readBoolOrNull(offsets[125]),
+    showPagesNumber: reader.readBoolOrNull(offsets[126]),
     sortChapterList: reader.readObjectList<SortChapter>(
-      offsets[126],
+      offsets[127],
       SortChapterSchema.deserialize,
       allOffsets,
       SortChapter(),
     ),
     sortLibraryAnime: reader.readObjectOrNull<SortLibraryManga>(
-      offsets[127],
-      SortLibraryMangaSchema.deserialize,
-      allOffsets,
-    ),
-    sortLibraryManga: reader.readObjectOrNull<SortLibraryManga>(
       offsets[128],
       SortLibraryMangaSchema.deserialize,
       allOffsets,
     ),
-    sortLibraryNovel: reader.readObjectOrNull<SortLibraryManga>(
+    sortLibraryManga: reader.readObjectOrNull<SortLibraryManga>(
       offsets[129],
       SortLibraryMangaSchema.deserialize,
       allOffsets,
     ),
-    startDatebackup: reader.readLongOrNull(offsets[130]),
-    themeIsDark: reader.readBoolOrNull(offsets[131]),
-    updateProgressAfterReading: reader.readBoolOrNull(offsets[132]),
-    updatedAt: reader.readLongOrNull(offsets[133]),
-    useLibass: reader.readBoolOrNull(offsets[134]),
-    useMpvConfig: reader.readBoolOrNull(offsets[135]),
-    usePageTapZones: reader.readBoolOrNull(offsets[136]),
-    useYUV420P: reader.readBoolOrNull(offsets[137]),
-    userAgent: reader.readStringOrNull(offsets[138]),
-    volumeBoostCap: reader.readLongOrNull(offsets[139]),
+    sortLibraryNovel: reader.readObjectOrNull<SortLibraryManga>(
+      offsets[130],
+      SortLibraryMangaSchema.deserialize,
+      allOffsets,
+    ),
+    startDatebackup: reader.readLongOrNull(offsets[131]),
+    themeIsDark: reader.readBoolOrNull(offsets[132]),
+    updateProgressAfterReading: reader.readBoolOrNull(offsets[133]),
+    updatedAt: reader.readLongOrNull(offsets[134]),
+    useLibass: reader.readBoolOrNull(offsets[135]),
+    useMpvConfig: reader.readBoolOrNull(offsets[136]),
+    usePageTapZones: reader.readBoolOrNull(offsets[137]),
+    useYUV420P: reader.readBoolOrNull(offsets[138]),
+    userAgent: reader.readStringOrNull(offsets[139]),
+    volumeBoostCap: reader.readLongOrNull(offsets[140]),
   );
   object.chapterFilterBookmarkedList = reader
       .readObjectList<ChapterFilterBookmarked>(
@@ -2226,18 +2233,13 @@ P _settingsDeserializeProp<P>(
     case 125:
       return (reader.readBoolOrNull(offset)) as P;
     case 126:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 127:
       return (reader.readObjectList<SortChapter>(
             offset,
             SortChapterSchema.deserialize,
             allOffsets,
             SortChapter(),
-          ))
-          as P;
-    case 127:
-      return (reader.readObjectOrNull<SortLibraryManga>(
-            offset,
-            SortLibraryMangaSchema.deserialize,
-            allOffsets,
           ))
           as P;
     case 128:
@@ -2255,15 +2257,20 @@ P _settingsDeserializeProp<P>(
           ))
           as P;
     case 130:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readObjectOrNull<SortLibraryManga>(
+            offset,
+            SortLibraryMangaSchema.deserialize,
+            allOffsets,
+          ))
+          as P;
     case 131:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 132:
       return (reader.readBoolOrNull(offset)) as P;
     case 133:
-      return (reader.readLongOrNull(offset)) as P;
-    case 134:
       return (reader.readBoolOrNull(offset)) as P;
+    case 134:
+      return (reader.readLongOrNull(offset)) as P;
     case 135:
       return (reader.readBoolOrNull(offset)) as P;
     case 136:
@@ -2271,8 +2278,10 @@ P _settingsDeserializeProp<P>(
     case 137:
       return (reader.readBoolOrNull(offset)) as P;
     case 138:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 139:
+      return (reader.readStringOrNull(offset)) as P;
+    case 140:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -11139,6 +11148,32 @@ extension SettingsQueryFilter
     });
   }
 
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> showNSFWIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'showNSFW'),
+      );
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> showNSFWIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'showNSFW'),
+      );
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterFilterCondition> showNSFWEqualTo(
+    bool? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'showNSFW', value: value),
+      );
+    });
+  }
+
   QueryBuilder<Settings, Settings, QAfterFilterCondition>
   showPagesNumberIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -13437,6 +13472,18 @@ extension SettingsQuerySortBy on QueryBuilder<Settings, Settings, QSortBy> {
     });
   }
 
+  QueryBuilder<Settings, Settings, QAfterSortBy> sortByShowNSFW() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'showNSFW', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> sortByShowNSFWDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'showNSFW', Sort.desc);
+    });
+  }
+
   QueryBuilder<Settings, Settings, QAfterSortBy> sortByShowPagesNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'showPagesNumber', Sort.asc);
@@ -14945,6 +14992,18 @@ extension SettingsQuerySortThenBy
     });
   }
 
+  QueryBuilder<Settings, Settings, QAfterSortBy> thenByShowNSFW() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'showNSFW', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QAfterSortBy> thenByShowNSFWDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'showNSFW', Sort.desc);
+    });
+  }
+
   QueryBuilder<Settings, Settings, QAfterSortBy> thenByShowPagesNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'showPagesNumber', Sort.asc);
@@ -15817,6 +15876,12 @@ extension SettingsQueryWhereDistinct
   QueryBuilder<Settings, Settings, QDistinct> distinctByScaleType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'scaleType');
+    });
+  }
+
+  QueryBuilder<Settings, Settings, QDistinct> distinctByShowNSFW() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'showNSFW');
     });
   }
 
@@ -16731,6 +16796,12 @@ extension SettingsQueryProperty
   QueryBuilder<Settings, ScaleType, QQueryOperations> scaleTypeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'scaleType');
+    });
+  }
+
+  QueryBuilder<Settings, bool?, QQueryOperations> showNSFWProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'showNSFW');
     });
   }
 

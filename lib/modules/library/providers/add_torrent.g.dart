@@ -66,7 +66,7 @@ final class AddTorrentFromUrlOrFromFileProvider
 }
 
 String _$addTorrentFromUrlOrFromFileHash() =>
-    r'a54f90b6708b13eeb8fed098691f9a79dbab50fd';
+    r'dd27f7e84edaae350e0ff7c1f2bcbbf063c63102';
 
 final class AddTorrentFromUrlOrFromFileFamily extends $Family
     with

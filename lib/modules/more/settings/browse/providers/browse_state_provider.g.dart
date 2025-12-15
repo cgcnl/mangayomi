@@ -118,6 +118,59 @@ abstract class _$OnlyIncludePinnedSourceState extends $Notifier<bool> {
   }
 }
 
+@ProviderFor(ShowNSFWState)
+const showNSFWStateProvider = ShowNSFWStateProvider._();
+
+final class ShowNSFWStateProvider
+    extends $NotifierProvider<ShowNSFWState, bool> {
+  const ShowNSFWStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'showNSFWStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$showNSFWStateHash();
+
+  @$internal
+  @override
+  ShowNSFWState create() => ShowNSFWState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$showNSFWStateHash() => r'fdb147ceef80a95066adc64ee63237fbdb3de81e';
+
+abstract class _$ShowNSFWState extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 @ProviderFor(ExtensionsRepoState)
 const extensionsRepoStateProvider = ExtensionsRepoStateFamily._();
 
